@@ -1,0 +1,3 @@
+[submodule "DAQ_System/mbed-os"]
+	path = DAQ_System/mbed-os
+	url = https://github.com/ARMmbed/mbed-os.git
