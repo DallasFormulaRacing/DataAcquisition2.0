@@ -11,3 +11,5 @@ assignees: ''
 
 
 **Definition of Done**
+* Tested
+* Code reviewed
