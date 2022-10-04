@@ -1,3 +1,8 @@
+/*
+Written by: Manuel DJC
+
+this file is probably no longer needed
+*/
 #include "mbed.h"
 
 class Potentiometer {
@@ -9,7 +14,6 @@ class Potentiometer {
         double getVCoeff();
         PinName getPinName();
     private:
-        int size;
         double vC;
         PinName pin;
 };

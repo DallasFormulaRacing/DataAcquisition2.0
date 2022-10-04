@@ -1,30 +1,36 @@
+/*
+Written by: Manuel DJC
+
+implements AnalogSensor as a potentiometer with a coefficient.
+*/
 #include "mbed.h"
 #include "AnalogIn.h"
-#include "potentiometer.h"
+#include "analogSensor.tpp"
 
-Potentiometer::Potentiometer(PinName p, double vCoeff) {
-    pin = p;
-    vC = vCoeff;
-}
+class Potentiometer : public AnalogSensor {
+    public:
+        Potentiometer(PinName p, double vCoeff) : AnalogSensor(p) {
+            vC = vCoeff;
+        }
 
-Potentiometer::Potentiometer() {
-    pin = PA_0;
-    vC = 1.0;
-}
+        Potentiometer(PinName p) : AnalogSensor(p) {
+            vC = 1.0;
+        }
 
-void Potentiometer::changePin(PinName p){
-    pin = p;
-}
+        //sls1300 pot goes from 1-14k ohm
+        ///reads potentiometer and converts to cm
+        double read(){
+            return AnalogIn(pin) * vC;
+        }
 
-double Potentiometer::read(){
-    return AnalogIn(pin) * vC;
-}
-
-double Potentiometer::getVCoeff(){
-    return vC;
-
-}
-PinName Potentiometer::getPinName(){
-    return pin;
-}
-
+        void changePin(PinName p){
+            pin = p;
+        }
+        
+        double getVCoeff(){
+            return vC;
+        }
+    private:
+        double vC;
+        PinName pin;
+};
