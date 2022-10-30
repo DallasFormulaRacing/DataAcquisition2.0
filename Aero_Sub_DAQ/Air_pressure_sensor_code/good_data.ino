@@ -101,7 +101,7 @@ void loop()
     Serial.println(outb[6], DEC);
    
 
-  Tmp = 0;
+    Tmp = 0;
  
     // --- convert Temperature to degrees C:
     Tmp = (outb[4] << 8) + outb[5];
@@ -111,7 +111,7 @@ void loop()
 
     Prs = 0;
     // --- convert Pressure to %Full Scale Span ( +/- 100%)
-    Prs = (outb[1] << 16) + (outb[2] <<8); //outb is still a char
+    Prs = (outb[1] << 16) + (outb[2] <<8) + outb[3]; //outb is still a char
     //Prs = outb[1] + outb[2] + outb[3];
     transf = (float)Prs - (0.5*two_24);
     fPress = transf/two_24;
