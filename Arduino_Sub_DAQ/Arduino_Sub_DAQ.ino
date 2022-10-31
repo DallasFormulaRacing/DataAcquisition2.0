@@ -1,36 +1,32 @@
 /*
- *  Linear Potentiometer Microcontroller Code
- * 
- *  By: Basel Jazzar - Suspension Lead
- *  8/25/22
- *  
- *  Dallas Formula Racing - Formula SAE
- *  
- */
+* Linear Potentiometers
+* Author:        Bazel Jazzar   Suspension Lead
+* Modified By:   Manuel De Jesus Contreras & Cristian Cruz    Embedded Firmware Team
+* Email:         Manuel.DeJesusContreras@UTDallas.edu
+* 
+* (c) 2022 Dallas Formula Racing - Formula SAE
+* GPL-3.0 License
+*/
 
 
 #include <SPI.h>
 #include <SD.h>
-File myFile;
+File my_file;
 
-bool hasntClose = true;
+bool hasnt_close = true;
 String file_name;
 int file_name_num = 1;
-int sensorValue1 = -1;
-int sensorValue2 = -1;
-int sensorValue3 = -1;
-int sensorValue4 = -1;
 
 //A2, A3 are front, A0, A1 are rear
-int anaPins[] = {A0, A1, A2, A3};
+int analog_pins[] = {A0, A1, A2, A3};
 
-int anaVals[] = {-1, -1, -1, -1};
-int rstPin = 6;
+int analog_values[] = {-1, -1, -1, -1};
+int reset_pin = 6;
 
 void setup() {
 
   Serial.begin(9600);
-  hasntClose = true;
+  hasnt_close = true;
   
   while(!Serial){
     ;
@@ -48,20 +44,18 @@ void setup() {
   while(SD.exists(file_name)){
     Serial.print("File already exists: " + file_name);
     file_name_num++;    
-    file_name = "data_" + String(file_name_num) + ".csv";
+    file_name = "linPotData_" + String(file_name_num) + ".csv";
   }
 
-  pinMode(rstPin, INPUT_PULLUP);
+  pinMode(reset_pin, INPUT_PULLUP);
 
-  while (!digitalRead(rstPin)){
-  // while(analogRead(A0) > 2){
-  //   Serial.println(analogRead(A0));
+  while (!digitalRead(reset_pin)){
      Serial.println("Waiting");
   }
 
   
-  myFile = SD.open(file_name, FILE_WRITE);
-  if (!myFile) {
+  my_file = SD.open(file_name, FILE_WRITE);
+  if (!my_file) {
     Serial.print("error opening " + file_name);
     while(1){
       ;
@@ -70,78 +64,24 @@ void setup() {
   
   
   Serial.println("Success opening: " + file_name);
-  myFile.println("Time Millis,rear1,rear2,front1,front2");
-  //delay(5000);
+  my_file.println("Time Millis,rear1,rear2,front1,front2");
 }
-//int count = 0;
+
 void loop() {
-  if (digitalRead(rstPin) && hasntClose){
-    myFile.print(millis());
-    myFile.print(",");
-    for (int x = 0; x < 4; x++){
-        anaVals[x] = analogRead(anaPins[x]);
-        myFile.print(anaVals[x]);
-        myFile.print(",");
-        
-        //Serial.print(anaVals[x]);
-        //Serial.print("\t");
-        
+  if (digitalRead(reset_pin) && hasnt_close){
+    my_file.print(millis());
+    my_file.print(",");
+    for (int x = 0; x < sizeof(analog_values)/sizeof(int); x++){
+        analog_values[x] = analogRead(analog_pins[x]);
+        my_file.print(analog_values[x]);
+        my_file.print(",");
     }
-    //Serial.println(count);
-    //count++;
-    myFile.println();
-    /*
-    sensorValue1 = analogRead(A0);
-    sensorValue2 = analogRead(A1);
-    sensorValue3 = analogRead(A2);
-    sensorValue4 = analogRead(A3);
-    */
-    myFile.flush();
-  
-  //  ln(sensorValue1 + "\t" + sensorValue2 + "\t" + sensorValue3 + "/t" + sensorValue4 + ",");
-  /*
-    
-    myFile.print("\t");
-    myFile.print(sensorValue1);
-    myFile.print("\t");
-    myFile.print(sensorValue2);
-    myFile.print("\t");
-    myFile.print(sensorValue3);
-    myFile.print("\t");
-    myFile.print(sensorValue4);
-    myFile.print("\n");
-    */
-    
-    
-    // myFile.print("\t");
-    //myFile.print(sensorValue1);
-    //myFile.print("\t");
-  
-    //myFile.print(sensorValue2);
-    // myFile.print("\t");
-    //myFile.print(sensorValue3);
-    // myFile.print("\t");
-    //myFile.println(sensorValue4);
-    
-    // Serial.print(millis());
-    // Serial.print(", ");
-    //Serial.print(sensorValue1);
-    // Serial.print(", ");
-    // Serial.print(sensorValue2);
-    // Serial.print(", ");
-    // Serial.print(sensorValue3);
-    // Serial.print(", ");
-    // Serial.println(sensorValue4);
-  
-    // if(analogRead(A0) < 2){
-    //   myFile.close();
-    //   Serial.println("Closed: " + file_name);
-    //   setup();
-    // }
+    my_file.println();
+    my_file.flush();
   } else {
-    hasntClose = false;
+    hasnt_close = false;
     Serial.println("reset");
-    myFile.close();
+    my_file.close();
     Serial.println("Closed: " + file_name);
     setup();
   }
