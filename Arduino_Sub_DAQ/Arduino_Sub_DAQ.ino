@@ -39,7 +39,7 @@ void setup() {
   }
   Serial.println("Initialization done");
 
-  file_name = "data_" + String(file_name_num) + ".csv";
+  file_name = "linPotData_" + String(file_name_num) + ".csv";
   
   while(SD.exists(file_name)){
     Serial.print("File already exists: " + file_name);
