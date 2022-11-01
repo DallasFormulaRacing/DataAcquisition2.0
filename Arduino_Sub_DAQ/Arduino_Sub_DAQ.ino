@@ -13,7 +13,7 @@
 #include <SD.h>
 File my_file;
 
-bool has_not_close = true;
+bool file_is_open = true;
 String file_name;
 int file_name_num = 1;
 
@@ -21,12 +21,13 @@ int file_name_num = 1;
 int analog_pins[] = {A0, A1, A2, A3};
 
 int analog_values[] = {-1, -1, -1, -1};
-int reset_pin = 6;
+const int kResetPin = 6;
+const int kAnalogSize = 4;
 
 void setup() {
 
   Serial.begin(9600);
-  has_not_close = true;
+  file_is_open = true;
   
   while(!Serial){
     ;
@@ -47,9 +48,9 @@ void setup() {
     file_name = "linPotData_" + String(file_name_num) + ".csv";
   }
 
-  pinMode(reset_pin, INPUT_PULLUP);
+  pinMode(kResetPin, INPUT_PULLUP);
 
-  while (!digitalRead(reset_pin)){
+  while (!digitalRead(kResetPin)){
      Serial.println("Waiting");
   }
 
@@ -68,10 +69,10 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(reset_pin) && has_not_close){
+  if (digitalRead(kResetPin) && file_is_open){
     my_file.print(millis());
     my_file.print(",");
-    for (int x = 0; x < sizeof(analog_values)/sizeof(int); x++){
+    for (int x = 0; x < kAnalogSize; x++){
         analog_values[x] = analogRead(analog_pins[x]);
         my_file.print(analog_values[x]);
         my_file.print(",");
@@ -79,7 +80,7 @@ void loop() {
     my_file.println();
     my_file.flush();
   } else {
-    has_not_close = false;
+    file_is_open = false;
     Serial.println("reset");
     my_file.close();
     Serial.println("Closed: " + file_name);
