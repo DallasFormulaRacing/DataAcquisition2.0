@@ -1,7 +1,7 @@
 /*
 * Linear Potentiometers
 * Author:        Bazel Jazzar   Suspension Lead
-* Modified By:   Manuel De Jesus Contreras & Cristian Cruz    Embedded Firmware Team
+* Modified By:   Manuel De Jesus Contreras            Embedded Firmware Team
 * Email:         Manuel.DeJesusContreras@UTDallas.edu
 * 
 * (c) 2022 Dallas Formula Racing - Formula SAE
@@ -13,7 +13,7 @@
 #include <SD.h>
 File my_file;
 
-bool hasnt_close = true;
+bool has_not_close = true;
 String file_name;
 int file_name_num = 1;
 
@@ -26,7 +26,7 @@ int reset_pin = 6;
 void setup() {
 
   Serial.begin(9600);
-  hasnt_close = true;
+  has_not_close = true;
   
   while(!Serial){
     ;
@@ -68,7 +68,7 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(reset_pin) && hasnt_close){
+  if (digitalRead(reset_pin) && has_not_close){
     my_file.print(millis());
     my_file.print(",");
     for (int x = 0; x < sizeof(analog_values)/sizeof(int); x++){
@@ -79,7 +79,7 @@ void loop() {
     my_file.println();
     my_file.flush();
   } else {
-    hasnt_close = false;
+    has_not_close = false;
     Serial.println("reset");
     my_file.close();
     Serial.println("Closed: " + file_name);
