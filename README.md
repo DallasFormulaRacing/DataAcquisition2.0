@@ -1,4 +1,5 @@
 # DataAcquisition2.0
+🏁 For documentation, checkout our [Wiki](https://github.com/DallasFormulaRacing/DataAcquisition2.0/wiki)!
 
 ## Objective:
 - A Data Acquisition (DAQ) System for interfacing with the vehicle ECU and additional sensors.
@@ -11,4 +12,4 @@
 - To be used in tandem with DFR's [DataAnalyzer](https://github.com/DallasFormulaRacing/DataAnalyzer)
 
 
-🏁 For documentation, checkout our [Wiki](https://github.com/DallasFormulaRacing/DataAcquisition2.0/wiki)!
+
