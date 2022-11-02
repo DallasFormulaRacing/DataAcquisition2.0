@@ -14,7 +14,7 @@
 #include <SPI.h>
 #include <SD.h>
 
-#define P1 0x29
+#define I2C_ADDRESS 0x29
 
 const int kSwitchPin = 7, kChipSelect = 10;
 const float kTwo24 = 16777216.00;
@@ -52,12 +52,12 @@ float pressureTransferFunction(uint32_t outb[]) {
 }
 
 void ReadAirPressureSensor() {
-  Wire.beginTransmission(P1);
+  Wire.beginTransmission(I2C_ADDRESS);
   Wire.write(0xAA);
   Wire.endTransmission();
   delay(100);
 
-  Wire.requestFrom(P1,7);
+  Wire.requestFrom(I2C_ADDRESS,7);
   char stat = Wire.read();
   char PressureA = Wire.read();
   char PressureB = Wire.read();
