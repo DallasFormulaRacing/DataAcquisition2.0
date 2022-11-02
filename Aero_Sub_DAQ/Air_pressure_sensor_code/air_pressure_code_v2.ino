@@ -49,6 +49,39 @@ float pressureTransferFunction(uint32_t outb[]){
   return abs(fPress);
 }
 
+void readInformation()
+{
+  Wire.beginTransmission(P1);
+  Wire.write(0xAA);
+  Wire.endTransmission();
+  delay(100);
+
+  Wire.requestFrom(P1,7);
+  char stat = Wire.read();
+  char PressureA = Wire.read();
+  char PressureB = Wire.read();
+  char PressureC = Wire.read();
+  char TemperatureA = Wire.read();
+  char TemperatureB = Wire.read();
+  char TemperatureC = Wire.read();
+   
+  delay(100);         
+
+  Wire.requestFrom (41, 7);
+  while(Wire.available() < 7)
+  delay(20);
+      
+    StatusByte = Wire.read();    // receive a byte as character
+  
+    outb[0] = Wire.read();     
+    outb[1] = Wire.read();    
+    outb[2] = Wire.read();    
+    outb[3] = Wire.read();    
+    outb[4] = Wire.read();    
+    outb[5] = Wire.read();    
+    outb[6] = Wire.read();    
+}
+
 void setup() 
 {
   pinMode(switch_pin, INPUT_PULLUP);
@@ -96,35 +129,7 @@ while(digitalRead(switch_pin) == HIGH){
   
   delay(1000);
   
-  Wire.beginTransmission(P1);
-  Wire.write(0xAA);
-  Wire.endTransmission();
-  delay(100);
-
-  Wire.requestFrom(P1,7);
-  char stat = Wire.read();
-  char PressureA = Wire.read();
-  char PressureB = Wire.read();
-  char PressureC = Wire.read();
-  char TemperatureA = Wire.read();
-  char TemperatureB = Wire.read();
-  char TemperatureC = Wire.read();
-   
-  delay(100);         
-
-  Wire.requestFrom (41, 7);
-  while(Wire.available() < 7)
-  delay(20);
-      
-    StatusByte = Wire.read();    // receive a byte as character
-  
-    outb[0] = Wire.read();     
-    outb[1] = Wire.read();    
-    outb[2] = Wire.read();    
-    outb[3] = Wire.read();    
-    outb[4] = Wire.read();    
-    outb[5] = Wire.read();    
-    outb[6] = Wire.read();    
+  readInformation();
 
 dataFile = SD.open(file_name, FILE_WRITE);
 
