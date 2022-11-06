@@ -11,18 +11,18 @@
 
 #include <SPI.h>
 #include <SD.h>
-File my_file;
+static File my_file;
 
 bool file_is_open = true;
 String file_name;
 int file_name_num = 1;
 
 //A2, A3 are front, A0, A1 are rear
-const int kAnalogSize = 4;
-int analog_pins[kAnalogSize] = {A0, A1, A2, A3};
-int analog_values[kAnalogSize] = {-1, -1, -1, -1};
+static constexpr int kAnalogSize = 4;
+static constexpr int analog_pins[kAnalogSize] = {A0, A1, A2, A3};
+static int analog_values[kAnalogSize] = {-1, -1, -1, -1};
 
-const int kResetPin = 6;
+static constexpr int kResetPin = 6;
 
 
 void setup() {
