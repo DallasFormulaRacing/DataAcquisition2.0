@@ -62,7 +62,6 @@ void loop() {
   temp_sensor.temp3 = temp_sensor.readObjectTempF();
   Serial.print("*F\tObject = "); Serial.print(temp_sensor.temp3); Serial.println("*F");
 
-
   temp_sensor.AddrSet(IR4_ADDR); 
   Serial.print("IR4: ");
   Serial.print("Ambient = "); Serial.print(temp_sensor.readAmbientTempF()); 
