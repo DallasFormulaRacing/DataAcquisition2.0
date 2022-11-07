@@ -18,10 +18,10 @@
 
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
-#define IR1 0x5C
-#define IR2 0x5A
-#define IR3 0x5B
-#define IR4 0x5D
+#define IR1_ADDR 0x5C
+#define IR2_ADDR 0x5A
+#define IR3_ADDR 0x5B
+#define IR4_ADDR 0x5D
 Adafruit_MLX90614 mlx;
 
 void setup() {
@@ -44,32 +44,34 @@ void setup() {
 
 void loop() {
   
-  mlx.AddrSet(IR1); 
+  mlx.AddrSet(IR1_ADDR); 
   Serial.print("IR1: ");
   Serial.print("Ambient = "); Serial.print(mlx.readAmbientTempF()); 
   Serial.print("*F\tObject = "); Serial.print(mlx.readObjectTempF()); Serial.println("*F");
   mlx.temp1 = mlx.readObjectTempF();
-  delay(1);
-  mlx.AddrSet(IR2); 
+
+  mlx.AddrSet(IR2_ADDR); 
   Serial.print("IR2: ");
   Serial.print("Ambient = "); Serial.print(mlx.readAmbientTempF()); 
   Serial.print("*F\tObject = "); Serial.print(mlx.readObjectTempF()); Serial.println("*F");
   mlx.temp2 = mlx.readObjectTempF();
-  delay(1);
-  mlx.AddrSet(IR3); 
+
+  mlx.AddrSet(IR3_ADDR); 
   Serial.print("IR3: ");
   Serial.print("Ambient = "); Serial.print(mlx.readAmbientTempF()); 
   Serial.print("*F\tObject = "); Serial.print(mlx.readObjectTempF()); Serial.println("*F");
   mlx.temp3 = mlx.readObjectTempF();
-  delay(1);
-   mlx.AddrSet(IR4); 
+
+  mlx.AddrSet(IR4_ADDR); 
   Serial.print("IR4: ");
   Serial.print("Ambient = "); Serial.print(mlx.readAmbientTempF()); 
   Serial.print("*F\tObject = "); Serial.print(mlx.readObjectTempF()); Serial.println("*F");
   mlx.temp4 = mlx.readObjectTempF();
-  delay(1);
-  Serial.print("\n***********Average Temp:"); Serial.print(mlx.avgF=(mlx.temp1+mlx.temp2+mlx.temp3+mlx.temp4)/4); 
+
+  constexpr int i = 4; 
+  double compute_average_temp (mlx.avgF=((mlx.temp1+mlx.temp2+mlx.temp3+mlx.temp4)/i));
+  Serial.print("\n***********Average Temp: "); 
+  Serial.print(compute_average_temp); 
   Serial.print("***********\n");
   Serial.println();
-  delay(1);
 }
