@@ -22,7 +22,7 @@
 #define IR2_ADDR 0x5A
 #define IR3_ADDR 0x5B
 #define IR4_ADDR 0x5D
-Adafruit_MLX90614 mlx;
+Adafruit_MLX90614 temp_sensor;
 
 void setup() {
   Serial.begin(9600);
@@ -30,7 +30,7 @@ void setup() {
 
   Serial.println("Adafruit MLX90614 test");  
 
-  if(!mlx.begin()) {
+  if(!temp_sensor.begin()) {
     
     Serial.println("Error connecting to MLX sensors. Check wiring.");
     while (1);
@@ -44,32 +44,33 @@ void setup() {
 
 void loop() {
   
-  mlx.AddrSet(IR1_ADDR); 
+  temp_sensor.AddrSet(IR1_ADDR); 
   Serial.print("IR1: ");
-  Serial.print("Ambient = "); Serial.print(mlx.readAmbientTempF()); 
-  Serial.print("*F\tObject = "); Serial.print(mlx.readObjectTempF()); Serial.println("*F");
-  mlx.temp1 = mlx.readObjectTempF();
+  Serial.print("Ambient = "); Serial.print(temp_sensor.readAmbientTempF()); 
+  temp_sensor.temp1=temp_sensor.readObjectTempF();
+  Serial.print("*F\tObject = "); Serial.print(temp_sensor.temp1); Serial.println("*F");
 
-  mlx.AddrSet(IR2_ADDR); 
+  temp_sensor.AddrSet(IR2_ADDR); 
   Serial.print("IR2: ");
-  Serial.print("Ambient = "); Serial.print(mlx.readAmbientTempF()); 
-  Serial.print("*F\tObject = "); Serial.print(mlx.readObjectTempF()); Serial.println("*F");
-  mlx.temp2 = mlx.readObjectTempF();
+  Serial.print("Ambient = "); Serial.print(temp_sensor.readAmbientTempF()); 
+  temp_sensor.temp2=temp_sensor.readObjectTempF();
+  Serial.print("*F\tObject = "); Serial.print(temp_sensor.temp2); Serial.println("*F");
 
-  mlx.AddrSet(IR3_ADDR); 
+  temp_sensor.AddrSet(IR3_ADDR); 
   Serial.print("IR3: ");
-  Serial.print("Ambient = "); Serial.print(mlx.readAmbientTempF()); 
-  Serial.print("*F\tObject = "); Serial.print(mlx.readObjectTempF()); Serial.println("*F");
-  mlx.temp3 = mlx.readObjectTempF();
+  Serial.print("Ambient = "); Serial.print(temp_sensor.readAmbientTempF()); 
+  temp_sensor.temp3 = temp_sensor.readObjectTempF();
+  Serial.print("*F\tObject = "); Serial.print(temp_sensor.temp3); Serial.println("*F");
 
-  mlx.AddrSet(IR4_ADDR); 
+
+  temp_sensor.AddrSet(IR4_ADDR); 
   Serial.print("IR4: ");
-  Serial.print("Ambient = "); Serial.print(mlx.readAmbientTempF()); 
-  Serial.print("*F\tObject = "); Serial.print(mlx.readObjectTempF()); Serial.println("*F");
-  mlx.temp4 = mlx.readObjectTempF();
+  Serial.print("Ambient = "); Serial.print(temp_sensor.readAmbientTempF()); 
+  temp_sensor.temp4 = temp_sensor.readObjectTempF();
+  Serial.print("*F\tObject = "); Serial.print(temp_sensor.temp4); Serial.println("*F");
 
-  constexpr int i = 4; 
-  double compute_average_temp (mlx.avgF=((mlx.temp1+mlx.temp2+mlx.temp3+mlx.temp4)/i));
+  constexpr int kNumofTempSensors = 4; 
+  double compute_average_temp (temp_sensor.avgF=((temp_sensor.temp1+temp_sensor.temp2+temp_sensor.temp3+temp_sensor.temp4)/kNumofTempSensors));
   Serial.print("\n***********Average Temp: "); 
   Serial.print(compute_average_temp); 
   Serial.print("***********\n");
