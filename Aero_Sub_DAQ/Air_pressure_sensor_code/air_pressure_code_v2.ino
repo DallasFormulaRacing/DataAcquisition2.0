@@ -20,9 +20,9 @@ const int kSwitchPin = 7, kChipSelect = 10;
 const float kTwo24 = 16777216.00;
 uint8_t cmd[8], StatusByte, cmdbyte;
 uint32_t outb[12];
-int file_name_num = 1, count;
+int count;
 float time;
-String file_name;
+String file_name = "aerodata.csv";
 File dataFile;
 bool switchUsed;
 
@@ -102,20 +102,19 @@ void setup() {
   }
   Serial.println("card initialized.");
   
-  file_name = "aerodata.csv";
-  while(SD.exists(file_name)){
-   Serial.println("File already exists: " + file_name);
-   ++file_name_num;    
-   file_name = "aerodata" + (String)file_name_num + ".csv";
-  }
-  Serial.print("New file name: ");
-  Serial.println(file_name);
+//  while(SD.exists(file_name)){
+//   Serial.println("File already exists: " + file_name);
+//   ++file_name_num;    
+//   file_name = "aerodata" + (String)file_name_num + ".csv";
+//  }
+//  Serial.print("New file name: ");
+//  Serial.println(file_name);
   
   if(dataFile)
     dataFile.close();
   
   dataFile = SD.open(file_name, FILE_WRITE);
-  dataFile.print("Time(s),Pressure,Temperature\n");
+  dataFile.print("Time(ms),Pressure(),Temperature()\n");
 }
 
 void loop() {
@@ -136,11 +135,10 @@ if(switchUsed){
   switchUsed = false;
 }
   
-  delay(1000);
   ReadAirPressureSensor();
 
   if(dataFile) {
-    dataFile.print(time);
+    dataFile.print(millis());
     dataFile.print(",");
     dataFile.print(pressureTransferFunction(outb));
     dataFile.print(",");
@@ -151,5 +149,4 @@ if(switchUsed){
     Serial.println(file_name + " is not open!");
 
   delay(100);
-  time += 1.1;
 }
