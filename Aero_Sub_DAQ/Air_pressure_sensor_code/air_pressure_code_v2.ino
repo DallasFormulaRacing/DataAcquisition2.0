@@ -69,8 +69,9 @@ void ReadAirPressureSensor() {
 	delay(100);         
 	
 	Wire.requestFrom (41, 7);
-	while(Wire.available() < 7)
-	delay(20);
+	while(Wire.available() < 7) {
+	   delay(20);
+	}
 	
 	StatusByte = Wire.read();    // receive a byte as character
 	
