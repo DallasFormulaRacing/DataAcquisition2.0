@@ -1,5 +1,6 @@
 #include "Application/potentiometer.h"
 #include "mbed.h"
+#include <iostream>
 
 
 
@@ -11,8 +12,9 @@ int main()
 
     while (true) {
         unsigned short d = a.read_u16();
-        unsigned short e = p.read();
-        printf ("[%d,%d]\n",d, e);
+        double e = p.read();
+        //printf ("[%d,%d]\n",d, e);
+        cout << d << "\t" << e << endl;
         //printf("%f \n", d);
     }
 }

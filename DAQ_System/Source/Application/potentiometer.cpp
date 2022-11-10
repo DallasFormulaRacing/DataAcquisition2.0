@@ -15,8 +15,8 @@ Potentiometer::Potentiometer(PinName p) : ain_(p) {
 double Potentiometer::read(){
     //0 to 65535 is adc in range
     //      Kohm = (adcin * (V/steps) / Itot)
-    last_ = ain_.read_u16()*100/65535;
-    //last_ = 25*ain_.read_u16()*(3.3/4096)/.235+100;
+    last_ = (double)(ain_.read_u16())/65535.0;
+    //last_ = 25*ain_.read_u16()*(3.3/65535)/.235;
     return last_;
 }
 
