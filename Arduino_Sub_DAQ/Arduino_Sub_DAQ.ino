@@ -1,7 +1,7 @@
 /*
 * Linear Potentiometers
-* Author:        Bazel Jazzar   Suspension Lead
-* Modified By:   Manuel De Jesus Contreras            Embedded Firmware Team
+* Author:        Bazel Jazzar                 Suspension Lead
+* Modified By:   Manuel De Jesus Contreras    Embedded Firmware Team
 * Email:         Manuel.DeJesusContreras@UTDallas.edu
 * 
 * (c) 2022 Dallas Formula Racing - Formula SAE
@@ -11,18 +11,19 @@
 
 #include <SPI.h>
 #include <SD.h>
-File my_file;
+static File my_file;
 
 bool file_is_open = true;
 String file_name;
 int file_name_num = 1;
 
 //A2, A3 are front, A0, A1 are rear
-int analog_pins[] = {A0, A1, A2, A3};
+static constexpr int kAnalogSize = 4;
+static constexpr int analog_pins[kAnalogSize] = {A0, A1, A2, A3};
+static int analog_values[kAnalogSize] = {-1, -1, -1, -1};
 
-int analog_values[] = {-1, -1, -1, -1};
-const int kResetPin = 6;
-const int kAnalogSize = 4;
+static constexpr int kResetPin = 6;
+
 
 void setup() {
 
