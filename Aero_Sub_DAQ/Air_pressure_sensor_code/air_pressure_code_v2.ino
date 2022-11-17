@@ -18,10 +18,8 @@
 //initialize global variables
 const int kSwitchPin = 7, kChipSelect = 10;
 const float kTwo24 = 16777216.00;
-uint8_t command[8], StatusByte, cmdbyte;
 uint32_t sensor_output_bytes[7];
 int count;
-float time;
 String file_name = "aerodata.csv";
 File dataFile;
 bool switchUsed;
@@ -54,40 +52,19 @@ float pressureTransferFunction(uint32_t sensor_output_bytes[]) {
 void ReadAirPressureSensor() {
 	Wire.beginTransmission(I2C_ADDRESS);
 	Wire.write(0xAA);
-	Wire.endTransmission();
-	delay(100);
-	
-	Wire.requestFrom(I2C_ADDRESS,7);
-	char stat = Wire.read();
-	char PressureA = Wire.read();
-	char PressureB = Wire.read();
-	char PressureC = Wire.read();
-	char TemperatureA = Wire.read();
-	char TemperatureB = Wire.read();
-	char TemperatureC = Wire.read();
-	
-	delay(100);         
+	Wire.endTransmission();        
 	
 	Wire.requestFrom (41, 7);
 	while(Wire.available() < 7) {
 	   delay(20);
 	}
-	
-	StatusByte = Wire.read();    // receive a byte as character
-	
-	sensor_output_bytes[0] = Wire.read();     
-	sensor_output_bytes[1] = Wire.read();    
-	sensor_output_bytes[2] = Wire.read();    
-	sensor_output_bytes[3] = Wire.read();    
-	sensor_output_bytes[4] = Wire.read();    
-	sensor_output_bytes[5] = Wire.read();    
-	sensor_output_bytes[6] = Wire.read();    
+	for(int i = 0; i <= 6;i++) {
+	   sensor_output_bytes[i] = Wire.read();
+	}
 }
 
 void setup() {
 	pinMode(kSwitchPin, INPUT_PULLUP);
-	time = 0;
-	delay(100);
 	Serial.begin(9600); 
 	while (!Serial); // wait for serial port to connect. Needed for native USB port only
 
@@ -101,9 +78,6 @@ void setup() {
 		while (1);
 		}
 	Serial.println("card initialized.");
-
-	if(dataFile)
-		dataFile.close();
 	
 	dataFile = SD.open(file_name, FILE_WRITE);
 	dataFile.print("Time(ms),Pressure(),Temperature()\n");
@@ -117,11 +91,7 @@ void loop() {
 			count++;
 			switchUsed = true;
 		}
-		Serial.println("Switch is off");
-		delay(250);
 	}
-	
-	Serial.println("Switch is on");
 	if(switchUsed)
 		setup();
 	
@@ -135,9 +105,4 @@ void loop() {
 		dataFile.print(temperatureTransferFunction(sensor_output_bytes));
 		dataFile.print("\n");
 	}
-	else
-		Serial.println(file_name + " is not open!");
-	
-	delay(100);
-
 }
