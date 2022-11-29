@@ -16,37 +16,32 @@
 
 #define I2C_ADDRESS 0x29
 //initialize global variables
-const int kSwitchPin = 7, kChipSelect = 10;
-const float kTwo24 = 16777216.00;
-uint32_t sensor_output_bytes[7];
-int count;
-String file_name = "aerodata.csv";
+static constexpr int kSwitchPin = 7, kChipSelect = 10;
+static constexpr float kTwo24 = 16777216.00;
+static uint32_t sensor_output_bytes[7];
+static String file_name = "aerodata.csv";
 File dataFile;
-bool switchUsed;
+static bool switchUsed;
 
 float temperatureTransferFunction(uint32_t sensor_output_bytes[]) {
-	uint32_t Tmp = 0;
-	float fTemp;
+	uint32_t temperature = 0;
+	float final_temperature;
 	// --- convert Temperature to degrees C:
-	Tmp = (sensor_output_bytes[4] << 8) + sensor_output_bytes[5];
-	fTemp = (((float)Tmp*125.0)/kTwo24) - 40.0;
-	Serial.print("Temperature: ");
-	Serial.println(fTemp);
-	return abs(fTemp);
+	temperature = (sensor_output_bytes[4] << 8) + sensor_output_bytes[5];
+	final_temperature = (((float)temperature*125.0)/kTwo24) - 40.0;
+	return abs(final_temperature);
 }
 
 float pressureTransferFunction(uint32_t sensor_output_bytes[]) {
-	uint32_t Prs = 0;
-	float fPress, transf;
+	uint32_t pressure = 0;
+	float final_pressure, transfer_function;
 	
 	// --- convert Pressure to %Full Scale Span ( +/- 100%)
-	Prs = (sensor_output_bytes[1] << 16) + (sensor_output_bytes[2] <<8) + sensor_output_bytes[3];
-	transf = (float)Prs - (0.5*kTwo24);
-	fPress = (transf/kTwo24)*1.25;
-	fPress *= 0.1;
-	Serial.print("Pressure: ");
-	Serial.println(fPress);
-	return abs(fPress);
+	pressure = (sensor_output_bytes[1] << 16) + (sensor_output_bytes[2] <<8) + sensor_output_bytes[3];
+	transfer_function = (float)pressure - (0.5*kTwo24);
+	final_pressure = (transfer_function/kTwo24)*1.25;
+	final_pressure *= 0.1;
+	return abs(final_pressure);
 }
 
 void ReadAirPressureSensor() {
@@ -84,16 +79,16 @@ void setup() {
 }
 
 void loop() {
-	count = 0;
 	while(digitalRead(kSwitchPin) == HIGH){
-		if (count == 0){
+		if (!switchUsed){
 			dataFile.close();
-			count++;
 			switchUsed = true;
 		}
+		delay(100);
 	}
-	if(switchUsed)
+	if(switchUsed){
 		setup();
+	}
 	
 	ReadAirPressureSensor();
 	
