@@ -34,7 +34,7 @@ void setup() {
     
     Serial.println("Error connecting to MLX sensors. Check wiring.");
     while (1);
-      } 
+    } 
  
   //Serial.print("Emissivity = "); Serial.println(mlx.readEmissivity());
   Serial.println("================================================");
