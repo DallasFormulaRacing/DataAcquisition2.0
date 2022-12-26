@@ -58,8 +58,8 @@ void loop() {
   data_file = SD.open(file_name, FILE_WRITE);
 
   if(data_file) {
-    float air_pressure = pressureTransferFunction(sensor_output_bytes);
-    float air_temperature = temperatureTransferFunction(sensor_output_bytes);
+    float air_pressure = computeAirPressure(sensor_output_bytes);
+    float air_temperature = computeAirTemperature(sensor_output_bytes);
 
     data_file.print(millis());
     data_file.print(",");
@@ -97,20 +97,20 @@ void readAirPressureSensor() {
   }
 }
 
-float pressureTransferFunction(uint32_t sensor_output_bytes[]) {
+float computeAirPressure(uint32_t sensor_output_bytes[]) {
   // Pressure Output Transfer Function (Pg 3 of Datasheet)
   // Convert Pressure to %Full Scale Span ( +/- 100%)
   uint32_t nominal_air_pressure = (sensor_output_bytes[1] << 16) + (sensor_output_bytes[2] << 8) + sensor_output_bytes[3];
   float transfer_function_numerator = (float)nominal_air_pressure - (0.5 * k2PowerOf24);
   float real_air_pressure = (transfer_function_numerator / k2PowerOf24) * 1.25;
   real_air_pressure *= 10;
-  return real_air_pressure;
+  return abs(real_air_pressure);
 }
 
-float temperatureTransferFunction(uint32_t sensor_output_bytes[]){
+float computeAirTemperature(uint32_t sensor_output_bytes[]){
   // Temperature Output Transfer Function (Pg 3 of Datasheet)
   // Convert Temperature to degrees in Celsius:
   uint32_t nominal_temperature = (sensor_output_bytes[4] << 8) + sensor_output_bytes[5];
   float real_temperature = ((nominal_temperature * 125.0) / k2PowerOf24) - 40.0;
-  return real_temperature;
+  return abs(real_temperature);
 }
