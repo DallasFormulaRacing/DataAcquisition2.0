@@ -4,13 +4,14 @@
 // main() runs in its own thread in the OS
 int main()
 {
-    CAN can(PD_1, PD_0, 250000);
-
+    // PA_12 = TX, PA_11 = RX
+    CAN can(PA_12, PA_11, 250000);
+    CANMessage msg;
     while (true) {
-        CANMessage msg;
+        
 
         can.read(msg);
-        cout << msg.id << " ";
+        cout << msg.id << "\t";
 
         for (char x : msg.data){
             cout << x << " ";
