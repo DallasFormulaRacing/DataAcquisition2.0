@@ -1,0 +1,63 @@
+# ninja log v5
+2	1254	6936243414362929	untitled_autogen/timestamp	8c2db89e624e83ac
+2	1254	6936243414362929	untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+2	1254	6936243414362929	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/timestamp	8c2db89e624e83ac
+2	1254	6936243414362929	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+1262	3465	6936243439498625	CMakeFiles/untitled.dir/worker.cpp.obj	90d01bd9cdfcfc0d
+1265	3799	6936243442839385	CMakeFiles/untitled.dir/mainwindow.cpp.obj	c6891c746ed3ae9
+1258	3901	6936243443859612	CMakeFiles/untitled.dir/untitled_autogen/mocs_compilation.cpp.obj	5aa5e8371f93f618
+16	424	6936243694351295	untitled_autogen/timestamp	8c2db89e624e83ac
+16	424	6936243694351295	untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+16	424	6936243694351295	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/timestamp	8c2db89e624e83ac
+16	424	6936243694351295	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+454	2610	6936243716206243	CMakeFiles/untitled.dir/mainwindow.cpp.obj	c6891c746ed3ae9
+451	2702	6936243717126457	CMakeFiles/untitled.dir/main.cpp.obj	5c1914ec8caeffd0
+2703	2957	6936243719637027	untitled.exe	1542f3fe29ef4c6c
+7	437	6936244435540161	untitled_autogen/timestamp	8c2db89e624e83ac
+7	437	6936244435540161	untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+7	437	6936244435540161	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/timestamp	8c2db89e624e83ac
+7	437	6936244435540161	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+466	3042	6936244461596069	CMakeFiles/untitled.dir/mainwindow.cpp.obj	c6891c746ed3ae9
+462	3059	6936244461756113	CMakeFiles/untitled.dir/main.cpp.obj	5c1914ec8caeffd0
+3059	3279	6936244463926598	untitled.exe	1542f3fe29ef4c6c
+10	437	6936245035980148	untitled_autogen/timestamp	8c2db89e624e83ac
+10	437	6936245035980148	untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+10	437	6936245035980148	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/timestamp	8c2db89e624e83ac
+10	437	6936245035980148	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+16	1966	6936245069442333	CMakeFiles/untitled.dir/worker.cpp.obj	90d01bd9cdfcfc0d
+13	2330	6936245073083151	CMakeFiles/untitled.dir/main.cpp.obj	5c1914ec8caeffd0
+2330	2542	6936245075163629	untitled.exe	1542f3fe29ef4c6c
+8	402	6936245580416916	untitled_autogen/timestamp	8c2db89e624e83ac
+8	402	6936245580416916	untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+8	402	6936245580416916	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/timestamp	8c2db89e624e83ac
+8	402	6936245580416916	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+429	2841	6936245604802434	CMakeFiles/untitled.dir/mainwindow.cpp.obj	c6891c746ed3ae9
+425	2874	6936245605142514	CMakeFiles/untitled.dir/main.cpp.obj	5c1914ec8caeffd0
+2874	3089	6936245607242986	untitled.exe	1542f3fe29ef4c6c
+12	405	6936246243553574	untitled_autogen/timestamp	8c2db89e624e83ac
+12	405	6936246243553574	untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+12	405	6936246243553574	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/timestamp	8c2db89e624e83ac
+12	405	6936246243553574	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+434	2823	6936246267729061	CMakeFiles/untitled.dir/mainwindow.cpp.obj	c6891c746ed3ae9
+430	2881	6936246268309192	CMakeFiles/untitled.dir/main.cpp.obj	5c1914ec8caeffd0
+2882	3100	6936246270459677	untitled.exe	1542f3fe29ef4c6c
+16	441	6936246889765446	untitled_autogen/timestamp	8c2db89e624e83ac
+16	441	6936246889765446	untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+16	441	6936246889765446	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/timestamp	8c2db89e624e83ac
+16	441	6936246889765446	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+469	2755	6936246912900698	CMakeFiles/untitled.dir/mainwindow.cpp.obj	c6891c746ed3ae9
+465	2804	6936246913390817	CMakeFiles/untitled.dir/main.cpp.obj	5c1914ec8caeffd0
+2804	3028	6936246915591309	untitled.exe	1542f3fe29ef4c6c
+14	504	6936247688080900	untitled_autogen/timestamp	8c2db89e624e83ac
+14	504	6936247688080900	untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+14	504	6936247688080900	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/timestamp	8c2db89e624e83ac
+14	504	6936247688080900	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+537	3128	6936247714337961	CMakeFiles/untitled.dir/mainwindow.cpp.obj	c6891c746ed3ae9
+534	3272	6936247715778289	CMakeFiles/untitled.dir/main.cpp.obj	5c1914ec8caeffd0
+3272	3507	6936247718078813	untitled.exe	1542f3fe29ef4c6c
+14	422	6936248057869112	untitled_autogen/timestamp	8c2db89e624e83ac
+14	422	6936248057869112	untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+14	422	6936248057869112	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/timestamp	8c2db89e624e83ac
+14	422	6936248057869112	C:/Users/djcma/Mbed Programs/DataAcquisition2.0/DAQ_Dash/build-untitled-Desktop_Qt_6_4_1_MinGW_64_bit-Debug/untitled_autogen/mocs_compilation.cpp	8c2db89e624e83ac
+447	2720	6936248080854332	CMakeFiles/untitled.dir/mainwindow.cpp.obj	c6891c746ed3ae9
+2720	2935	6936248082974810	untitled.exe	1542f3fe29ef4c6c

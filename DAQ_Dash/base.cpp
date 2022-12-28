@@ -1,4 +1,5 @@
 #include <gtkmm.h>
+#include <gtkmm/progressbar.h>
 
 int main(int argc, char* argv[])
 {
@@ -6,6 +7,19 @@ int main(int argc, char* argv[])
 
   Gtk::Window window;
   window.set_default_size(200, 200);
+  Gtk::ProgressBar progBar;
 
-  return app->run(window);
+  
+  progBar.set_fraction(.5);
+  window.add(progBar); 
+  progBar.set_halign(Gtk::ALIGN_CENTER);
+  progBar.set_valign(Gtk::ALIGN_CENTER);
+  progBar.set_text("some text");
+  progBar.set_show_text(true);
+  app->run(window);
+  
+
+  
+
+  return 0;
 }
