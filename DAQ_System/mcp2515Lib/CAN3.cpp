@@ -1,6 +1,7 @@
 #include "CAN3.h"
 
 #include "mbed.h"
+#include "mbed_wait_api.h"
 #include "mcp2515.h"
 #include "mcp2515_can.h"
 #include "mcp2515_defs.h"
@@ -65,7 +66,7 @@ int CAN3::frequency(int canSpeed) {
     uint8_t res;
 
     res = _mcp.init(canSpeed); //CAN_500KBPS_8MHZ
-    wait(.001);
+    //wait(.001);
 
     _mcp.setRegister(MCP_CANINTE, 0x3);//0x3); //MCP_RX_INT);
     _mcp.setRegister(MCP_CANINTF, 0x3);// 0xff);
@@ -86,7 +87,7 @@ int CAN3::frequency(int canSpeed) {
     }
 
     _mcp.dumpExtendedStatus();
-    wait(.001);
+    //wait(.001);
 
     if (res != MCP2515_OK) {
         return 0;
