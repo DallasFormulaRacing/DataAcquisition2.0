@@ -1,11 +1,22 @@
 #include "mbed.h"
 #include "iostream"
 #include "CAN3.h"
+#include "Hx711.h"
 
 
 // main() runs in its own thread in the OS
 int main()
 {
+
+    Hx711 hx7(PE_2, PE_6);
+
+    while (true){
+        if (hx7.is_ready()){
+            cout << hx7.read();
+        }
+    }
+
+    /*
     SPI spi(PE_6, PE_5, PE_2);// MOSI, MISO, SCLK : on arduino/shield: D11, D12, D13
     PinName chipSelect = PE_4; // CS, D10 on arduino/shield
     CAN3 can(spi, chipSelect);
@@ -22,6 +33,10 @@ int main()
         }
         cout << endl;
     }
+
+    */
+
+
     /*
     CAN can(PD_1, PD_0, 250000);
 
