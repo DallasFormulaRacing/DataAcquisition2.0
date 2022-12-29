@@ -17,12 +17,12 @@
  ****************************************************/
 
 #include <Wire.h>
-#include <Adafruit_MLX90614.h>
+#include "Adafruit_MLX90614.h"
 
-static constexpr uint8_t kIR1Addr 0x5C;
-static constexpr uint8_t kIR2Addr 0x5A;
-static constexpr uint8_t kIR3Addr 0x5B;
-static constexpr uint8_t kIR4Addr 0x5D;
+static constexpr uint8_t kIR1Addr = 0x5C;
+static constexpr uint8_t kIR2Addr = 0x5A;
+static constexpr uint8_t kIR3Addr = 0x5B;
+static constexpr uint8_t kIR4Addr = 0x5D;
 static Adafruit_MLX90614 temp_sensor;
 
 constexpr int kNumofTempSensors = 4; 
