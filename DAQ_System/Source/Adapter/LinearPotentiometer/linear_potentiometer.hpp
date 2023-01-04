@@ -1,27 +1,38 @@
 /*
 * Linear Potentiometer
-* Author:        Manuel DJC              
+* Author:        Manuel DJC    
+* Modified By:   Cristian Cruz
+*          
 * Email:         Manuel.DeJesusContreras@UTDallas.edu
+*                cris14.alex@gmail.com
 * 
 * (c) 2022 Dallas Formula Racing - Embedded Firmware Team
 * Formula SAE International Collegiate Chapter
 * GPL-3.0 License
 */
 
-#ifndef POTENTOMETER_H
-#define POTENTOMETER_H
+#ifndef LINEAR_POTENTOMETER_H
+#define LINEAR_POTENTOMETER_H
 
 #include "mbed.h"
 
-class LinearPotentiometer {
+#include "Adapter/Interfaces/ilinear_potentiometer.hpp"
+
+namespace adapter {
+
+class LinearPotentiometer : public adapter::ILinear_Potentiometer {
     public:
         LinearPotentiometer(PinName p);
-        double read();
+        virtual ~LinearPotentiometer();
         void setPin(PinName p);
         double getLast();
+
+        double read_displacement() override;
     private:
         AnalogIn ain_;
         double last_;
 };
 
-#endif
+}
+
+#endif // LINEAR_POTENTOMETER_H
