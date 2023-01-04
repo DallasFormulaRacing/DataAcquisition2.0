@@ -1,9 +1,16 @@
 /*
-Written by: Manuel DJC
-header file for potentiometer class
+* Linear Potentiometer
+* Author:        Manuel DJC              
+* Email:         Manuel.DeJesusContreras@UTDallas.edu
+* 
+* (c) 2022 Dallas Formula Racing - Embedded Firmware Team
+* Formula SAE International Collegiate Chapter
+* GPL-3.0 License
 */
+
 #ifndef POTENTOMETER_H
 #define POTENTOMETER_H
+
 #include "mbed.h"
 
 class Potentiometer {

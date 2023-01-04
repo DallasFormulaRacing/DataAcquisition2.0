@@ -1,8 +1,7 @@
-#include "Application/potentiometer.h"
 #include "mbed.h"
 #include <iostream>
 
-
+#include "Adapter/LinearPotentiometer/potentiometer.hpp"
 
 // main() runs in its own thread in the OS
 int main()

@@ -1,9 +1,14 @@
 /*
-Written by: Manuel DJC
-
-implements AnalogSensor as a potentiometer with a coefficient.
+* Linear Potentiometer
+* Author:        Manuel DJC              
+* Email:         Manuel.DeJesusContreras@UTDallas.edu
+* 
+* (c) 2022 Dallas Formula Racing - Embedded Firmware Team
+* Formula SAE International Collegiate Chapter
+* GPL-3.0 License
 */
-#include "potentiometer.h"
+
+#include "potentiometer.hpp"
 #include "AnalogIn.h"
 #include "mbed.h"
 
