@@ -1,12 +1,13 @@
-#include "mbed.h"
 #include <iostream>
 
-#include "Adapter/LinearPotentiometer/potentiometer.hpp"
+#include "mbed.h"
+
+#include "Adapter/LinearPotentiometer/linear_potentiometer.hpp"
 
 // main() runs in its own thread in the OS
 int main()
 {
-    Potentiometer p(PF_4);
+    LinearPotentiometer p(PF_4);
     AnalogIn a(PF_4);
 
     while (true) {

@@ -13,9 +13,9 @@
 
 #include "mbed.h"
 
-class Potentiometer {
+class LinearPotentiometer {
     public:
-        Potentiometer(PinName p);
+        LinearPotentiometer(PinName p);
         double read();
         void setPin(PinName p);
         double getLast();

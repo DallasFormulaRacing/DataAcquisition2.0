@@ -8,16 +8,17 @@
 * GPL-3.0 License
 */
 
-#include "potentiometer.hpp"
 #include "AnalogIn.h"
 #include "mbed.h"
 
-Potentiometer::Potentiometer(PinName p) : ain_(p) {
+#include "linear_potentiometer.hpp"
+
+LinearPotentiometer::LinearPotentiometer(PinName p) : ain_(p) {
 }
 //sls1300 pot goes from 1-14k ohm, v = 3.3v, vdiv formula. Should return values from 100 to 450
 
 ///reads potentiometer and converts to mm
-double Potentiometer::read(){
+double LinearPotentiometer::read(){
     //0 to 65535 is adc in range
     //      Kohm = (adcin * (V/steps) / Itot)
     last_ = (double)(ain_.read_u16())/65535.0;
@@ -25,12 +26,12 @@ double Potentiometer::read(){
     return last_;
 }
 
-void Potentiometer::setPin(PinName p){
+void LinearPotentiometer::setPin(PinName p){
     ain_ = AnalogIn(p);
 }
 
 
-double Potentiometer::getLast(){
+double LinearPotentiometer::getLast(){
     return last_;
 }
 
