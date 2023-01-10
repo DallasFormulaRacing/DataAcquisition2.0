@@ -1,0 +1,7 @@
+{
+    "CUSTOM_F446RE": {
+        "inherits": ["NUCLEO_F446RE"],
+        "components": ["SD"],
+        "features_add": ["STORAGE"]
+    }
+}
