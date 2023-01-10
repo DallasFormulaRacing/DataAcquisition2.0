@@ -1,3 +1,15 @@
+// Code from: https://os.mbed.com/users/hudakz/code/SDCard//file/d08c053d5a35/main.cpp/
+
+/* Relevant files
+*   SDBlockDevice not found: https://os.mbed.com/questions/82585/SDBlockDeviceh-not-found/
+*   MCU Pinout diagram: https://os.mbed.com/platforms/ST-Nucleo-F446RE/
+*   SD Pinout: https://learn.adafruit.com/adafruit-microsd-spi-sdio/pinouts
+*   Corruption: https://forums.mbed.com/t/os-6-sd-card-filesystem-gets-corrupted-when-written-to/16632/2
+*   Properly Saving data: https://os.mbed.com/questions/69263/Saving-analog-data-in-SD-card/
+*   
+*/
+
+
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2013 ARM Limited
  *
