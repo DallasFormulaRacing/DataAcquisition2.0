@@ -18,7 +18,7 @@ static constexpr uint8_t SWITCH_PIN = 7; // To be re-implemented (consider using
 static constexpr uint8_t CHIP_SELECT_PIN = 10;
 
 static constexpr uint8_t kSensorAddr = 0x29;
-static constexpr uint8_t kReadSensorCommand = 0xAA;
+static constexpr uint8_t kReadSensorCommand = 0xAE; // "Start-Average8" Command - Pg 5 of Datasheet
 static constexpr uint8_t kNumOfExpectedBytes = 7;
 
 static constexpr float k2PowerOf24 = 16777216.0f;
@@ -103,7 +103,7 @@ float computeAirPressure(uint32_t sensor_output_bytes[]) {
   uint32_t nominal_air_pressure = (sensor_output_bytes[1] << 16) + (sensor_output_bytes[2] << 8) + sensor_output_bytes[3];
   float transfer_function_numerator = (float)nominal_air_pressure - (0.5 * k2PowerOf24);
   float real_air_pressure = (transfer_function_numerator / k2PowerOf24) * 1.25;
-  real_air_pressure *= 10;
+  real_air_pressure *= 20;
   return abs(real_air_pressure);
 }
 
