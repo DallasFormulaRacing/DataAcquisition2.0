@@ -28,11 +28,10 @@
 #include <stdio.h>
 #include <errno.h>
 
-// our SD card uses FAT 32 format
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
 
-// initializes the block device, pins are set to the SPI arduino pins
+// Physical block device, can be any device that supports the BlockDevice API
 SDBlockDevice   block_device(PA_7, PA_6, PA_5, PB_6);  // mosi, miso, sck, cs
 
 // File system declaration
@@ -47,17 +46,17 @@ int main()
     printf("Mounting the filesystem... ");
     fflush(stdout);
 
-    int error = file_system.mount(&block_device);
-    printf("%s\n", (error ? "Fail :(" : "OK"));
-
-    if (error) {
-        // Reformat if we can't mount the filesystem, this should only happen on the first boot
+    int status = file_system.mount(&block_device);
+    printf("%s\n", (status ? "Fail :(" : "OK"));
+    if (status) {
+        // Reformat if we can't mount the filesystem
+        // this should only happen on the first boot
         printf("No filesystem found, formatting... ");
         fflush(stdout);
-        error = file_system.reformat(&block_device);
-        printf("%s\n", (error ? "Fail :(" : "OK"));
-        if (error) {
-            error("error: %s (%d)\n", strerror(-error), error);
+        status = file_system.reformat(&block_device);
+        printf("%s\n", (status ? "Fail :(" : "OK"));
+        if (status) {
+            error("error: %s (%d)\n", strerror(-status), status);
         }
     }
 
@@ -65,7 +64,7 @@ int main()
     printf("Opening \"/fs/numbers.txt\"... ");
     fflush(stdout);
 
-    FILE*   numbers_file = fopen("/fs/numbers.txt", "r+");
+    FILE* numbers_file = fopen("/fs/numbers.txt", "r+");
     printf("%s\n", (!numbers_file ? "Fail :(" : "OK"));
     if (!numbers_file) {
         // Create the numbers file if it doesn't exist
@@ -80,8 +79,8 @@ int main()
         for (int i = 0; i < 10; i++) {
             printf("\rWriting numbers (%d/%d)... ", i, 10);
             fflush(stdout);
-            error = fprintf(numbers_file, "    %d\n", i);
-            if (error < 0) {
+            status = fprintf(numbers_file, "    %d\n", i);
+            if (status < 0) {
                 printf("Fail :(\n");
                 error("error: %s (%d)\n", strerror(errno), -errno);
             }
@@ -91,9 +90,9 @@ int main()
 
         printf("Seeking file... ");
         fflush(stdout);
-        error = fseek(numbers_file, 0, SEEK_SET);
-        printf("%s\n", (error < 0 ? "Fail :(" : "OK"));
-        if (error < 0) {
+        status = fseek(numbers_file, 0, SEEK_SET);
+        printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
+        if (status < 0) {
             error("error: %s (%d)\n", strerror(errno), -errno);
         }
     }
@@ -126,9 +125,9 @@ int main()
     // Close the file which also flushes any cached writes
     printf("Closing \"/fs/numbers.txt\"... ");
     fflush(stdout);
-    error = fclose(numbers_file);
-    printf("%s\n", (error < 0 ? "Fail :(" : "OK"));
-    if (error < 0) {
+    status = fclose(numbers_file);
+    printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
+    if (status < 0) {
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
 
@@ -144,7 +143,7 @@ int main()
 
     printf("root directory:\n");
     while (true) {
-        struct dirent*  entry = readdir(root_dir);
+        struct dirent* entry = readdir(root_dir);
         if (!entry) {
             break;
         }
@@ -154,9 +153,9 @@ int main()
 
     printf("Closing the root directory... ");
     fflush(stdout);
-    error = closedir(root_dir);
-    printf("%s\n", (error < 0 ? "Fail :(" : "OK"));
-    if (error < 0) {
+    status = closedir(root_dir);
+    printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
+    if (status < 0) {
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
 
@@ -171,50 +170,50 @@ int main()
 
     printf("numbers:\n");
     while (!feof(numbers_file)) {
-        int number = fgetc(numbers_file);
-        printf("%c", number);
+        int num = fgetc(numbers_file);
+        printf("%c", num);
     }
 
     printf("\rClosing \"/fs/numbers.txt\"... ");
     fflush(stdout);
-    error = fclose(numbers_file);
-    printf("%s\n", (error < 0 ? "Fail :(" : "OK"));
-    if (error < 0) {
+    status = fclose(numbers_file);
+    printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
+    if (status < 0) {
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
 
     // Tidy up
     printf("Unmounting... ");
     fflush(stdout);
-    error = file_system.unmount();
-    printf("%s\n", (error < 0 ? "Fail :(" : "OK"));
-    if (error < 0) {
-        error("error: %s (%d)\n", strerror(-error), error);
+    status = file_system.unmount();
+    printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
+    if (status < 0) {
+        error("error: %s (%d)\n", strerror(-status), status);
     }
     
     printf("Initializing the block device... ");
     fflush(stdout);
 
-    error = block_device.init();
-    printf("%s\n", (error ? "Fail :(" : "OK"));
-    if (error) {
-        error("error: %s (%d)\n", strerror(-error), error);
+    status = block_device.init();
+    printf("%s\n", (status ? "Fail :(" : "OK"));
+    if (status) {
+        error("error: %s (%d)\n", strerror(-status), status);
     }
 
     printf("Erasing the block device... ");
     fflush(stdout);
-    error = block_device.erase(0, block_device.size());
-    printf("%s\n", (error ? "Fail :(" : "OK"));
-    if (error) {
-        error("error: %s (%d)\n", strerror(-error), error);
+    status = block_device.erase(0, block_device.size());
+    printf("%s\n", (status ? "Fail :(" : "OK"));
+    if (status) {
+        error("error: %s (%d)\n", strerror(-status), status);
     }
 
     printf("Deinitializing the block device... ");
     fflush(stdout);
-    error = block_device.deinit();
-    printf("%s\n", (error ? "Fail :(" : "OK"));
-    if (error) {
-        error("error: %s (%d)\n", strerror(-error), error);
+    status = block_device.deinit();
+    printf("%s\n", (status ? "Fail :(" : "OK"));
+    if (status) {
+        error("error: %s (%d)\n", strerror(-status), status);
     }
     
     printf("\r\n");
