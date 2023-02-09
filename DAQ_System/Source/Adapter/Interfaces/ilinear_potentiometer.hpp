@@ -20,7 +20,7 @@ class ILinear_Potentiometer {
     public:
         virtual ~ILinear_Potentiometer() = default;
         
-        virtual double read_displacement() = 0;
+        virtual double ReadDisplacementPercentage() = 0;
 };
 
 }

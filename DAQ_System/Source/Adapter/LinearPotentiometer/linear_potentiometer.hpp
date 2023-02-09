@@ -27,7 +27,7 @@ class LinearPotentiometer : public adapter::ILinear_Potentiometer {
         void setPin(PinName p);
         double getLast();
 
-        double read_displacement() override;
+        double ReadDisplacementPercentage() override;
     private:
         AnalogIn ain_;
         double last_;

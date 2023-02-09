@@ -26,8 +26,9 @@ int main() {
 
     while (true) {
         unsigned short d = a.read_u16();
-        double displacement_mm = linear_potentiometer->read_displacement();
-        std::cout << d << "\t" << displacement_mm << std::endl;
+        double displacement_percentage = linear_potentiometer->ReadDisplacementPercentage();
+        std::cout << d << "\t" << displacement_percentage << "%" << std::endl;
     }
+
 }
 

@@ -32,7 +32,7 @@ double LinearPotentiometer::getLast(){
 
 //sls1300 pot goes from 1-14k ohm, v = 3.3v, vdiv formula. Should return values from 100 to 450
 ///reads potentiometer and converts to mm
-double LinearPotentiometer::read_displacement() {
+double LinearPotentiometer::ReadDisplacementPercentage() {
     //0 to 65535 is adc in range
     //      Kohm = (adcin * (V/steps) / Itot)
     last_ = (double)(ain_.read_u16()) / 65535.0;
