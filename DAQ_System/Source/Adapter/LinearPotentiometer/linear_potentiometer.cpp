@@ -1,5 +1,5 @@
 /*
-* Linear Potentiometer
+* Linear Potentiometer SLS1300
 * Author:        Manuel DJC
 * Modified By:   Cristian Cruz
 *              
@@ -29,13 +29,12 @@ double LinearPotentiometer::GetDisplacementPercentage() {
 
 
 void LinearPotentiometer::ComputeDisplacementPercentage() {
-    //sls1300 pot goes from 1-14k ohm, v = 3.3v, vdiv formula. Should compute values from 100 to 450
-    //reads potentiometer and converts to mm
+    // The LinPot goes from 1-14k ohm, v = 3.3v, vdiv formula
+    // Should compute values from 100 to 450
 
     //0 to 65535 is adc in range
     //      Kohm = (adcin * (V/steps) / Itot)
     displacement_percentage_ = (double)(analog_input_monitor_.read_u16()) / kAnalogRange;
-    //last_ = 25*ain_.read_u16()*(3.3/65535)/.235;
 }
 
 }

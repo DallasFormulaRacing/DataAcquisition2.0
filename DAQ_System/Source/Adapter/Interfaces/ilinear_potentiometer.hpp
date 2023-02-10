@@ -1,5 +1,5 @@
 /*
-* Linear Potentiometer SLS1300 Linear Potentiometer
+* Linear Potentiometer
 * Authors:        Cristian Cruz
 *                 Manuel DJC
 *

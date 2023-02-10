@@ -1,5 +1,5 @@
 /*
-* Linear Potentiometer
+* Linear Potentiometer SLS1300
 * Author:        Manuel DJC    
 * Modified By:   Cristian Cruz
 *          
@@ -18,8 +18,6 @@
 
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
 
-// 2^16 range of 16 bit analogin from MBED, hardware adc is 12bit
-const int kAnalogRange = 65535.0;
 
 namespace adapter {
 
@@ -35,6 +33,10 @@ class LinearPotentiometer : public adapter::ILinear_Potentiometer {
     private:
         AnalogIn analog_input_monitor_;
         double displacement_percentage_;
+
+        // Mbed AnalogIn range: 2^(16 bits)
+        // Note: hardware adc is 12 bit
+        const int kAnalogRange = 65535;
 };
 
 }

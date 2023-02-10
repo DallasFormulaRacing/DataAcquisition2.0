@@ -10,6 +10,7 @@
 
 // main() runs in its own thread in the OS
 int main() {
+    // =====Implementation before OOP, Polymorphism, and Inheritance/Composition=====
     // LinearPotentiometer p(PF_4);
     // AnalogIn a(PF_4);
 
@@ -20,6 +21,7 @@ int main() {
     //     cout << d << "\t" << e << endl;
     //     //printf("%f \n", d);
     // }
+    // ===============================================================================
 
     shared_ptr<adapter::ILinear_Potentiometer> linear_potentiometer = make_shared<adapter::LinearPotentiometer>(PF_4);
     AnalogIn a(PF_4);
