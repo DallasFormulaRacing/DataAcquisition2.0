@@ -1,10 +1,37 @@
+#include <iostream>
+#include <memory>
+
 #include "mbed.h"
 
-// main() runs in its own thread in the OS
-int main()
-{
-    while (true) {
+// This file should not use hardware-dependent includes
+// TODO: A component that serves component assembly using abstract classes
+#include "Adapter/Interfaces/ilinear_potentiometer.hpp"
+#include "Adapter/LinearPotentiometer/linear_potentiometer.hpp"
 
+// main() runs in its own thread in the OS
+int main() {
+    // =====Implementation before OOP, Polymorphism, and Inheritance/Composition=====
+    // LinearPotentiometer p(PF_4);
+    // AnalogIn a(PF_4);
+
+    // while (true) {
+    //     unsigned short d = a.read_u16();
+    //     double e = p.read();
+    //     //printf ("[%d,%d]\n",d, e);
+    //     cout << d << "\t" << e << endl;
+    //     //printf("%f \n", d);
+    // }
+    // ===============================================================================
+
+    shared_ptr<adapter::ILinear_Potentiometer> linear_potentiometer = make_shared<adapter::LinearPotentiometer>(PF_4);
+    AnalogIn a(PF_4);
+
+    while (true) {
+        unsigned short d = a.read_u16();
+        linear_potentiometer->ComputeDisplacementPercentage();
+        double displacement_percentage = linear_potentiometer->GetDisplacementPercentage();
+        std::cout << d << "\t" << displacement_percentage << "%" << std::endl;
     }
+
 }
 
