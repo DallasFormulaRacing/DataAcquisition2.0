@@ -18,6 +18,8 @@
 
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
 
+const int kAnalogRange = 65535.0;
+
 namespace adapter {
 
 class LinearPotentiometer : public adapter::ILinear_Potentiometer {

@@ -34,7 +34,7 @@ void LinearPotentiometer::ComputeDisplacementPercentage() {
 
     //0 to 65535 is adc in range
     //      Kohm = (adcin * (V/steps) / Itot)
-    displacement_percentage_ = (double)(analog_input_monitor_.read_u16()) / 65535;
+    displacement_percentage_ = (double)(analog_input_monitor_.read_u16()) / kAnalogRange;
     //last_ = 25*ain_.read_u16()*(3.3/65535)/.235;
 }
 
