@@ -22,15 +22,16 @@ namespace adapter {
 
 class LinearPotentiometer : public adapter::ILinear_Potentiometer {
     public:
-        LinearPotentiometer(PinName p);
+        LinearPotentiometer(PinName analog_pin);
         virtual ~LinearPotentiometer();
-        void setPin(PinName p);
-        double getLast();
+        void SetPin(PinName analog_pin);
 
-        double ReadDisplacementPercentage() override;
+
+        double GetDisplacementPercentage() override;
+        void ComputeDisplacementPercentage() override;
     private:
-        AnalogIn ain_;
-        double last_;
+        AnalogIn analog_input_monitor_;
+        double displacement_percentage_;
 };
 
 }

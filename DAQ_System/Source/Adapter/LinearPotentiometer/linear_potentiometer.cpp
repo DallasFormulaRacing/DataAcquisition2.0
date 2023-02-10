@@ -11,36 +11,31 @@
 * GPL-3.0 License
 */
 
-#include "AnalogIn.h"
-#include "mbed.h"
-
 #include "linear_potentiometer.hpp"
 
 namespace adapter {
 
-LinearPotentiometer::LinearPotentiometer(PinName p) : ain_(p) { }
+LinearPotentiometer::LinearPotentiometer(PinName analog_pin) : analog_input_monitor_(analog_pin) { }
 LinearPotentiometer::~LinearPotentiometer() { }
 
-void LinearPotentiometer::setPin(PinName p){
-    ain_ = AnalogIn(p);
+void LinearPotentiometer::SetPin(PinName analog_pin) {
+    analog_input_monitor_ = AnalogIn(analog_pin);
 }
 
 
-double LinearPotentiometer::getLast(){
-    return last_;
+double LinearPotentiometer::GetDisplacementPercentage() {
+    return displacement_percentage_;
 }
 
-//sls1300 pot goes from 1-14k ohm, v = 3.3v, vdiv formula. Should return values from 100 to 450
-///reads potentiometer and converts to mm
-double LinearPotentiometer::ReadDisplacementPercentage() {
+
+void LinearPotentiometer::ComputeDisplacementPercentage() {
+    //sls1300 pot goes from 1-14k ohm, v = 3.3v, vdiv formula. Should compute values from 100 to 450
+    //reads potentiometer and converts to mm
+
     //0 to 65535 is adc in range
     //      Kohm = (adcin * (V/steps) / Itot)
-    last_ = (double)(ain_.read_u16()) / 65535.0;
+    displacement_percentage_ = (double)(analog_input_monitor_.read_u16()) / 65535;
     //last_ = 25*ain_.read_u16()*(3.3/65535)/.235;
-    return last_;
 }
-
-PinName pin_;
-double last_;
 
 }
