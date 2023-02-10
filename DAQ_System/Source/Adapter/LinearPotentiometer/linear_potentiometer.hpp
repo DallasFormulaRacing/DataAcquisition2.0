@@ -18,6 +18,7 @@
 
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
 
+// 2^16 range of 16 bit analogin from MBED, hardware adc is 12bit
 const int kAnalogRange = 65535.0;
 
 namespace adapter {
