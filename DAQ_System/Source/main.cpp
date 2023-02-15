@@ -32,15 +32,14 @@
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
 
-void mount(FATFileSystem*, SDBlockDevice*);
-void unmount(FATFileSystem*);
-FILE* file_open(const char*);
-void file_close(FILE*);
-void file_write(FILE*, const char*);
+void Mount(FATFileSystem*, SDBlockDevice*);
+void Unmount(FATFileSystem*);
+FILE* FileOpen(const char*);
+void FileClose(FILE*);
+void FileWrite(FILE*, const char*);
 
 // Entry point for the example
-int main()
-{
+int main() {
     // Physical block device, can be any device that supports the BlockDevice API
     SDBlockDevice   block_device(PA_7, PA_6, PA_5, PB_6);  // mosi, miso, sck, cs
 
@@ -52,14 +51,14 @@ int main()
     // Try to mount the filesystem
     printf("Mounting the filesystem... ");
     fflush(stdout);
-    mount(&file_system, &block_device);
+    Mount(&file_system, &block_device);
 
     int status = 0;
     // Open the numbers file
     printf("Opening \"/fs/numbers.txt\"... ");
     fflush(stdout);
 
-    FILE* numbers_file = file_open("/fs/numbers.txt");
+    FILE* numbers_file = FileOpen("/fs/numbers.txt");
 
     char buffer[32] = "\0"; // buffer string used to write to a file
 
@@ -67,7 +66,7 @@ int main()
         printf("\rWriting numbers (%d/%d)... ", i, 10);
         fflush(stdout);
         sprintf(buffer, "   %d\n", i); // we use this to print our desired format to the buffer string which is then written to the file
-        file_write(numbers_file, buffer);
+        FileWrite(numbers_file, buffer);
     }
 
     printf("\rWriting numbers (%d/%d)... OK\n", 10, 10);
@@ -101,7 +100,7 @@ int main()
 
         // Store number
         sprintf(buffer, "    %d\n", number);
-        file_write(numbers_file, buffer);
+        FileWrite(numbers_file, buffer);
 
         // Flush between write and read on same file
         fflush(numbers_file);
@@ -112,7 +111,7 @@ int main()
     // Close the file which also flushes any cached writes
     printf("Closing \"/fs/numbers.txt\"... ");
     fflush(stdout);
-    file_close(numbers_file);
+    FileClose(numbers_file);
 
 
     // Display the root directory
@@ -146,7 +145,7 @@ int main()
     // Display the numbers file
     printf("Opening \"/fs/numbers.txt\"... ");
     fflush(stdout);
-    numbers_file = file_open("/fs/numbers.txt");
+    numbers_file = FileOpen("/fs/numbers.txt");
 
     printf("numbers:\n");
     while (!feof(numbers_file)) {
@@ -156,12 +155,12 @@ int main()
 
     printf("\rClosing \"/fs/numbers.txt\"... ");
     fflush(stdout);
-    file_close(numbers_file);
+    FileClose(numbers_file);
 
     // Tidy up
     printf("Unmounting... ");
     fflush(stdout);
-    unmount(&file_system);
+    Unmount(&file_system);
     
     printf("Initializing the block device... ");
     fflush(stdout);
@@ -194,7 +193,7 @@ int main()
 }
 
 // mounts the filesystem to the given sd block device and checks for errors, reformats the device of no filesystem is found
-void mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
+void Mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
     int status = file_system->mount(block_device);
     printf("%s\n", (status ? "Fail :(" : "OK"));
     if (status) {
@@ -211,7 +210,7 @@ void mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
 }
 
 // unmounts the filesystem from the given sd block device and checks for errors
-void unmount(FATFileSystem *file_system) {
+void Unmount(FATFileSystem *file_system) {
     int status = file_system->unmount();
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
@@ -220,7 +219,7 @@ void unmount(FATFileSystem *file_system) {
 }
 
 // opens the file at the given file path and creates it if it doesn't exist
-FILE* file_open(const char* file_path) {
+FILE* FileOpen(const char* file_path) {
     FILE* file = fopen(file_path, "r+");
     printf("%s\n", (!file ? "Fail :(" : "OK"));
     if(!file) {
@@ -237,7 +236,7 @@ FILE* file_open(const char* file_path) {
 }
 
 // closes the given file
-void file_close(FILE* file) {
+void FileClose(FILE* file) {
     int status = fclose(file);
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
@@ -246,7 +245,7 @@ void file_close(FILE* file) {
 }
 
 // writes the given input to the given file, to allow a specified format, we use sprintf() to print the format to a buffer string and then send the buffer to file_write()
-void file_write(FILE* file, const char* input) {
+void FileWrite(FILE* file, const char* input) {
     int status = fprintf(file, input);
     if (status < 0) {
         printf("Fail :(\n");
