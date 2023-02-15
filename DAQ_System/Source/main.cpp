@@ -2,10 +2,35 @@
 #include "LSM303DLHC.h"
 #include <iostream>
 
+static float _lsm303Accel_MG_LSB     = 0.001F;
+const int sampleCount = 100;
+//this should be based on a calibrated value for 1.0 G
+const double gravity = 1.0;
+
+//the following can be used for calibration
+int loopNum = 0;
+double average = 0;
+double previousSamples[sampleCount];
+
+//can be used for data calibration 
+double averageData(double array[],int arraylength){
+	double total = 0,average = 0;
+	for(int k = 0;k<arraylength;k++){
+		total = total + array[k];
+	}
+	average = total/(arraylength);
+	return average;
+}
+//converts from raw data
+double accelerometerConvert(int input){
+    double output = (double)input * (double)_lsm303Accel_MG_LSB * gravity;
+    return output;
+}
+
 // main() runs in its own thread in the OS
 int main() {
 
-    LSM303DLHC sensor_obj(I2C_SDA, I2C_SCL);
+    LSM303DLHC sensor_obj(PB_9, PB_8);
     sensor_obj.init();
     // accel_obj.frequency(75);
 
@@ -17,23 +42,41 @@ int main() {
     
 
     while (true) {
-
+        
         sensor_obj.read(acc_data, mag_data);
-        ThisThread::sleep_for(500ms);
+        ThisThread::sleep_for(50ms);
+        /*
+        double magnitude = sqrt(acc_data[0]*acc_data[0]+acc_data[1]*acc_data[1]+acc_data[2]*acc_data[2]);
+        if(loopNum < sampleCount){
+			previousSamples[loopNum] = magnitude;
+			loopNum = loopNum + 1;
+		}
+        else{
+			for (int j = 0; j<sampleCount-1; j++) {
+				previousSamples[j] = previousSamples[j + 1];
+			}
+			previousSamples[sampleCount - 1] = magnitude;
+		}
 
+        average = averageData(previousSamples, loopNum);*/
+
+        //accelerometer values must be 
         std::cout << "ACC:" << 
-                     "\tX: " << acc_data[0] <<
-                     "\tY: " << acc_data[1] <<
-                     "\tZ: " << acc_data[2] << std::endl;
+                     "\tX: " << accelerometerConvert(acc_data[0]) <<
+                     "\tY: " << accelerometerConvert(acc_data[0]) <<
+                     "\tZ: " << accelerometerConvert(acc_data[0]) << std::endl;
+        /*std::cout << "Magnitude: " << accelerometerConver(magnitude) << std::endl;
 
         std::cout << "MAG:" << 
                      "\tX: " << mag_data[0] <<
                      "\tY: " << mag_data[1] <<
-                     "\tZ: " << mag_data[2] << std::endl;
+                     "\tZ: " << mag_data[2] << std::endl;*/
+        
         
         std::cout << std::endl;
-        ThisThread::sleep_for(500ms);
+        ThisThread::sleep_for(50ms);
 
     }
 }
 
+//testing found that ~1.028 is about 1G
