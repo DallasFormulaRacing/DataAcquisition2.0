@@ -6,7 +6,6 @@
 *   SD Pinout: https://learn.adafruit.com/adafruit-microsd-spi-sdio/pinouts
 *   Corruption: https://forums.mbed.com/t/os-6-sd-card-filesystem-gets-corrupted-when-written-to/16632/2
 *   Properly Saving data: https://os.mbed.com/questions/69263/Saving-analog-data-in-SD-card/
-*   
 */
 
 
@@ -27,84 +26,61 @@
  */
 #include "mbed.h"
 #include <stdio.h>
+#include <cstdio>
 #include <errno.h>
 
-// Block devices
-//#include "SPIFBlockDevice.h"
-//#include "DataFlashBlockDevice.h"
 #include "SDBlockDevice.h"
-//#include "HeapBlockDevice.h"
-
-// File systems
-
-//#include "LittleFileSystem.h"
 #include "FATFileSystem.h"
 
-// Physical block device, can be any device that supports the BlockDevice API
-SDBlockDevice   blockDevice(PA_7, PA_6, PA_5, PB_6);  // mosi, miso, sck, cs
-
-// File system declaration
-FATFileSystem   fileSystem("fs");
+void Mount(FATFileSystem*, SDBlockDevice*);
+void Unmount(FATFileSystem*);
+FILE* FileOpen(const char*);
+void FileClose(FILE*);
+void FileWrite(FILE*, const char*);
 
 // Entry point for the example
-int main()
-{
+int main() {
+    // Physical block device, can be any device that supports the BlockDevice API
+    SDBlockDevice   block_device(PA_7, PA_6, PA_5, PB_6);  // mosi, miso, sck, cs
+
+    // File system declaration
+    FATFileSystem   file_system("fs");
+    
     printf("--- Mbed OS filesystem example ---\n");
 
     // Try to mount the filesystem
     printf("Mounting the filesystem... ");
     fflush(stdout);
+    Mount(&file_system, &block_device);
 
-    int err = fileSystem.mount(&blockDevice);
-    printf("%s\n", (err ? "Fail :(" : "OK"));
-    if (err) {
-        // Reformat if we can't mount the filesystem
-        // this should only happen on the first boot
-        printf("No filesystem found, formatting... ");
-        fflush(stdout);
-        err = fileSystem.reformat(&blockDevice);
-        printf("%s\n", (err ? "Fail :(" : "OK"));
-        if (err) {
-            error("error: %s (%d)\n", strerror(-err), err);
-        }
-    }
-
+    int status = 0;
     // Open the numbers file
     printf("Opening \"/fs/numbers.txt\"... ");
     fflush(stdout);
 
-    FILE*   f = fopen("/fs/numbers.txt", "r+");
-    printf("%s\n", (!f ? "Fail :(" : "OK"));
-    if (!f) {
-        // Create the numbers file if it doesn't exist
-        printf("No file found, creating a new file... ");
+    FILE* numbers_file = FileOpen("/fs/numbers.txt");
+
+    char buffer[32] = "\0"; // buffer string used to write to a file
+
+    for (int i = 0; i < 10; i++) {
+        printf("\rWriting numbers (%d/%d)... ", i, 10);
         fflush(stdout);
-        f = fopen("/fs/numbers.txt", "w+");
-        printf("%s\n", (!f ? "Fail :(" : "OK"));
-        if (!f) {
-            error("error: %s (%d)\n", strerror(errno), -errno);
-        }
-
-        for (int i = 0; i < 10; i++) {
-            printf("\rWriting numbers (%d/%d)... ", i, 10);
-            fflush(stdout);
-            err = fprintf(f, "    %d\n", i);
-            if (err < 0) {
-                printf("Fail :(\n");
-                error("error: %s (%d)\n", strerror(errno), -errno);
-            }
-        }
-
-        printf("\rWriting numbers (%d/%d)... OK\n", 10, 10);
-
-        printf("Seeking file... ");
-        fflush(stdout);
-        err = fseek(f, 0, SEEK_SET);
-        printf("%s\n", (err < 0 ? "Fail :(" : "OK"));
-        if (err < 0) {
-            error("error: %s (%d)\n", strerror(errno), -errno);
-        }
+        sprintf(buffer, "   %d\n", i); // we use this to print our desired format to the buffer string which is then written to the file
+        FileWrite(numbers_file, buffer);
     }
+
+    printf("\rWriting numbers (%d/%d)... OK\n", 10, 10);
+
+    // create a separate function for this as well maybe?
+    printf("Seeking file... ");
+    fflush(stdout);
+    status = fseek(numbers_file, 0, SEEK_SET);
+    printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
+    if (status < 0) {
+        error("error: %s (%d)\n", strerror(errno), -errno);
+    }
+
+    long pos = 0;
 
     // Go through and increment the numbers
     for (int i = 0; i < 10; i++) {
@@ -112,21 +88,22 @@ int main()
         fflush(stdout);
 
         // Get current stream position
-        long    pos = ftell(f);
+        pos = ftell(numbers_file);
 
         // Parse out the number and increment
         int32_t number;
-        fscanf(f, "%ld", &number);
+        fscanf(numbers_file, "%ld", &number);
         number += 1;
 
         // Seek to beginning of number
-        fseek(f, pos, SEEK_SET);
+        fseek(numbers_file, pos, SEEK_SET);
 
         // Store number
-        fprintf(f, "    %ld\n", number);
+        sprintf(buffer, "    %d\n", number);
+        FileWrite(numbers_file, buffer);
 
         // Flush between write and read on same file
-        fflush(f);
+        fflush(numbers_file);
     }
 
     printf("\rIncrementing numbers (%d/%d)... OK\n", 10, 10);
@@ -134,98 +111,150 @@ int main()
     // Close the file which also flushes any cached writes
     printf("Closing \"/fs/numbers.txt\"... ");
     fflush(stdout);
-    err = fclose(f);
-    printf("%s\n", (err < 0 ? "Fail :(" : "OK"));
-    if (err < 0) {
-        error("error: %s (%d)\n", strerror(errno), -errno);
-    }
+    FileClose(numbers_file);
+
 
     // Display the root directory
     printf("Opening the root directory... ");
     fflush(stdout);
 
-    DIR*    d = opendir("/fs/");
-    printf("%s\n", (!d ? "Fail :(" : "OK"));
-    if (!d) {
+    DIR* root_dir = opendir("/fs/");
+    printf("%s\n", (!root_dir ? "Fail :(" : "OK"));
+    if (!root_dir) {
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
 
     printf("root directory:\n");
     while (true) {
-        struct dirent*  e = readdir(d);
-        if (!e) {
+        struct dirent* entry = readdir(root_dir);
+        if (!entry) {
             break;
         }
 
-        printf("    %s\n", e->d_name);
+        printf("    %s\n", entry->d_name);
     }
 
     printf("Closing the root directory... ");
     fflush(stdout);
-    err = closedir(d);
-    printf("%s\n", (err < 0 ? "Fail :(" : "OK"));
-    if (err < 0) {
+    status = closedir(root_dir);
+    printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
+    if (status < 0) {
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
 
     // Display the numbers file
     printf("Opening \"/fs/numbers.txt\"... ");
     fflush(stdout);
-    f = fopen("/fs/numbers.txt", "r");
-    printf("%s\n", (!f ? "Fail :(" : "OK"));
-    if (!f) {
-        error("error: %s (%d)\n", strerror(errno), -errno);
-    }
+    numbers_file = FileOpen("/fs/numbers.txt");
 
     printf("numbers:\n");
-    while (!feof(f)) {
-        int c = fgetc(f);
-        printf("%c", c);
+    while (!feof(numbers_file)) {
+        int num = fgetc(numbers_file);
+        printf("%c", num);
     }
 
     printf("\rClosing \"/fs/numbers.txt\"... ");
     fflush(stdout);
-    err = fclose(f);
-    printf("%s\n", (err < 0 ? "Fail :(" : "OK"));
-    if (err < 0) {
-        error("error: %s (%d)\n", strerror(errno), -errno);
-    }
+    FileClose(numbers_file);
 
     // Tidy up
     printf("Unmounting... ");
     fflush(stdout);
-    err = fileSystem.unmount();
-    printf("%s\n", (err < 0 ? "Fail :(" : "OK"));
-    if (err < 0) {
-        error("error: %s (%d)\n", strerror(-err), err);
-    }
+    Unmount(&file_system);
     
     printf("Initializing the block device... ");
     fflush(stdout);
 
-    err = blockDevice.init();
-    printf("%s\n", (err ? "Fail :(" : "OK"));
-    if (err) {
-        error("error: %s (%d)\n", strerror(-err), err);
+    status = block_device.init();
+    printf("%s\n", (status ? "Fail :(" : "OK"));
+    if (status) {
+        error("error: %s (%d)\n", strerror(-status), status);
     }
 
     printf("Erasing the block device... ");
     fflush(stdout);
-    err = blockDevice.erase(0, blockDevice.size());
-    printf("%s\n", (err ? "Fail :(" : "OK"));
-    if (err) {
-        error("error: %s (%d)\n", strerror(-err), err);
+    status = block_device.erase(0, block_device.size());
+    printf("%s\n", (status ? "Fail :(" : "OK"));
+    if (status) {
+        error("error: %s (%d)\n", strerror(-status), status);
     }
 
     printf("Deinitializing the block device... ");
     fflush(stdout);
-    err = blockDevice.deinit();
-    printf("%s\n", (err ? "Fail :(" : "OK"));
-    if (err) {
-        error("error: %s (%d)\n", strerror(-err), err);
+    status = block_device.deinit();
+    printf("%s\n", (status ? "Fail :(" : "OK"));
+    if (status) {
+        error("error: %s (%d)\n", strerror(-status), status);
     }
     
     printf("\r\n");
     
     printf("Mbed OS filesystem example done!\n");
 }
+
+// mounts the filesystem to the given sd block device and checks for errors, reformats the device of no filesystem is found
+void Mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
+    int status = file_system->mount(block_device);
+    printf("%s\n", (status ? "Fail :(" : "OK"));
+    if (status) {
+        /* Reformat if we can't mount the filesystem,
+           this should only happen on the first boot */
+        printf("No filesystem found, formatting... ");
+        fflush(stdout);
+        status = file_system->reformat(block_device);
+        printf("%s\n", (status ? "Fail :(" : "OK"));
+        if (status) {
+            error("error: %s (%d)\n", strerror(-status), status);
+        }
+    }
+}
+
+// unmounts the filesystem from the given sd block device and checks for errors
+void Unmount(FATFileSystem *file_system) {
+    int status = file_system->unmount();
+    printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
+    if (status < 0) {
+        error("error: %s (%d)\n", strerror(-status), status);
+    }
+}
+
+// opens the file at the given file path and creates it if it doesn't exist
+FILE* FileOpen(const char* file_path) {
+    FILE* file = fopen(file_path, "r+");
+    printf("%s\n", (!file ? "Fail :(" : "OK"));
+    if(!file) {
+        // create the file if it doesn't exist
+        printf("No file found, creating a new file... ");
+        fflush(stdout);
+        file = fopen(file_path, "w+");
+        printf("%s\n", (!file ? "Fail :(" : "OK"));
+        if (!file) {
+            error("error: %s (%d)\n", strerror(errno), -errno);
+        }
+    }
+    return file;
+}
+
+// closes the given file
+void FileClose(FILE* file) {
+    int status = fclose(file);
+    printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
+    if (status < 0) {
+        error("error: %s (%d)\n", strerror(errno), -errno);
+    }
+}
+
+// writes the given input to the given file, to allow a specified format, we use sprintf() to print the format to a buffer string and then send the buffer to file_write()
+void FileWrite(FILE* file, const char* input) {
+    int status = fprintf(file, input);
+    if (status < 0) {
+        printf("Fail :(\n");
+        error("error: %s (%d)\n", strerror(errno), -errno);
+    }
+}
+
+/*
+TODO:
+File read function
+Open, read, and close file directory functions
+*/
