@@ -32,11 +32,11 @@
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
 
-void Mount(FATFileSystem*, SDBlockDevice*);
-void Unmount(FATFileSystem*);
+int Mount(FATFileSystem*, SDBlockDevice*);
+int Unmount(FATFileSystem*);
 FILE* FileOpen(const char*);
-void FileClose(FILE*);
-void FileWrite(FILE*, const char*);
+int FileClose(FILE*);
+int FileWrite(FILE*, const char*);
 
 // Entry point for the example
 int main() {
@@ -193,7 +193,7 @@ int main() {
 }
 
 // mounts the filesystem to the given sd block device and checks for errors, reformats the device of no filesystem is found
-void Mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
+int Mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
     int status = file_system->mount(block_device);
     printf("%s\n", (status ? "Fail :(" : "OK"));
     if (status) {
@@ -207,15 +207,17 @@ void Mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
             error("error: %s (%d)\n", strerror(-status), status);
         }
     }
+    return status;
 }
 
 // unmounts the filesystem from the given sd block device and checks for errors
-void Unmount(FATFileSystem *file_system) {
+int Unmount(FATFileSystem *file_system) {
     int status = file_system->unmount();
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
         error("error: %s (%d)\n", strerror(-status), status);
     }
+    return status;
 }
 
 // opens the file at the given file path and creates it if it doesn't exist
@@ -236,21 +238,23 @@ FILE* FileOpen(const char* file_path) {
 }
 
 // closes the given file
-void FileClose(FILE* file) {
+int FileClose(FILE* file) {
     int status = fclose(file);
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
+    return status;
 }
 
 // writes the given input to the given file, to allow a specified format, we use sprintf() to print the format to a buffer string and then send the buffer to file_write()
-void FileWrite(FILE* file, const char* input) {
+int FileWrite(FILE* file, const char* input) {
     int status = fprintf(file, input);
     if (status < 0) {
         printf("Fail :(\n");
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
+    return status;
 }
 
 /*
