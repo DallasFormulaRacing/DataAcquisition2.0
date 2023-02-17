@@ -24,19 +24,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "File.h"
 #include "mbed.h"
 #include <stdio.h>
 #include <cstdio>
 #include <errno.h>
+#include <time.h>
 
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
 
-void Mount(FATFileSystem*, SDBlockDevice*);
-void Unmount(FATFileSystem*);
+int Mount(FATFileSystem*, SDBlockDevice*);
+int Unmount(FATFileSystem*);
 FILE* FileOpen(const char*);
-void FileClose(FILE*);
-void FileWrite(FILE*, const char*);
+int FileClose(FILE*);
+int FileWrite(FILE*, const char*);
 
 // Entry point for the example
 int main() {
@@ -46,122 +48,57 @@ int main() {
     // File system declaration
     FATFileSystem   file_system("fs");
     
-    printf("--- Mbed OS filesystem example ---\n");
+    // buffer string used to write to a file
+    char buffer[512] = "\0"; 
+
+    // used for error checking when operating the block device
+    int status = 0;
+
+    // sensor values
+    int RPM = 0;
+    int tire_temp = 0;
+    int air_temp = 0;
+    int battery = 10;
+
+    printf("--- CSV File Test ---\n");
 
     // Try to mount the filesystem
     printf("Mounting the filesystem... ");
     fflush(stdout);
     Mount(&file_system, &block_device);
 
-    int status = 0;
     // Open the numbers file
-    printf("Opening \"/fs/numbers.txt\"... ");
+    printf("Opening \"/fs/data.csv\"... ");
     fflush(stdout);
 
-    FILE* numbers_file = FileOpen("/fs/numbers.txt");
+    FILE* data_file = FileOpen("/fs/data.csv");
 
-    char buffer[32] = "\0"; // buffer string used to write to a file
+    // write the first row to the file with some arbitrary sensor names
+    FileWrite(data_file, "Time (sec), RPM, Tire Temp(F), Air Temp (F), Battery (V)");
 
-    for (int i = 0; i < 10; i++) {
-        printf("\rWriting numbers (%d/%d)... ", i, 10);
-        fflush(stdout);
-        sprintf(buffer, "   %d\n", i); // we use this to print our desired format to the buffer string which is then written to the file
-        FileWrite(numbers_file, buffer);
+    // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
+    clock_t timer = clock();
+    for(int i = 0; i < 10; i++) {
+        snprintf(buffer, sizeof(buffer), "%f, %d, %d, %d, %d", ((float)timer)/CLOCKS_PER_SEC, RPM, tire_temp, air_temp, battery);
+        FileWrite(data_file, buffer);
+        RPM += 100;
+        tire_temp += 10;
+        air_temp++;
+        battery -= 10;
+        timer = clock() - timer;
     }
-
-    printf("\rWriting numbers (%d/%d)... OK\n", 10, 10);
-
-    // create a separate function for this as well maybe?
-    printf("Seeking file... ");
-    fflush(stdout);
-    status = fseek(numbers_file, 0, SEEK_SET);
-    printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
-    if (status < 0) {
-        error("error: %s (%d)\n", strerror(errno), -errno);
-    }
-
-    long pos = 0;
-
-    // Go through and increment the numbers
-    for (int i = 0; i < 10; i++) {
-        printf("\rIncrementing numbers (%d/%d)... ", i, 10);
-        fflush(stdout);
-
-        // Get current stream position
-        pos = ftell(numbers_file);
-
-        // Parse out the number and increment
-        int32_t number;
-        fscanf(numbers_file, "%ld", &number);
-        number += 1;
-
-        // Seek to beginning of number
-        fseek(numbers_file, pos, SEEK_SET);
-
-        // Store number
-        sprintf(buffer, "    %d\n", number);
-        FileWrite(numbers_file, buffer);
-
-        // Flush between write and read on same file
-        fflush(numbers_file);
-    }
-
-    printf("\rIncrementing numbers (%d/%d)... OK\n", 10, 10);
 
     // Close the file which also flushes any cached writes
-    printf("Closing \"/fs/numbers.txt\"... ");
+    printf("Closing \"/fs/data.csv\"... ");
     fflush(stdout);
-    FileClose(numbers_file);
-
-
-    // Display the root directory
-    printf("Opening the root directory... ");
-    fflush(stdout);
-
-    DIR* root_dir = opendir("/fs/");
-    printf("%s\n", (!root_dir ? "Fail :(" : "OK"));
-    if (!root_dir) {
-        error("error: %s (%d)\n", strerror(errno), -errno);
-    }
-
-    printf("root directory:\n");
-    while (true) {
-        struct dirent* entry = readdir(root_dir);
-        if (!entry) {
-            break;
-        }
-
-        printf("    %s\n", entry->d_name);
-    }
-
-    printf("Closing the root directory... ");
-    fflush(stdout);
-    status = closedir(root_dir);
-    printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
-    if (status < 0) {
-        error("error: %s (%d)\n", strerror(errno), -errno);
-    }
-
-    // Display the numbers file
-    printf("Opening \"/fs/numbers.txt\"... ");
-    fflush(stdout);
-    numbers_file = FileOpen("/fs/numbers.txt");
-
-    printf("numbers:\n");
-    while (!feof(numbers_file)) {
-        int num = fgetc(numbers_file);
-        printf("%c", num);
-    }
-
-    printf("\rClosing \"/fs/numbers.txt\"... ");
-    fflush(stdout);
-    FileClose(numbers_file);
+    FileClose(data_file);
 
     // Tidy up
     printf("Unmounting... ");
     fflush(stdout);
     Unmount(&file_system);
-    
+
+    // not really sure if the following block device stuff is important to the function of the program or not so I left it alone, but I don't think it needs to be here
     printf("Initializing the block device... ");
     fflush(stdout);
 
@@ -189,11 +126,11 @@ int main() {
     
     printf("\r\n");
     
-    printf("Mbed OS filesystem example done!\n");
+    printf("CSV File Test Done!\n");
 }
 
 // mounts the filesystem to the given sd block device and checks for errors, reformats the device of no filesystem is found
-void Mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
+int Mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
     int status = file_system->mount(block_device);
     printf("%s\n", (status ? "Fail :(" : "OK"));
     if (status) {
@@ -207,15 +144,17 @@ void Mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
             error("error: %s (%d)\n", strerror(-status), status);
         }
     }
+    return status;
 }
 
 // unmounts the filesystem from the given sd block device and checks for errors
-void Unmount(FATFileSystem *file_system) {
+int Unmount(FATFileSystem *file_system) {
     int status = file_system->unmount();
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
         error("error: %s (%d)\n", strerror(-status), status);
     }
+    return status;
 }
 
 // opens the file at the given file path and creates it if it doesn't exist
@@ -236,21 +175,23 @@ FILE* FileOpen(const char* file_path) {
 }
 
 // closes the given file
-void FileClose(FILE* file) {
+int FileClose(FILE* file) {
     int status = fclose(file);
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
+    return status;
 }
 
 // writes the given input to the given file, to allow a specified format, we use sprintf() to print the format to a buffer string and then send the buffer to file_write()
-void FileWrite(FILE* file, const char* input) {
+int FileWrite(FILE* file, const char* input) {
     int status = fprintf(file, input);
     if (status < 0) {
         printf("Fail :(\n");
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
+    return status;
 }
 
 /*
