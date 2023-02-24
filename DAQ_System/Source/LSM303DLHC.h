@@ -69,11 +69,7 @@
 class LSM303DLHC {
  
     public:
-        /** Create a new interface for an LSM303DLM
-         *
-         * @param sda is the pin for the I2C SDA line
-         * @param scl is the pin for the I2C SCL line
-         */
+       
         LSM303DLHC(PinName sda, PinName scl);
  
         /** sets the x, y, and z offset corrections for hard iron calibration
@@ -102,7 +98,7 @@ class LSM303DLHC {
          * supplying a multipler such that x, y and z will be normalized to the
          * same max/min values
          */
-        void setScale(float x, float y, float z);
+        void SetScale(float x, float y, float z);
  
         /** read the calibrated accelerometer and magnetometer values
          *
@@ -128,6 +124,8 @@ class LSM303DLHC {
          * @param frequency is the I2C bus/clock frequency, either standard (100000) or fast (400000)
          */
         void frequency(int hz);
+
+        
      
     private:
         I2C _device;

@@ -1,15 +1,14 @@
 #include "mbed.h"
 #include "LSM303DLHC.h"
 #include "stdio.h"
+#include <locale>
  
 #define MAG_ADDRESS  0x3C
 #define ACC_ADDRESS  0x32
   
  
-LSM303DLHC::LSM303DLHC(PinName sda, PinName scl): _device(sda, scl)
-{
+LSM303DLHC::LSM303DLHC(PinName sda, PinName scl): _device(sda, scl){
     _device.frequency(400000);
-//    init();
 }
  
 void LSM303DLHC::init()
@@ -59,7 +58,7 @@ void LSM303DLHC::readMag(int m[3])
     m[2] = (short) (_data[2]<<8 | _data[3]); // Z
  }
  
-void LSM303DLHC::setScale(float x, float y, float z)
+void LSM303DLHC::SetScale(float x, float y, float z)
 {
     scale[0] = x;
     scale[1] = y;
