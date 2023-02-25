@@ -125,7 +125,15 @@ class LSM303DLHC {
          */
         void frequency(int hz);
 
+        /** does nothing lol
+         *
+         * @param a is meaningless
+         */
+        void doNothing(int a);
         
+        void computeAcc(int in[3], float out[3], float gravity);
+
+        double calibrate();
      
     private:
         I2C _device;
