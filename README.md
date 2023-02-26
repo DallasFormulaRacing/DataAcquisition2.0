@@ -1,6 +1,4 @@
 # `DataAcquisition2.0`
-<img src="https://user-images.githubusercontent.com/56659754/213814128-479f33dd-2018-4715-a117-a4f1babf91f6.png" alt="DFR Logo" width="350"/>
-
 🏁 For documentation, checkout our [Wiki](https://github.com/DallasFormulaRacing/DataAcquisition2.0/wiki)!
 
 ## Objective:
