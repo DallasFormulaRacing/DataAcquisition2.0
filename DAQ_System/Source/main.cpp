@@ -34,6 +34,8 @@
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
 
+#define kBlockSectorByteSize 512
+
 int Mount(FATFileSystem*, SDBlockDevice*);
 int Unmount(FATFileSystem*);
 FILE* FileOpen(const char*);
@@ -49,10 +51,16 @@ int main() {
     FATFileSystem   file_system("fs");
     
     // buffer string used to write to a file
-    char buffer[512] = "\0"; 
+    char buffer[kBlockSectorByteSize] = "\0"; 
 
     // used for error checking when operating the block device
     int status = 0;
+
+    /* Error code for failed hardware
+    Whenever a sensor fails, this value will be updated
+    with the appropriate error code and that will be what 
+    is written to the corresponding field in the file. */
+    int hardware_error = 0;
 
     // sensor values
     int RPM = 0;
@@ -79,7 +87,7 @@ int main() {
     // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
     clock_t timer = clock();
     for(int i = 0; i < 10; i++) {
-        snprintf(buffer, sizeof(buffer), "%f, %d, %d, %d, %d", ((float)timer)/CLOCKS_PER_SEC, RPM, tire_temp, air_temp, battery);
+        snprintf(buffer, sizeof(buffer), "%f, %d, %d, %d, %d\n", ((float)timer)/CLOCKS_PER_SEC, RPM, tire_temp, air_temp, battery);
         FileWrite(data_file, buffer);
         RPM += 100;
         tire_temp += 10;
@@ -97,32 +105,6 @@ int main() {
     printf("Unmounting... ");
     fflush(stdout);
     Unmount(&file_system);
-
-    // not really sure if the following block device stuff is important to the function of the program or not so I left it alone, but I don't think it needs to be here
-    printf("Initializing the block device... ");
-    fflush(stdout);
-
-    status = block_device.init();
-    printf("%s\n", (status ? "Fail :(" : "OK"));
-    if (status) {
-        error("error: %s (%d)\n", strerror(-status), status);
-    }
-
-    printf("Erasing the block device... ");
-    fflush(stdout);
-    status = block_device.erase(0, block_device.size());
-    printf("%s\n", (status ? "Fail :(" : "OK"));
-    if (status) {
-        error("error: %s (%d)\n", strerror(-status), status);
-    }
-
-    printf("Deinitializing the block device... ");
-    fflush(stdout);
-    status = block_device.deinit();
-    printf("%s\n", (status ? "Fail :(" : "OK"));
-    if (status) {
-        error("error: %s (%d)\n", strerror(-status), status);
-    }
     
     printf("\r\n");
     

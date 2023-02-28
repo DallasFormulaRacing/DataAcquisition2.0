@@ -3,4 +3,4 @@
 */projectfiles
 */*.py*
 */BUILD
-
+.vscode/
