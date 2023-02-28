@@ -26,6 +26,7 @@
  */
 #include "File.h"
 #include "mbed.h"
+#include <cstdint>
 #include <stdio.h>
 #include <cstdio>
 #include <errno.h>
@@ -56,17 +57,11 @@ int main() {
     // used for error checking when operating the block device
     int status = 0;
 
-    /* Error code for failed hardware
-    Whenever a sensor fails, this value will be updated
-    with the appropriate error code and that will be what 
-    is written to the corresponding field in the file. */
-    int hardware_error = 0;
-
     // sensor values
-    int RPM = 0;
-    int tire_temp = 0;
-    int air_temp = 0;
-    int battery = 10;
+    int linpot1 = 0;
+    int linpot2 = 0;
+    int linpot3 = 0;
+    int linpot4 = 0;
 
     printf("--- CSV File Test ---\n");
 
@@ -82,17 +77,17 @@ int main() {
     FILE* data_file = FileOpen("/fs/data.csv");
 
     // write the first row to the file with some arbitrary sensor names
-    FileWrite(data_file, "Time (sec), RPM, Tire Temp(F), Air Temp (F), Battery (V)");
+    FileWrite(data_file, "Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
 
     // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
     clock_t timer = clock();
-    for(int i = 0; i < 10; i++) {
-        snprintf(buffer, sizeof(buffer), "%f, %d, %d, %d, %d\n", ((float)timer)/CLOCKS_PER_SEC, RPM, tire_temp, air_temp, battery);
+    for(int i = 0; i < 100; i++) {
+        snprintf(buffer, sizeof(buffer), "%f, %d, %d, %d, %d\n", ((float)timer)/CLOCKS_PER_SEC, linpot1, linpot2, linpot3, linpot4);
         FileWrite(data_file, buffer);
-        RPM += 100;
-        tire_temp += 10;
-        air_temp++;
-        battery -= 10;
+        linpot1++;
+        linpot2++;
+        linpot3++;
+        linpot4++;
         timer = clock() - timer;
     }
 
