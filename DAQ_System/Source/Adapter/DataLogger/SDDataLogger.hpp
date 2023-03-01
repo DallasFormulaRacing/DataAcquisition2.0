@@ -18,17 +18,17 @@
 #include "FATFileSystem.h"
 #include "SDBlockDevice.h"
 
-#include "Adapter/Interfaces/idata_logger.hpp"
+#include "Adapter/Interfaces/IDataLogger.hpp"
 
 #define kBlockSectorByteSize 512
 
 namespace adapter {
 
-class DataLogger : public adapter::IData_Logger {
+class SDDataLogger : public adapter::IDataLogger {
     public:
-        DataLogger(PinName mosi, PinName miso, PinName sck, PinName cs);
-        virtual ~DataLogger();
-
+        SDDataLogger(PinName mosi, PinName miso, PinName sck, PinName cs);
+        virtual ~SDDataLogger();
+        
         virtual int Mount(FileSystem*, BlockDevice*) override;
         virtual int Unmount(FileSystem*) override;
         virtual FILE* FileOpen(const char*) override;

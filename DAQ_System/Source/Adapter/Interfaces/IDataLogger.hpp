@@ -18,9 +18,9 @@
 
 namespace adapter {
     
-class IData_Logger {
+class IDataLogger {
     public:
-        virtual ~IData_Logger() = default;
+        virtual ~IDataLogger() = default;
 
         virtual int Mount(FileSystem*, BlockDevice*) = 0;
         virtual int Unmount(FileSystem*) = 0;

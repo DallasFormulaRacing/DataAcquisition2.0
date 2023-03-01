@@ -11,7 +11,7 @@
 * GPL-3.0 License
 */
 
-#include "data_logger.hpp"
+#include "SDDataLogger.hpp"
 #include "FATFileSystem.h"
 
 namespace adapter {
@@ -20,7 +20,7 @@ namespace adapter {
 // kBlockSectorByteSize is defined in data_logger.hpp
 char write_buffer[kBlockSectorByteSize] = "\0";
 
-DataLogger::DataLogger(PinName mosi, PinName miso, PinName sck, PinName cs) {
+SDDataLogger::SDDataLogger(PinName mosi, PinName miso, PinName sck, PinName cs) {
     block_device = new SDBlockDevice(mosi, miso, sck, cs);
     file_system = new FATFileSystem("fs");
 
@@ -29,13 +29,13 @@ DataLogger::DataLogger(PinName mosi, PinName miso, PinName sck, PinName cs) {
     data_file = FileOpen("/fs/data.csv");
 }
 
-DataLogger::~DataLogger() {
+SDDataLogger::~SDDataLogger() {
     FileClose(data_file);
     Unmount(file_system);
 }
 
 // mounts the filesystem to the given sd block device and checks for errors, reformats the device of no filesystem is found
-int DataLogger::Mount(FileSystem *file_system, BlockDevice *block_device) {
+int SDDataLogger::Mount(FileSystem *file_system, BlockDevice *block_device) {
     int status = file_system->mount(block_device);
     printf("%s\n", (status ? "Fail :(" : "OK"));
     if (status) {
@@ -53,7 +53,7 @@ int DataLogger::Mount(FileSystem *file_system, BlockDevice *block_device) {
 }
 
 // unmounts the filesystem from the given sd block device and checks for errors
-int DataLogger::Unmount(FileSystem *file_system) {
+int SDDataLogger::Unmount(FileSystem *file_system) {
     int status = file_system->unmount();
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
@@ -63,7 +63,7 @@ int DataLogger::Unmount(FileSystem *file_system) {
 }
 
 // opens the file at the given file path and creates it if it doesn't exist
-FILE* DataLogger::FileOpen(const char* file_path) {
+FILE* SDDataLogger::FileOpen(const char* file_path) {
     FILE* file = fopen(file_path, "r+");
     printf("%s\n", (!file ? "Fail :(" : "OK"));
     if(!file) {
@@ -80,7 +80,7 @@ FILE* DataLogger::FileOpen(const char* file_path) {
 }
 
 // closes the given file
-int DataLogger::FileClose(FILE* file) {
+int SDDataLogger::FileClose(FILE* file) {
     int status = fclose(file);
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
@@ -90,7 +90,7 @@ int DataLogger::FileClose(FILE* file) {
 }
 
 // writes the given input to the given file, to allow a specified format, we use sprintf() to print the format to a write_buffer string and then send the write_buffer to file_write()
-int DataLogger::FileWrite(FILE* file, const char* input) {
+int SDDataLogger::FileWrite(FILE* file, const char* input) {
     int status = fprintf(file, input);
     if (status < 0) {
         printf("Fail :(\n");

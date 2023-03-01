@@ -35,14 +35,14 @@
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
 
-#include "Adapter/DataLogger/data_logger.hpp"
+#include "Adapter/DataLogger/SDDataLogger.hpp"
 
 using namespace adapter;
 
 // Entry point for the example
 int main() {
 
-    DataLogger data_logger(PA_7, PA_6, PA_5, PB_6); //mosi, miso, sck, cs
+    SDDataLogger data_logger(PA_7, PA_6, PA_5, PB_6); //mosi, miso, sck, cs
 
     // used for error checking when operating the block device
     int status = 0;
