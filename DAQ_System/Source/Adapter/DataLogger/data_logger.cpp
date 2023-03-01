@@ -13,11 +13,12 @@
 
 #include "data_logger.hpp"
 #include "FATFileSystem.h"
-#include <cstring>
 
 namespace adapter {
 
-char buffer[kBlockSectorByteSize] = "\0";
+// buffer string used to write to a file
+// kBlockSectorByteSize is defined in data_logger.hpp
+char write_buffer[kBlockSectorByteSize] = "\0";
 
 DataLogger::DataLogger(PinName mosi, PinName miso, PinName sck, PinName cs) {
     block_device = new SDBlockDevice(mosi, miso, sck, cs);
@@ -28,6 +29,7 @@ DataLogger::DataLogger(PinName mosi, PinName miso, PinName sck, PinName cs) {
 }
 
 DataLogger::~DataLogger() {
+    FileClose(data_file);
     Unmount(file_system);
 }
 
@@ -86,7 +88,7 @@ int DataLogger::FileClose(FILE* file) {
     return status;
 }
 
-// writes the given input to the given file, to allow a specified format, we use sprintf() to print the format to a buffer string and then send the buffer to file_write()
+// writes the given input to the given file, to allow a specified format, we use sprintf() to print the format to a write_buffer string and then send the write_buffer to file_write()
 int DataLogger::FileWrite(FILE* file, const char* input) {
     int status = fprintf(file, input);
     if (status < 0) {

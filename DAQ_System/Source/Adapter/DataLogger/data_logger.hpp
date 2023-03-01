@@ -35,9 +35,12 @@ class DataLogger : public adapter::IData_Logger {
         virtual int FileClose(FILE*) override;
         virtual int FileWrite(FILE*, const char*) override;
 
+        FILE* data_file; // CSV file with data
+        char write_buffer; // write buffer
+    
+    private:
         SDBlockDevice* block_device; // physical block device
         FATFileSystem* file_system; // file system
-        FILE* data_file; // CSV file with data
 };
     
 }

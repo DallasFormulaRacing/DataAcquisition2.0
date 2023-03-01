@@ -42,10 +42,7 @@ using namespace adapter;
 // Entry point for the example
 int main() {
 
-    DataLogger data_logger(PA_7, PA_6, PA_5, PB_6);
-    
-    // buffer string used to write to a file
-    char buffer[kBlockSectorByteSize] = "\0";
+    DataLogger data_logger(PA_7, PA_6, PA_5, PB_6); //mosi, miso, sck, cs
 
     // used for error checking when operating the block device
     int status = 0;
@@ -66,8 +63,8 @@ int main() {
     // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
     clock_t timer = clock();
     for(int i = 0; i < 100; i++) {
-        snprintf(buffer, sizeof(buffer), "%f, %d, %d, %d, %d\n", ((float)timer)/CLOCKS_PER_SEC, linpot1, linpot2, linpot3, linpot4);
-        status = data_logger.FileWrite(data_logger.data_file, buffer);
+        snprintf(&data_logger.write_buffer, sizeof(data_logger.write_buffer), "%f, %d, %d, %d, %d\n", ((float)timer)/CLOCKS_PER_SEC, linpot1, linpot2, linpot3, linpot4);
+        status = data_logger.FileWrite(data_logger.data_file, &data_logger.write_buffer);
         linpot1++;
         linpot2++;
         linpot3++;
@@ -75,10 +72,7 @@ int main() {
         timer = clock() - timer;
     }
 
-    /*
-        Closing the data file and Unmounting the file system have moved to the deconstructor of the DataLogger. 
-        Not sure if this is a correct/valid implementation or not though.
-    */
+    // Closing the data file and Unmounting the file system have moved to the deconstructor of the DataLogger. 
     
     printf("\r\n");
     
