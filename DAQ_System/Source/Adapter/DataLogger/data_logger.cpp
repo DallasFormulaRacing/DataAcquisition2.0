@@ -23,9 +23,10 @@ char write_buffer[kBlockSectorByteSize] = "\0";
 DataLogger::DataLogger(PinName mosi, PinName miso, PinName sck, PinName cs) {
     block_device = new SDBlockDevice(mosi, miso, sck, cs);
     file_system = new FATFileSystem("fs");
-    data_file = FileOpen("/fs/data.csv");
 
     Mount(file_system, block_device);
+    
+    data_file = FileOpen("/fs/data.csv");
 }
 
 DataLogger::~DataLogger() {
