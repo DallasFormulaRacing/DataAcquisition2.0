@@ -14,6 +14,7 @@
 #ifndef IDATA_LOGGER
 #define IDATA_LOGGER
 
+#include "BlockDevice.h"
 #include "mbed.h"
 
 namespace application {
@@ -30,8 +31,6 @@ class I_Data_Logger {
         virtual const char* NewLogSessionFile() = 0;
 
         char write_buffer;
-        FILE* data_file;
-
 };
 
 }

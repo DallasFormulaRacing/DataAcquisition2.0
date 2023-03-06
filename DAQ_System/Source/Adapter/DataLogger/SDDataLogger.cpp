@@ -106,7 +106,7 @@ uint8_t SdDataLogger::FileWrite(FILE* file, const char* input) {
 }
 
 // return the file path of the new data log file for a new data log session
-const char* NewLogSessionFile() {
+const char* SdDataLogger::NewLogSessionFile() {
     log_session++;
     snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", log_session);
     return file_name;
