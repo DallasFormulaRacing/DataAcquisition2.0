@@ -16,17 +16,21 @@
 
 #include "mbed.h"
 
-namespace adapter {
+namespace application {
     
-class IDataLogger {
+class I_Data_Logger {
     public:
-        virtual ~IDataLogger() = default;
+        virtual ~I_Data_Logger() = default;
 
-        virtual int Mount(FileSystem*, BlockDevice*) = 0;
-        virtual int Unmount(FileSystem*) = 0;
+        virtual uint8_t Mount(FileSystem*, BlockDevice*) = 0;
+        virtual uint8_t Unmount(FileSystem*) = 0;
         virtual FILE* FileOpen(const char*) = 0;
-        virtual int FileClose(FILE*) = 0;
-        virtual int FileWrite(FILE*, const char*) = 0;
+        virtual uint8_t FileClose(FILE*) = 0;
+        virtual uint8_t FileWrite(FILE*, const char*) = 0;
+        virtual const char* NewLogSessionFile() = 0;
+
+        char write_buffer;
+        FILE* data_file;
 
 };
 
