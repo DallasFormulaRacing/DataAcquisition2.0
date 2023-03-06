@@ -30,18 +30,22 @@
 #include <stdio.h>
 #include <cstdio>
 #include <errno.h>
-#include <time.h>
 
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
 
-#define kBlockSectorByteSize 512
+constexpr short kBlockSectorByteSize = 512;
 
-int Mount(FATFileSystem*, SDBlockDevice*);
-int Unmount(FATFileSystem*);
+int log_session = 0;
+char file_name[16] = "\0";
+
+
+uint8_t Mount(FATFileSystem*, SDBlockDevice*);
+uint8_t Unmount(FATFileSystem*);
 FILE* FileOpen(const char*);
-int FileClose(FILE*);
-int FileWrite(FILE*, const char*);
+uint8_t FileClose(FILE*);
+uint8_t FileWrite(FILE*, const char*);
+const char* NewLogSessionFile();
 
 // Entry point for the example
 int main() {
@@ -74,21 +78,21 @@ int main() {
     printf("Opening \"/fs/data.csv\"... ");
     fflush(stdout);
 
-    FILE* data_file = FileOpen("/fs/data.csv");
+    const char* file_name = NewLogSessionFile();
+
+    FILE* data_file = FileOpen(file_name);
 
     // write the first row to the file with some arbitrary sensor names
     FileWrite(data_file, "Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
 
     // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
-    clock_t timer = clock();
     for(int i = 0; i < 100; i++) {
-        snprintf(buffer, sizeof(buffer), "%f, %d, %d, %d, %d\n", ((float)timer)/CLOCKS_PER_SEC, linpot1, linpot2, linpot3, linpot4);
+        snprintf(buffer, sizeof(buffer), "%d, %d, %d, %d, %d\n", i, linpot1, linpot2, linpot3, linpot4);
         FileWrite(data_file, buffer);
         linpot1++;
         linpot2++;
         linpot3++;
         linpot4++;
-        timer = clock() - timer;
     }
 
     // Close the file which also flushes any cached writes
@@ -107,8 +111,8 @@ int main() {
 }
 
 // mounts the filesystem to the given sd block device and checks for errors, reformats the device of no filesystem is found
-int Mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
-    int status = file_system->mount(block_device);
+uint8_t Mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
+    uint8_t status = file_system->mount(block_device);
     printf("%s\n", (status ? "Fail :(" : "OK"));
     if (status) {
         /* Reformat if we can't mount the filesystem,
@@ -125,8 +129,8 @@ int Mount(FATFileSystem *file_system, SDBlockDevice *block_device) {
 }
 
 // unmounts the filesystem from the given sd block device and checks for errors
-int Unmount(FATFileSystem *file_system) {
-    int status = file_system->unmount();
+uint8_t Unmount(FATFileSystem *file_system) {
+    uint8_t status = file_system->unmount();
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
         error("error: %s (%d)\n", strerror(-status), status);
@@ -152,8 +156,8 @@ FILE* FileOpen(const char* file_path) {
 }
 
 // closes the given file
-int FileClose(FILE* file) {
-    int status = fclose(file);
+uint8_t FileClose(FILE* file) {
+    uint8_t status = fclose(file);
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
         error("error: %s (%d)\n", strerror(errno), -errno);
@@ -162,13 +166,20 @@ int FileClose(FILE* file) {
 }
 
 // writes the given input to the given file, to allow a specified format, we use sprintf() to print the format to a buffer string and then send the buffer to file_write()
-int FileWrite(FILE* file, const char* input) {
-    int status = fprintf(file, input);
+uint8_t FileWrite(FILE* file, const char* input) {
+    uint8_t status = fprintf(file, input);
     if (status < 0) {
         printf("Fail :(\n");
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
     return status;
+}
+
+// return the file path of the new data log file for a new data log session
+const char* NewLogSessionFile() {
+    log_session++;
+    snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", log_session);
+    return file_name;
 }
 
 /*
