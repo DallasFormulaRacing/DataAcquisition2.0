@@ -75,10 +75,8 @@ int main() {
     Mount(&file_system, &block_device);
 
     // Open the numbers file
-    printf("Opening \"/fs/data.csv\"... ");
-    fflush(stdout);
-
-    char* file_name = NewLogSessionFile();
+    // printf("Opening \"/fs/data.csv\"... ");
+    // fflush(stdout);
 
     FILE* data_file = FileOpen(file_name);
 
@@ -138,31 +136,34 @@ uint8_t Unmount(FATFileSystem *file_system) {
     return status;
 }
 
-// opens the file at the given file path and creates it if it doesn't exist
+// opens the file at the given default file path and creates a unique file name
 FILE* FileOpen(char* file_path) {
-    FILE* file = fopen(file_path, "r+");
-    printf("%s\n", (!file ? "Fail :(" : "OK"));
-    if(!file) {
-        // create the file if it doesn't exist
-        printf("No file found, creating a new file... ");
-        fflush(stdout);
-        file = fopen(file_path, "w+");
-        printf("%s\n", (!file ? "Fail :(" : "OK"));
+    FILE* file;
+
+    for(int i = 0; i < 1000; i++) {
+        // Increment file_name
+        snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", i);
+        file_path = file_name;
+        file = fopen(file_path, "r+");
+
         if (!file) {
-            error("error: %s (%d)\n", strerror(errno), -errno);
+            // File not found, found a unique name
+            break;
+        } else {
+            // File already exists
+            FileClose(file);
         }
-    } else {
-
-        printf("Duplicate file name");
-        fflush(stdout);
-        FileClose(file);
-
-        file_path = NewLogSessionFile();
-        file = fopen(file_path, "w+");
-        printf("%s\n", (!file ? "Failed AGAIN :(" : "OK"));
-
     }
 
+    file = fopen(file_path, "w+");
+
+    if (!file) {
+        printf("Opening failed :(\n");
+        error("error: %s (%d)\n", strerror(errno), -errno);
+    } else {
+        printf("Opened %s\n", file_path);
+    }
+    fflush(stdout);
 
     return file;
 }
@@ -185,13 +186,6 @@ uint8_t FileWrite(FILE* file, const char* input) {
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
     return status;
-}
-
-// return the file path of the new data log file for a new data log session
-char* NewLogSessionFile() {
-    log_session++;
-    snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", log_session);
-    return file_name;
 }
 
 /*
