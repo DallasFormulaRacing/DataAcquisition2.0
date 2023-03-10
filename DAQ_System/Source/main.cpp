@@ -42,10 +42,10 @@ char file_name[16] = "\0";
 
 uint8_t Mount(FATFileSystem*, SDBlockDevice*);
 uint8_t Unmount(FATFileSystem*);
-FILE* FileOpen(const char*);
+FILE* FileOpen(char*);
 uint8_t FileClose(FILE*);
 uint8_t FileWrite(FILE*, const char*);
-const char* NewLogSessionFile();
+char* NewLogSessionFile();
 
 // Entry point for the example
 int main() {
@@ -78,7 +78,7 @@ int main() {
     printf("Opening \"/fs/data.csv\"... ");
     fflush(stdout);
 
-    const char* file_name = NewLogSessionFile();
+    char* file_name = NewLogSessionFile();
 
     FILE* data_file = FileOpen(file_name);
 
@@ -139,7 +139,7 @@ uint8_t Unmount(FATFileSystem *file_system) {
 }
 
 // opens the file at the given file path and creates it if it doesn't exist
-FILE* FileOpen(const char* file_path) {
+FILE* FileOpen(char* file_path) {
     FILE* file = fopen(file_path, "r+");
     printf("%s\n", (!file ? "Fail :(" : "OK"));
     if(!file) {
@@ -151,7 +151,19 @@ FILE* FileOpen(const char* file_path) {
         if (!file) {
             error("error: %s (%d)\n", strerror(errno), -errno);
         }
+    } else {
+
+        printf("Duplicate file name");
+        fflush(stdout);
+        FileClose(file);
+
+        file_path = NewLogSessionFile();
+        file = fopen(file_path, "w+");
+        printf("%s\n", (!file ? "Failed AGAIN :(" : "OK"));
+
     }
+
+
     return file;
 }
 
@@ -176,7 +188,7 @@ uint8_t FileWrite(FILE* file, const char* input) {
 }
 
 // return the file path of the new data log file for a new data log session
-const char* NewLogSessionFile() {
+char* NewLogSessionFile() {
     log_session++;
     snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", log_session);
     return file_name;
