@@ -60,7 +60,9 @@ int main() {
     // mounting the file system has moved to the constructor of the data logger class
 
     // NewLogSessionFile() provides the file path for the next data file to open to start a new log session
-    FILE* data_file = data_logger->FileOpen(data_logger->NewLogSessionFile());
+    //const char* file_path = data_logger->NewLogSessionFile();
+    // printf("%s", file_path);
+    FILE* data_file = data_logger->FileOpen("/fs/data1.csv");
 
     // write the first row to the file with some arbitrary sensor names
     status = data_logger->FileWrite(data_file, "Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
@@ -81,7 +83,8 @@ int main() {
     // Second Log Session:
 
     // NewLogSessionFile() provides the file path for the next data file to open to start a new log session
-    data_file = data_logger->FileOpen(data_logger->NewLogSessionFile());
+    // data_file = data_logger->FileOpen(data_logger->NewLogSessionFile());
+    data_file = data_logger->FileOpen("/fs/data2.csv");
 
     // write the first row to the file with some arbitrary sensor names
     status = data_logger->FileWrite(data_file, "Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
