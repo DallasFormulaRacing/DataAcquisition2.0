@@ -36,13 +36,9 @@
 
 constexpr short kBlockSectorByteSize = 512;
 
-int log_session = 0;
-
-
-
 uint8_t Mount(FATFileSystem*, SDBlockDevice*);
 uint8_t Unmount(FATFileSystem*);
-FILE* FileOpen();
+uint8_t FileOpen(FILE** file, char* file_path);
 uint8_t FileClose(FILE*);
 uint8_t FileWrite(FILE*, const char*);
 char* NewLogSessionFile();
@@ -74,11 +70,26 @@ int main() {
     fflush(stdout);
     Mount(&file_system, &block_device);
 
-    // Open the numbers file
-    // printf("Opening \"/fs/data.csv\"... ");
-    // fflush(stdout);
+    FILE* data_file;
+    char file_name[16] = "\0";
+    int file_name_status = 0;
 
-    FILE* data_file = FileOpen();
+    for(int i = 0; i < 1000; i++) {
+        // Increment file_name
+        snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", i);
+        file_name_status = FileOpen(&data_file, file_name);
+
+        if (file_name_status == 2) {
+            // File not found, found a unique name
+            break;
+        } else {
+            // File already exists
+            FileClose(data_file);
+        }
+    }
+
+    printf("Opened %s\n", file_name);
+    fflush(stdout);
 
     // write the first row to the file with some arbitrary sensor names
     FileWrite(data_file, "Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
@@ -136,37 +147,30 @@ uint8_t Unmount(FATFileSystem *file_system) {
     return status;
 }
 
-// opens the file at the given default file path and creates a unique file name
-FILE* FileOpen() {
-    char file_name[16] = "\0";
-    FILE* file;
 
-    for(int i = 0; i < 1000; i++) {
-        // Increment file_name
-        snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", i);
-        // file_path = file_name;
-        file = fopen(file_name, "r+");
 
-        if (!file) {
-            // File not found, found a unique name
-            break;
-        } else {
-            // File already exists
-            FileClose(file);
-        }
-    }
-
-    file = fopen(file_name, "w+");
-
-    if (!file) {
-        printf("Opening failed :(\n");
-        error("error: %s (%d)\n", strerror(errno), -errno);
+// opens the file at the given file path and creates it if it doesn't exist
+// return 0 = failed to create a file
+// return 1 = opened a pre-existing file
+// return 2 = created a new file with a unique file name
+uint8_t FileOpen(FILE** file, char* file_path) {
+    uint8_t status = 0;
+    *file = fopen(file_path, "r+");
+    
+    if(!(*file)) {
+        // Create the file if it doesn't exist
+        *file = fopen(file_path, "w+");
+        
+        status = 2;
     } else {
-        printf("Opened %s\n", file_name);
+        status = 1;
     }
-    fflush(stdout);
 
-    return file;
+    if (!(*file)) {
+        error("error: %s (%d)\n", strerror(errno), -errno);
+        status = 0;
+    }
+    return status;
 }
 
 // closes the given file
