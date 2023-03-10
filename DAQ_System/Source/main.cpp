@@ -37,12 +37,12 @@
 constexpr short kBlockSectorByteSize = 512;
 
 int log_session = 0;
-char file_name[16] = "\0";
+
 
 
 uint8_t Mount(FATFileSystem*, SDBlockDevice*);
 uint8_t Unmount(FATFileSystem*);
-FILE* FileOpen(char*);
+FILE* FileOpen();
 uint8_t FileClose(FILE*);
 uint8_t FileWrite(FILE*, const char*);
 char* NewLogSessionFile();
@@ -78,7 +78,7 @@ int main() {
     // printf("Opening \"/fs/data.csv\"... ");
     // fflush(stdout);
 
-    FILE* data_file = FileOpen(file_name);
+    FILE* data_file = FileOpen();
 
     // write the first row to the file with some arbitrary sensor names
     FileWrite(data_file, "Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
@@ -137,14 +137,15 @@ uint8_t Unmount(FATFileSystem *file_system) {
 }
 
 // opens the file at the given default file path and creates a unique file name
-FILE* FileOpen(char* file_path) {
+FILE* FileOpen() {
+    char file_name[16] = "\0";
     FILE* file;
 
     for(int i = 0; i < 1000; i++) {
         // Increment file_name
         snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", i);
-        file_path = file_name;
-        file = fopen(file_path, "r+");
+        // file_path = file_name;
+        file = fopen(file_name, "r+");
 
         if (!file) {
             // File not found, found a unique name
@@ -155,13 +156,13 @@ FILE* FileOpen(char* file_path) {
         }
     }
 
-    file = fopen(file_path, "w+");
+    file = fopen(file_name, "w+");
 
     if (!file) {
         printf("Opening failed :(\n");
         error("error: %s (%d)\n", strerror(errno), -errno);
     } else {
-        printf("Opened %s\n", file_path);
+        printf("Opened %s\n", file_name);
     }
     fflush(stdout);
 
