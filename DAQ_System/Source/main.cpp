@@ -18,7 +18,7 @@
 // This file should not use hardware-dependent includes
 // TODO: A component that serves component assembly using abstract classes
 
-using AutoReloadTimer = Ticker;
+using AutoReloadTimer = LowPowerTicker;
 
 static bool sampling = false;
 static void start_sampling() {
