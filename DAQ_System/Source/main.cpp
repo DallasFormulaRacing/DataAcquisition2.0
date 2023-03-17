@@ -14,13 +14,18 @@
 
 // DFR Custom Dependancies
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
+#include "platform/component_interface_bridge.hpp"
 
 // This file should not use hardware-dependent includes
 // TODO: A component that serves component assembly using abstract classes
 
 int main() {
     // Init
-    shared_ptr<adapter::ILinear_Potentiometer> linear_potentiometer; // todo, get concrete class
+    platform::ComponentInterfaceBridge bridge;
+
+    std::unique_ptr<adapter::ILinear_Potentiometer> linear_potentiometer = bridge.GetLinearPotentiometer();
+
+
 
     // Operate
     while (true) {

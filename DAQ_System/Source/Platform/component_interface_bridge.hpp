@@ -14,6 +14,7 @@
 #include "Adapter/LinearPotentiometer/linear_potentiometer.hpp"
 
 #include "daq_pin_map.hpp"
+#include <memory>
 
 namespace platform {
 
@@ -22,11 +23,10 @@ class ComponentInterfaceBridge {
         ComponentInterfaceBridge();
         ~ComponentInterfaceBridge();
 
+        std::unique_ptr<adapter::LinearPotentiometer> GetLinearPotentiometer();
+
     private:
         DaqPinMap pins;
-        shared_ptr<adapter::ILinear_Potentiometer> linear_potentiometer_;
-        
-
 };
 
 
