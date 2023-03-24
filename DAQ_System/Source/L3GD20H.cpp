@@ -79,23 +79,20 @@ bool L3GD20H::read(short g[3]) {
 
 
 
-bool L3GD20H::write_reg(int addr_i2c,int addr_reg, char v)
-{
+bool L3GD20H::write_reg(int addr_i2c,int addr_reg, char v) {
     char data[2] = {static_cast<char>(addr_reg), v}; 
     return L3GD20H::_L3GD20H.write(addr_i2c, data, 2) == 0;
 }
 
-bool L3GD20H::read_reg(int addr_i2c,int addr_reg, char *v)
-{
+bool L3GD20H::read_reg(int addr_i2c,int addr_reg, char *v) {
     char data = addr_reg; 
     bool result = false;
-    
-    __disable_irq();
+
     if ((_L3GD20H.write(addr_i2c, &data, 1) == 0) && (_L3GD20H.read(addr_i2c, &data, 1) == 0)){
         *v = data;
         result = true;
     }
-    __enable_irq();
+
     return result;
 }
 

@@ -63,7 +63,7 @@ int main(){
             */
                    
             //raw data from the gyroscope
-            //printf("\033[2J\033[1;1H"); 
+            printf("\033[2J\033[1;1H"); 
             // printf("tx: %d \n",gyro_data[0] ); 
             //printf("ty: %d \n",gyro_data[1] );
             //printf("tz: %d \n",gyro_data[2] );
@@ -72,9 +72,9 @@ int main(){
             //printf("the average of the y-axis is: %d \n", average_offset[1]);
             //printf("the average of the z-axis is: %d \n", average_offset[2]);
             // displays the callibrated data of the gyroscope in dps
-            //printf("callibration of X(in dps): %d \n",degrees_per_second[0]);
-            //printf("callibration of Y(in dps): %d \n",degrees_per_second[1]);
-            //printf("callibration of Z(in dps): %d \n",degrees_per_second[2]);
+            printf("callibration of X(in dps): %d \n",degrees_per_second[0]);
+            printf("callibration of Y(in dps): %d \n",degrees_per_second[1]);
+            printf("callibration of Z(in dps): %d \n",degrees_per_second[2]);
             // displays the callibrated data of the gyroscope in radians per second
             //printf("callibration of x(in rad/s) %.5f \n",radians_per_second[0]);
             //printf("callibration of y(in rad/s) %.5f \n",radians_per_second[1]);
