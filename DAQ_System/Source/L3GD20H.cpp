@@ -30,32 +30,18 @@
  #include "L3GD20H.h"
 
 
-// Defines ////////////////////////////////////////////////////////////////
-
-// The Arduino two-wire interface uses a 7-bit number for the address, 
-// and sets the last bit correctly based on reads and writes
-// mbed I2C libraries take the 7-bit address shifted left 1 bit
-// #define GYR_ADDRESS (0xD2 >> 1)
 #define GYR_ADDRESS 0xD6
 
 
-// Public Methods //////////////////////////////////////////////////////////////
-
-// Constructor
-L3GD20H::L3GD20H(PinName sda, PinName scl):
-    _L3GD20H(sda, scl)
-{
+L3GD20H::L3GD20H(PinName sda, PinName scl)
+:_L3GD20H_(sda, scl){
     char reg_v;
-    _L3GD20H.frequency(100000);
+    _L3GD20H_.frequency(100000);
     
-  // 0x0F = 0b00001111
   // Normal power mode, all axes enabled
     reg_v = 0;    
     reg_v |= 0x0F;       
     write_reg(GYR_ADDRESS,L3GD20_CTRL_REG1,reg_v);
-    
-
-
 }
 
 
@@ -79,29 +65,25 @@ bool L3GD20H::read(short g[3]) {
 
 
 
-bool L3GD20H::write_reg(int addr_i2c,int addr_reg, char v)
-{
+bool L3GD20H::write_reg(int addr_i2c,int addr_reg, char v){
     char data[2] = {static_cast<char>(addr_reg), v}; 
-    return L3GD20H::_L3GD20H.write(addr_i2c, data, 2) == 0;
+    return L3GD20H::_L3GD20H_.write(addr_i2c, data, 2) == 0;
 }
 
-bool L3GD20H::read_reg(int addr_i2c,int addr_reg, char *v)
-{
+bool L3GD20H::read_reg(int addr_i2c,int addr_reg, char *v){
     char data = addr_reg; 
     bool result = false;
     
-    __disable_irq();
-    if ((_L3GD20H.write(addr_i2c, &data, 1) == 0) && (_L3GD20H.read(addr_i2c, &data, 1) == 0)){
+    if ((_L3GD20H_.write(addr_i2c, &data, 1) == 0) && (_L3GD20H_.read(addr_i2c, &data, 1) == 0)){
         *v = data;
         result = true;
     }
-    __enable_irq();
     return result;
 }
 
 
-bool L3GD20H::recv(char sad, char sub, char *buf, int length) {
+bool L3GD20H::recv(char sad, char sub, char *buf, int length){
     if (length > 1) sub |= 0x80;
  
-    return _L3GD20H.write(sad, &sub, 1, true) == 0 && _L3GD20H.read(sad, buf, length) == 0;
+    return _L3GD20H_.write(sad, &sub, 1, true) == 0 && _L3GD20H_.read(sad, buf, length) == 0;
 }
