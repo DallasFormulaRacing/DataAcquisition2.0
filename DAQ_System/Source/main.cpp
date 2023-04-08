@@ -15,8 +15,7 @@
 // DFR Custom Dependancies
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
 #include "Adapter/LinearPotentiometer/linear_potentiometer.hpp"
-// This file should not use hardware-dependent includes
-// TODO: A component that serves component assembly using abstract classes
+
 
 using AutoReloadTimer = LowPowerTicker;
 
@@ -45,13 +44,3 @@ int main() {
         }
     }
 }
-
-
-/*
-* OneShot: https://os.mbed.com/docs/mbed-os/v6.15/apis/timeout.html
-* AutoReload: https://os.mbed.com/docs/mbed-os/v6.15/apis/ticker.html
-
-* ===Low Power Versions===
-* OneShot: https://os.mbed.com/docs/mbed-os/v6.15/apis/lowpowertimeout.html
-* AutoReload: https://os.mbed.com/docs/mbed-os/v6.15/apis/lowpowerticker.html
-*/
