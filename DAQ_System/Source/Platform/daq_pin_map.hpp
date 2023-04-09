@@ -12,7 +12,10 @@
 namespace platform {
 
 struct DaqPinMap {
-    PinName linpot_analog_input = PC_0;
+    PinName analog_linpot_front_left    = PC_0;
+    PinName analog_linpot_front_right   = PC_1;
+    PinName analog_linpot_rear_left     = PB_0;
+    PinName analog_linpot_rear_right    = PA_4;
 };
 
 

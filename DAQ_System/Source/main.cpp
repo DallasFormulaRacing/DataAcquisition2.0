@@ -23,13 +23,24 @@ static void start_logging() {
     logging = true;
 }
 
+struct LinearPotentiometers {
+    std::unique_ptr<adapter::ILinear_Potentiometer> front_left;
+    std::unique_ptr<adapter::ILinear_Potentiometer> front_right;
+    std::unique_ptr<adapter::ILinear_Potentiometer> rear_left;
+    std::unique_ptr<adapter::ILinear_Potentiometer> rear_right;
+};
+
 int main() {
-    // Init
+    // Init components
     platform::ComponentInterfaceBridge bridge;
 
-    std::unique_ptr<adapter::ILinear_Potentiometer> linear_potentiometer = bridge.GetLinearPotentiometer();
-
+    LinearPotentiometers suspension_pots;
+    suspension_pots.front_left  = bridge.GetLinearPotentiometer(platform::front_left);
+    suspension_pots.front_right = bridge.GetLinearPotentiometer(platform::front_right);
+    suspension_pots.rear_left   = bridge.GetLinearPotentiometer(platform::rear_left);
+    suspension_pots.rear_right  = bridge.GetLinearPotentiometer(platform::rear_right);
     
+    // Start timer
     constexpr uint8_t kLoggingRate = 3;
     AutoReloadTimer timer;
     timer.attach(&start_logging, std::chrono::seconds(kLoggingRate));
@@ -38,12 +49,12 @@ int main() {
 
     // Operate
     while (true) {
-        linear_potentiometer->ComputeDisplacementPercentage();
+        suspension_pots.front_left->ComputeDisplacementPercentage();
 
         if (logging) {
             // Operate: Writing
             timestamp += kLoggingRate;
-            std::cout << linear_potentiometer->GetDisplacementPercentage() << "%" << std::endl;
+            std::cout << suspension_pots.front_left->GetDisplacementPercentage() << "%" << std::endl;
             
             logging = false;
         }

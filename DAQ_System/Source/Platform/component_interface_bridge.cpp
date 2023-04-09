@@ -19,8 +19,24 @@ ComponentInterfaceBridge::~ComponentInterfaceBridge() {
     // Note: experiment on a side program if these remaining pointers are still valid after moving
 }
 
-std::unique_ptr<adapter::LinearPotentiometer> ComponentInterfaceBridge::GetLinearPotentiometer() {
-    return std::make_unique<adapter::LinearPotentiometer>(pins.linpot_analog_input);
+std::unique_ptr<adapter::LinearPotentiometer> ComponentInterfaceBridge::GetLinearPotentiometer(LinPotLocation location) {
+    PinName linpot_pin;
+    switch (location) {
+        case front_left:
+            linpot_pin = pins.analog_linpot_front_left;
+            break;
+        case front_right:
+            linpot_pin = pins.analog_linpot_front_right;
+            break;
+        case rear_left:
+            linpot_pin = pins.analog_linpot_rear_left;
+            break;
+        case rear_right:
+            linpot_pin = pins.analog_linpot_rear_right;
+            break;
+    }
+
+    return std::make_unique<adapter::LinearPotentiometer>(linpot_pin);
 }
 
 
