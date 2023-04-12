@@ -60,3 +60,14 @@ int main() {
         }
     }
 }
+
+/*
+* todo
+
+rename linpot class with sensor model name
+rename get displacement to get retraction
+add get displacement percentage (simply do 1 minus retraction total)
+add get mm
+add get inches
+
+*/
