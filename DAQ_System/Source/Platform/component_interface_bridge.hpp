@@ -36,7 +36,7 @@ class ComponentInterfaceBridge {
         ComponentInterfaceBridge();
         ~ComponentInterfaceBridge();
 
-        std::unique_ptr<adapter::LinearPotentiometer> GetLinearPotentiometer(LinPotLocation location);
+        std::unique_ptr<adapter::LinearPotentiometer_SLS1322> GetLinearPotentiometer(LinPotLocation location);
 
     private:
         DaqPinMap pins;

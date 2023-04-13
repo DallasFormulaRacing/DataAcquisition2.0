@@ -15,20 +15,20 @@
 
 namespace adapter {
 
-LinearPotentiometer::LinearPotentiometer(PinName analog_pin) : analog_input_monitor_(analog_pin) { }
-LinearPotentiometer::~LinearPotentiometer() { }
+LinearPotentiometer_SLS1322::LinearPotentiometer_SLS1322(PinName analog_pin) : analog_input_monitor_(analog_pin) { }
+LinearPotentiometer_SLS1322::~LinearPotentiometer_SLS1322() { }
 
-void LinearPotentiometer::SetPin(PinName analog_pin) {
+void LinearPotentiometer_SLS1322::SetPin(PinName analog_pin) {
     analog_input_monitor_ = AnalogIn(analog_pin);
 }
 
 
-double LinearPotentiometer::GetDisplacementPercentage() {
+double LinearPotentiometer_SLS1322::GetDisplacementPercentage() {
     return displacement_percentage_;
 }
 
 
-void LinearPotentiometer::ComputeDisplacementPercentage() {
+void LinearPotentiometer_SLS1322::ComputeDisplacementPercentage() {
     // The LinPot goes from 1-14k ohm, v = 3.3v, vdiv formula
     // Should compute values from 100 to 450
 
