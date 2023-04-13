@@ -37,10 +37,10 @@ class LinearPotentiometer_SLS1322 : public adapter::ILinear_Potentiometer {
         float displacement_percentage_;
 
         // Mbed AnalogIn range: 2^(16 bits)
-        // Note: hardware adc is 12 bit
+        // Note: hardware adc is 12 bit (mbed provides padding via AnalogIn)
         static constexpr uint16_t kAnalogRange = 65535;
         static constexpr uint8_t kMaxLengthInches = 3;
-        static constexpr float kMaxLengthMillimeters = 25.4f;
+        static constexpr float kMaxLengthMillimeters = 25.4f * kMaxLengthInches;
 };
 
 }

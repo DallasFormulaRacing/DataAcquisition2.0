@@ -15,8 +15,8 @@ namespace platform {
 ComponentInterfaceBridge::ComponentInterfaceBridge() { }
 
 ComponentInterfaceBridge::~ComponentInterfaceBridge() {
+    // TODO: When moving to later destroying this object at the end of booting up
     // Check that all private pointers are nullified and destroyed
-    // Note: experiment on a side program if these remaining pointers are still valid after moving
 }
 
 std::unique_ptr<adapter::LinearPotentiometer_SLS1322> ComponentInterfaceBridge::GetLinearPotentiometer(LinPotLocation location) {
@@ -39,17 +39,4 @@ std::unique_ptr<adapter::LinearPotentiometer_SLS1322> ComponentInterfaceBridge::
     return std::make_unique<adapter::LinearPotentiometer_SLS1322>(linpot_pin);
 }
 
-
-
 }
-
-
-// Does the bridge have to be a class if we are only providing components?
-//      If no class: a suite of getter platform::functions -- we do this regardless
-//      So, class would be helpful to at least containerize the scope
-//
-// Consider returning the creation of unique pointers
-//      Only one pointer is needed (to be managed by the FSM)
-//      It is more efficient and simple
-//      Will reduce need of Bridge private variables
-//      https://www.lewuathe.com/return-std-make_unique-from-function.html 

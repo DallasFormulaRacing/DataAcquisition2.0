@@ -11,7 +11,7 @@
 * GPL-3.0 License
 */
 
-#include "linear_potentiometer.hpp"
+#include "linear_potentiometer_sls1322.hpp"
 
 namespace adapter {
 
@@ -27,11 +27,10 @@ float LinearPotentiometer_SLS1322::GetDisplacementMillimeters() {
 }
 
 void LinearPotentiometer_SLS1322::ComputeDisplacementPercentage() {
-    // The LinPot goes from 1-14k ohm, v = 3.3v, vdiv formula
-    // Should compute values from 100 to 450
-
-    //0 to 65535 is adc in range
-    //      Kohm = (adcin * (V/steps) / Itot)
+    // Expected output: 1-14k ohm when v_in = 3.3v
+    // Voltage division formula
+    
+    // Kohm = (adcin * (V/steps) / Itot)
     float retraction_percentage = (float)(analog_input_monitor_.read_u16()) / kAnalogRange;
     displacement_percentage_ =  1 - retraction_percentage;
 }

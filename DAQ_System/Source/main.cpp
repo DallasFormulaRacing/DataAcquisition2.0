@@ -41,11 +41,11 @@ int main() {
     suspension_pots.rear_right  = bridge.GetLinearPotentiometer(platform::rear_right);
     
     // Start timer
-    constexpr uint8_t kLoggingRate = 3;
+    constexpr uint8_t kLoggingRate = 3; // seconds
     AutoReloadTimer timer;
     timer.attach(&start_logging, std::chrono::seconds(kLoggingRate));
 
-    float timestamp = 0.0f;
+    double timestamp = 0.0f;
 
     // Operate
     while (true) {
@@ -54,20 +54,10 @@ int main() {
         if (logging) {
             // Operate: Writing
             timestamp += kLoggingRate;
-            std::cout << suspension_pots.front_left->GetDisplacementPercentage() << "%" << std::endl;
+            std::cout << suspension_pots.front_left->GetDisplacementInches() << " in\t"
+                      << suspension_pots.front_left->GetDisplacementMillimeters() << " mm" << std::endl;
             
             logging = false;
         }
     }
 }
-
-/*
-* todo
-
-rename linpot class with sensor model name
-rename get displacement to get retraction
-add get displacement percentage (simply do 1 minus retraction total)
-add get mm
-add get inches
-
-*/
