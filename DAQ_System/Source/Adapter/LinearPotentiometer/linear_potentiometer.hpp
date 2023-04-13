@@ -17,6 +17,7 @@
 #include "mbed.h"
 
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
+#include <cstdint>
 
 
 namespace adapter {
@@ -25,18 +26,21 @@ class LinearPotentiometer_SLS1322 : public adapter::ILinear_Potentiometer {
     public:
         LinearPotentiometer_SLS1322(PinName analog_pin);
         virtual ~LinearPotentiometer_SLS1322();
-        void SetPin(PinName analog_pin);
 
+        float GetDisplacementInches() override;
+        float GetDisplacementMillimeters() override;
 
-        double GetDisplacementPercentage() override;
         void ComputeDisplacementPercentage() override;
+
     private:
         AnalogIn analog_input_monitor_;
-        double displacement_percentage_;
+        float displacement_percentage_;
 
         // Mbed AnalogIn range: 2^(16 bits)
         // Note: hardware adc is 12 bit
-        const int kAnalogRange = 65535;
+        static constexpr uint16_t kAnalogRange = 65535;
+        static constexpr uint8_t kMaxLengthInches = 3;
+        static constexpr float kMaxLengthMillimeters = 25.4f;
 };
 
 }

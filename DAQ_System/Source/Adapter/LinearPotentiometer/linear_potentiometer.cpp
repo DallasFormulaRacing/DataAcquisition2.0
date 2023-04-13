@@ -18,15 +18,13 @@ namespace adapter {
 LinearPotentiometer_SLS1322::LinearPotentiometer_SLS1322(PinName analog_pin) : analog_input_monitor_(analog_pin) { }
 LinearPotentiometer_SLS1322::~LinearPotentiometer_SLS1322() { }
 
-void LinearPotentiometer_SLS1322::SetPin(PinName analog_pin) {
-    analog_input_monitor_ = AnalogIn(analog_pin);
+float LinearPotentiometer_SLS1322::GetDisplacementInches() {
+    return displacement_percentage_ * kMaxLengthInches;
 }
 
-
-double LinearPotentiometer_SLS1322::GetDisplacementPercentage() {
-    return displacement_percentage_;
+float LinearPotentiometer_SLS1322::GetDisplacementMillimeters() {
+    return displacement_percentage_ * kMaxLengthMillimeters;
 }
-
 
 void LinearPotentiometer_SLS1322::ComputeDisplacementPercentage() {
     // The LinPot goes from 1-14k ohm, v = 3.3v, vdiv formula
@@ -34,7 +32,8 @@ void LinearPotentiometer_SLS1322::ComputeDisplacementPercentage() {
 
     //0 to 65535 is adc in range
     //      Kohm = (adcin * (V/steps) / Itot)
-    displacement_percentage_ = (double)(analog_input_monitor_.read_u16()) / kAnalogRange;
+    float retraction_percentage = (float)(analog_input_monitor_.read_u16()) / kAnalogRange;
+    displacement_percentage_ =  1 - retraction_percentage;
 }
 
 }

@@ -20,7 +20,9 @@ class ILinear_Potentiometer {
     public:
         virtual ~ILinear_Potentiometer() = default;
         
-        virtual double GetDisplacementPercentage() = 0;
+        virtual float GetDisplacementInches() = 0;
+        virtual float GetDisplacementMillimeters() = 0;
+        
         virtual void ComputeDisplacementPercentage() = 0;
 };
 

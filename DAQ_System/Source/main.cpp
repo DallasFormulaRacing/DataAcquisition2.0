@@ -23,7 +23,7 @@ static void start_logging() {
     logging = true;
 }
 
-struct LinearPotentiometers {
+struct SuspensionPotentiometers {
     std::unique_ptr<adapter::ILinear_Potentiometer> front_left;
     std::unique_ptr<adapter::ILinear_Potentiometer> front_right;
     std::unique_ptr<adapter::ILinear_Potentiometer> rear_left;
@@ -34,7 +34,7 @@ int main() {
     // Init components
     platform::ComponentInterfaceBridge bridge;
 
-    LinearPotentiometers suspension_pots;
+    SuspensionPotentiometers suspension_pots;
     suspension_pots.front_left  = bridge.GetLinearPotentiometer(platform::front_left);
     suspension_pots.front_right = bridge.GetLinearPotentiometer(platform::front_right);
     suspension_pots.rear_left   = bridge.GetLinearPotentiometer(platform::rear_left);
