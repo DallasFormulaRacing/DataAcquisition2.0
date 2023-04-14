@@ -33,7 +33,6 @@ int main() {
         ThisThread::sleep_for(50ms);
         
         sensor_obj.doNothing(1);
-        double magnitude = sqrt(acc_data[0]*acc_data[0]+acc_data[1]*acc_data[1]+acc_data[2]*acc_data[2]);
         sensor_obj.computeAcc(acc_data, acc_usable, gravityRate);
 
         //accelerometer values must be 
