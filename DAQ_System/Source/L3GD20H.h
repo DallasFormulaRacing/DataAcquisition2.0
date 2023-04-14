@@ -30,8 +30,6 @@
 
 #include "mbed.h"
 
-// register addresses
-
 #define L3GD20_WHO_AM_I      0x0F
 
 #define L3GD20_CTRL_REG1     0x20
@@ -63,36 +61,20 @@
 #define L3GD20_INT1_THS_ZL   0x37
 #define L3GD20_INT1_DURATION 0x38
 
-/** Interface library for the ST L3GD20 3-axis gyro
- *
- * Ported from Pololu L3GD20 library for Arduino by
- *
- * @code
- * #include "mbed.h"
- * #include "L3GD20.h"
- * L3GD20 gyro(p28, p27);
- * ...
- * int g[3];
- * gyro.read(g);
- * @endcode
- */
-class L3GD20H
-{
+
+class L3GD20H{
     public:
-        /** Create a new L3GD20 I2C interface
-         * @param sda is the pin for the I2C SDA line
-         * @param scl is the pin for the I2C SCL line
-         */
+    
         L3GD20H(PinName sda, PinName scl);
         
-        /** Read gyro values
+        /** Returns a status of whether reading the gyro was successful
          * @param g Array containing x, y, and z gyro values
          * @return g Array containing x, y, and z gyro values
          */
         bool read(short g[3]);
         
     private:
-            I2C _L3GD20H;
+            I2C _L3GD20H_;
         short gx, gy, gz;
 
         bool write_reg(int addr_i2c,int addr_reg, char v);
