@@ -7,8 +7,8 @@
 // Found in: https://os.mbed.com/users/julioefajardo/code/L3GD20H/docs/tip/classL3GD20H.html
 
 
-constexpr float k250DPSSensitivity = 0.00875f;// this is using a sensitivity of 250 dps which is equivalent to .00875
-constexpr float kDegreesToRadians = (3.14159f/180); // this is the conversion factor for degrees per second to radians per second all you have to do is multiply the callibrated data or the raw data by the conversion factor
+constexpr float kSensitivityRange_250_DPS = 0.00875f;// this is using a sensitivity of 250 dps which is equivalent to .00875
+constexpr float kDegreesToRadians = 3.14159f / 180; // this is the conversion factor for degrees per second to radians per second all you have to do is multiply the callibrated data or the raw data by the conversion factor
 L3GD20H gyro(I2C_SDA, I2C_SCL);
 
 void AverageOffsetCalc(short offset[], short sum[]);
@@ -84,7 +84,7 @@ int main(){
 }
 
 
-void AverageOffsetCalc(short Offset[], short sum[]){
+void AverageOffsetCalc(short offset[], short sum[]){
   // collecting the sampled data for the offset average
   short gyro_data[3] = {0};
   int average_sample_size = 15;
@@ -96,21 +96,21 @@ void AverageOffsetCalc(short Offset[], short sum[]){
         sum[2] += gyro_data[2];
     }
 
-    Offset[0] = sum[0]/average_sample_size;
-    Offset[1] = sum[1]/average_sample_size;
-    Offset[2] = sum[2]/average_sample_size;
+    offset[0] = sum[0] / average_sample_size;
+    offset[1] = sum[1] / average_sample_size;
+    offset[2] = sum[2] / average_sample_size;
 
 }
 
 void DegreesPerSecondConversion(short degrees_per_second[],short offset[],short gyro_data[]){
   // the equation used to find the dps of the gyroscope is dps = (rawdata - offset)*sensitivity
-    degrees_per_second[0] = (gyro_data[0] - offset[0])*k250DPSSensitivity;
-    degrees_per_second[1] = (gyro_data[1] - offset[1])*k250DPSSensitivity;
-    degrees_per_second[2] = (gyro_data[2] - offset[2])*k250DPSSensitivity;
+    degrees_per_second[0] = (gyro_data[0] - offset[0]) * kSensitivityRange_250_DPS;
+    degrees_per_second[1] = (gyro_data[1] - offset[1]) * kSensitivityRange_250_DPS;
+    degrees_per_second[2] = (gyro_data[2] - offset[2]) * kSensitivityRange_250_DPS;
 }
 
 void RadiansPerSecondConversion(float rads[],short degrees_per_second[]){
-    rads[0] = kDegreesToRadians *degrees_per_second[0];
-    rads[1] = kDegreesToRadians *degrees_per_second[1];
-    rads[2] = kDegreesToRadians *degrees_per_second[2];
+    rads[0] = kDegreesToRadians * degrees_per_second[0];
+    rads[1] = kDegreesToRadians * degrees_per_second[1];
+    rads[2] = kDegreesToRadians * degrees_per_second[2];
 }
