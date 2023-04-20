@@ -14,33 +14,50 @@
 
 // DFR Custom Dependancies
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
-#include "Adapter/LinearPotentiometer/linear_potentiometer.hpp"
-
+#include "platform/component_interface_bridge.hpp"
 
 using AutoReloadTimer = LowPowerTicker;
 
-static bool sampling = false;
-static void start_sampling() {
-    sampling = true;
+static bool logging = false;
+static void start_logging() {
+    logging = true;
 }
 
-int main() {
-    // Init
-    shared_ptr<adapter::ILinear_Potentiometer> linear_potentiometer = make_shared<adapter::LinearPotentiometer>(PC_0);
+struct SuspensionPotentiometers {
+    std::unique_ptr<adapter::ILinear_Potentiometer> front_left;
+    std::unique_ptr<adapter::ILinear_Potentiometer> front_right;
+    std::unique_ptr<adapter::ILinear_Potentiometer> rear_left;
+    std::unique_ptr<adapter::ILinear_Potentiometer> rear_right;
+};
 
+int main() {
+    // Init components
+    platform::ComponentInterfaceBridge bridge;
+
+    SuspensionPotentiometers suspension_pots;
+    suspension_pots.front_left  = bridge.GetLinearPotentiometer(platform::front_left);
+    suspension_pots.front_right = bridge.GetLinearPotentiometer(platform::front_right);
+    suspension_pots.rear_left   = bridge.GetLinearPotentiometer(platform::rear_left);
+    suspension_pots.rear_right  = bridge.GetLinearPotentiometer(platform::rear_right);
+    
+    // Start timer
+    constexpr uint8_t kLoggingRate = 3; // seconds
     AutoReloadTimer timer;
-    timer.attach(&start_sampling, 3s);
+    timer.attach(&start_logging, std::chrono::seconds(kLoggingRate));
+
+    double timestamp = 0.0f;
 
     // Operate
     while (true) {
-        // Operate: Computing
-        linear_potentiometer->ComputeDisplacementPercentage();
+        suspension_pots.front_left->ComputeDisplacementPercentage();
 
-        if (sampling) {
+        if (logging) {
             // Operate: Writing
-            std::cout << linear_potentiometer->GetDisplacementPercentage() << "%" << std::endl;
+            timestamp += kLoggingRate;
+            std::cout << suspension_pots.front_left->GetDisplacementInches() << " in\t"
+                      << suspension_pots.front_left->GetDisplacementMillimeters() << " mm" << std::endl;
             
-            sampling = false;
+            logging = false;
         }
     }
 }
