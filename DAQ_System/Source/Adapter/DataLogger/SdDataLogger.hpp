@@ -29,10 +29,9 @@ class SdDataLogger : public application::I_Data_Logger {
         
         virtual uint8_t Mount(FileSystem*, BlockDevice*) override;
         virtual uint8_t Unmount(FileSystem*) override;
-        virtual FILE* FileOpen(const char*) override;
+        virtual uint8_t FileOpen(FILE**, char*) override;
         virtual uint8_t FileClose(FILE*) override;
         virtual uint8_t FileWrite(FILE*, const char*) override;
-        virtual const char* NewLogSessionFile() override;
 
         char write_buffer; // write buffer
     

@@ -59,32 +59,25 @@ int main() {
 
     // mounting the file system has moved to the constructor of the data logger class
 
-    // NewLogSessionFile() provides the file path for the next data file to open to start a new log session
-    //const char* file_path = data_logger->NewLogSessionFile();
-    // printf("%s", file_path);
-    FILE* data_file = data_logger->FileOpen("/fs/data1.csv");
+    FILE* data_file;
+    char file_name[16] = "\0";
+    uint8_t file_name_status = 0;
 
-    // write the first row to the file with some arbitrary sensor names
-    status = data_logger->FileWrite(data_file, "Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
+    for(int i = 0; i < 1000; i++) {
+        // Increment file_name
+        snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", i);
+        file_name_status = data_logger->FileOpen(&data_file, file_name);
 
-    // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
-    for(int i = 0; i < 100; i++) {
-        snprintf(&data_logger->write_buffer, sizeof(data_logger->write_buffer), "%d, %d, %d, %d, %d\n", i, linpot1, linpot2, linpot3, linpot4);
-        status = data_logger->FileWrite(data_file, &data_logger->write_buffer);
-        linpot1++;
-        linpot2++;
-        linpot3++;
-        linpot4++;
+        if (file_name_status == 2) {
+            // File not found, found a unique name
+            printf("Opened %s\n", file_name);
+            break;
+        } else {
+            // File already exists
+            data_logger->FileClose(data_file);
+        }
     }
 
-    // close the file
-    status = data_logger->FileClose(data_file);
-
-    // Second Log Session:
-
-    // NewLogSessionFile() provides the file path for the next data file to open to start a new log session
-    // data_file = data_logger->FileOpen(data_logger->NewLogSessionFile());
-    data_file = data_logger->FileOpen("/fs/data2.csv");
 
     // write the first row to the file with some arbitrary sensor names
     status = data_logger->FileWrite(data_file, "Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");

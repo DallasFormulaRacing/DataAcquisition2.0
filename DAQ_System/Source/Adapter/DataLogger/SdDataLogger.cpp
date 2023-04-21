@@ -42,6 +42,7 @@ SdDataLogger::~SdDataLogger() {
 
 // mounts the filesystem to the given sd block device and checks for errors, reformats the device of no filesystem is found
 uint8_t SdDataLogger::Mount(FileSystem *file_system, BlockDevice *block_device) {
+    printf("Mounting the filesystem... ");
     uint8_t status = file_system->mount(block_device);
     printf("%s\n", (status ? "Fail :(" : "OK"));
     if (status) {
@@ -60,6 +61,7 @@ uint8_t SdDataLogger::Mount(FileSystem *file_system, BlockDevice *block_device) 
 
 // unmounts the filesystem from the given sd block device and checks for errors
 uint8_t SdDataLogger::Unmount(FileSystem *file_system) {
+    printf("Unmounting... ");
     uint8_t status = file_system->unmount();
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
@@ -69,20 +71,28 @@ uint8_t SdDataLogger::Unmount(FileSystem *file_system) {
 }
 
 // opens the file at the given file path and creates it if it doesn't exist
-FILE* SdDataLogger::FileOpen(const char* file_path) {
-    FILE* file = fopen(file_path, "r+");
-    printf("%s\n", (!file ? "Fail :(" : "OK"));
-    if(!file) {
+// return 0 = failed to create a file
+// return 1 = opened a pre-existing file
+// return 2 = created a new file with a unique file name
+uint8_t SdDataLogger::FileOpen(FILE** file, char* file_path) {
+    uint8_t status = 0;
+    *file = fopen(file_path, "r+");
+
+    if(!(*file)) {
         // create the file if it doesn't exist
-        printf("No file found, creating a new file... ");
-        fflush(stdout);
-        file = fopen(file_path, "w+");
-        printf("%s\n", (!file ? "Fail :(" : "OK"));
-        if (!file) {
-            error("error: %s (%d)\n", strerror(errno), -errno);
-        }
+        *file = fopen(file_path, "w+");
+        status = 2;
     }
-    return file;
+    else {
+        status = 1; // file already exists
+    }
+
+    if(!(*file)) {
+        error("error: %s (%d)\n", strerror(errno), -errno);
+        status = 0;
+    }
+    
+    return status;
 }
 
 // closes the given file
@@ -103,13 +113,6 @@ uint8_t SdDataLogger::FileWrite(FILE* file, const char* input) {
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
     return status;
-}
-
-// return the file path of the new data log file for a new data log session
-const char* SdDataLogger::NewLogSessionFile() {
-    log_session++;
-    snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", log_session);
-    return file_name;
 }
 
 }

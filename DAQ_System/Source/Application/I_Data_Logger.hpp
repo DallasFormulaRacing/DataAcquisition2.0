@@ -25,10 +25,9 @@ class I_Data_Logger {
 
         virtual uint8_t Mount(FileSystem*, BlockDevice*) = 0;
         virtual uint8_t Unmount(FileSystem*) = 0;
-        virtual FILE* FileOpen(const char*) = 0;
+        virtual uint8_t FileOpen(FILE**, char*) = 0;
         virtual uint8_t FileClose(FILE*) = 0;
         virtual uint8_t FileWrite(FILE*, const char*) = 0;
-        virtual const char* NewLogSessionFile() = 0;
 
         char write_buffer;
 };
