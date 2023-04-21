@@ -90,9 +90,7 @@ double LSM303DLHC::calibrate()
         return_value = 0;
 
     //collects a number of samples to calibrate for 1G
-    for(int i = 0; i < sampleCount; i++)
-    {
-        
+    for(int i = 0; i < sampleCount; i++){ 
         acc_magnitude = sqrt(acc_array[0] * acc_array[0] + acc_array[1] * acc_array[1] + acc_array[2] * acc_array[2]);
         average_array[i] = acc_magnitude * 0.001;
         ThisThread::sleep_for(5ms);
