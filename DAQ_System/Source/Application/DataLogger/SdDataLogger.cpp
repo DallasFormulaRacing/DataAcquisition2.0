@@ -15,20 +15,17 @@
 #include "FATFileSystem.h"
 #include "SDBlockDevice.h"
 
-namespace adapter {
+namespace application {
 
-// used to set a new file name for each new log session
-int log_session = 0;
 char file_name[16] = "\0";
 
 // block device and file system declarations
-SDBlockDevice block_device;
-FATFileSystem file_system;
+SDBlockDevice block_device_;
+FATFileSystem file_system_;
 
-SdDataLogger::SdDataLogger(PinName mosi, PinName miso, PinName sck, PinName cs) : kBlockSectorByteSize(512) {
-    SDBlockDevice block_device(mosi, miso, sck, cs);
-    FATFileSystem file_system("fs");
-    Mount(&file_system, &block_device);
+SdDataLogger::SdDataLogger(PinName mosi, PinName miso, PinName sck, PinName cs) 
+  : block_device_(mosi, miso, sck, cs) {
+    Mount(&block_device_);
 
     // initialize write buffer used to write to a file
     char write_buffer[kBlockSectorByteSize];
@@ -37,20 +34,20 @@ SdDataLogger::SdDataLogger(PinName mosi, PinName miso, PinName sck, PinName cs) 
 }
 
 SdDataLogger::~SdDataLogger() {
-    Unmount(&file_system);
+    Unmount();
 }
 
 // mounts the filesystem to the given sd block device and checks for errors, reformats the device of no filesystem is found
-uint8_t SdDataLogger::Mount(FileSystem *file_system, BlockDevice *block_device) {
+uint8_t SdDataLogger::Mount(BlockDevice *block_device_) {
     printf("Mounting the filesystem... ");
-    uint8_t status = file_system->mount(block_device);
+    uint8_t status = file_system_.mount(block_device_);
     printf("%s\n", (status ? "Fail :(" : "OK"));
     if (status) {
         /* Reformat if we can't mount the filesystem,
            this should only happen on the first boot */
         printf("No filesystem found, formatting... ");
         fflush(stdout);
-        status = file_system->reformat(block_device);
+        status = file_system_.reformat(block_device_);
         printf("%s\n", (status ? "Fail :(" : "OK"));
         if (status) {
             error("error: %s (%d)\n", strerror(-status), status);
@@ -60,9 +57,9 @@ uint8_t SdDataLogger::Mount(FileSystem *file_system, BlockDevice *block_device) 
 }
 
 // unmounts the filesystem from the given sd block device and checks for errors
-uint8_t SdDataLogger::Unmount(FileSystem *file_system) {
+uint8_t SdDataLogger::Unmount() {
     printf("Unmounting... ");
-    uint8_t status = file_system->unmount();
+    uint8_t status = file_system_.unmount();
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
         error("error: %s (%d)\n", strerror(-status), status);

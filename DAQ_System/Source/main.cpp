@@ -34,15 +34,15 @@
 #include "SDBlockDevice.h"
 #include "FATFileSystem.h"
 
-#include "Adapter/DataLogger/SdDataLogger.hpp"
+#include "Application/DataLogger/SdDataLogger.hpp"
 #include "Application/I_Data_Logger.hpp"
 
-using namespace adapter;
+using namespace application;
 
 // Entry point for the example
 int main() {
 
-    shared_ptr<application::I_Data_Logger> data_logger = make_shared<adapter::SdDataLogger>(PA_7, PA_6, PA_5, PB_6); // mosi, miso, sck, cs
+    shared_ptr<application::I_Data_Logger> data_logger = make_shared<application::SdDataLogger>(PA_7, PA_6, PA_5, PB_6); // mosi, miso, sck, cs
 
     // used for error checking when operating the block device
     uint8_t status = 0;
@@ -84,8 +84,8 @@ int main() {
 
     // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
     for(int i = 0; i < 100; i++) {
-        snprintf(&data_logger->write_buffer, sizeof(data_logger->write_buffer), "%d, %d, %d, %d, %d\n", i, linpot1, linpot2, linpot3, linpot4);
-        status = data_logger->FileWrite(data_file, &data_logger->write_buffer);
+        snprintf(&data_logger->write_buffer_, sizeof(data_logger->write_buffer_), "%d, %d, %d, %d, %d\n", i, linpot1, linpot2, linpot3, linpot4);
+        status = data_logger->FileWrite(data_file, &data_logger->write_buffer_);
         linpot1++;
         linpot2++;
         linpot3++;

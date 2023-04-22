@@ -20,27 +20,27 @@
 
 #include "Application/I_Data_Logger.hpp"
 
-namespace adapter {
+namespace application {
 
 class SdDataLogger : public application::I_Data_Logger {
     public:
         SdDataLogger(PinName mosi, PinName miso, PinName sck, PinName cs);
         virtual ~SdDataLogger();
         
-        virtual uint8_t Mount(FileSystem*, BlockDevice*) override;
-        virtual uint8_t Unmount(FileSystem*) override;
+        virtual uint8_t Mount(BlockDevice*) override;
+        virtual uint8_t Unmount() override;
         virtual uint8_t FileOpen(FILE**, char*) override;
         virtual uint8_t FileClose(FILE*) override;
         virtual uint8_t FileWrite(FILE*, const char*) override;
 
-        char write_buffer; // write buffer
+        static constexpr int kBlockSectorByteSize = 512;
+        char write_buffer_[kBlockSectorByteSize]; // write buffer
+        
     
     private:
-        SDBlockDevice block_device; // physical block device
-        FATFileSystem file_system; // file system
-        int log_session;
-        char file_name[16];
-        const int kBlockSectorByteSize;
+        SDBlockDevice block_device_; // physical block device
+        FATFileSystem file_system_{"fs"}; // file system
+        char file_name_[16];
 };
     
 }

@@ -23,13 +23,13 @@ class I_Data_Logger {
     public:
         virtual ~I_Data_Logger() = default;
 
-        virtual uint8_t Mount(FileSystem*, BlockDevice*) = 0;
-        virtual uint8_t Unmount(FileSystem*) = 0;
+        virtual uint8_t Mount(BlockDevice*) = 0;
+        virtual uint8_t Unmount() = 0;
         virtual uint8_t FileOpen(FILE**, char*) = 0;
         virtual uint8_t FileClose(FILE*) = 0;
         virtual uint8_t FileWrite(FILE*, const char*) = 0;
 
-        char write_buffer;
+        char write_buffer_;
 };
 
 }
