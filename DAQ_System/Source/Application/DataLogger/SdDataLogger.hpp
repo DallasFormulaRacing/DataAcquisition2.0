@@ -29,9 +29,9 @@ class SdDataLogger : public application::I_Data_Logger {
         
         virtual uint8_t Mount(BlockDevice*) override;
         virtual uint8_t Unmount() override;
-        virtual uint8_t FileOpen(FILE**, char*) override;
-        virtual uint8_t FileClose(FILE*) override;
-        virtual uint8_t FileWrite(FILE*, const char*) override;
+        virtual uint8_t FileOpen(char*) override;
+        virtual uint8_t FileClose() override;
+        virtual uint8_t FileWrite(const char*) override;
 
         static constexpr int kBlockSectorByteSize = 512;
         char write_buffer_[kBlockSectorByteSize]; // write buffer
@@ -40,7 +40,7 @@ class SdDataLogger : public application::I_Data_Logger {
     private:
         SDBlockDevice block_device_; // physical block device
         FATFileSystem file_system_{"fs"}; // file system
-        char file_name_[16];
+        FILE* data_file_;
 };
     
 }

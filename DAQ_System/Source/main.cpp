@@ -66,7 +66,7 @@ int main() {
     for(int i = 0; i < 1000; i++) {
         // Increment file_name
         snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", i);
-        file_name_status = data_logger->FileOpen(&data_file, file_name);
+        file_name_status = data_logger->FileOpen(file_name);
 
         if (file_name_status == 2) {
             // File not found, found a unique name
@@ -74,18 +74,18 @@ int main() {
             break;
         } else {
             // File already exists
-            data_logger->FileClose(data_file);
+            data_logger->FileClose();
         }
     }
 
 
     // write the first row to the file with some arbitrary sensor names
-    status = data_logger->FileWrite(data_file, "Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
+    status = data_logger->FileWrite("Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
 
     // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
     for(int i = 0; i < 100; i++) {
         snprintf(&data_logger->write_buffer_, sizeof(data_logger->write_buffer_), "%d, %d, %d, %d, %d\n", i, linpot1, linpot2, linpot3, linpot4);
-        status = data_logger->FileWrite(data_file, &data_logger->write_buffer_);
+        status = data_logger->FileWrite(&data_logger->write_buffer_);
         linpot1++;
         linpot2++;
         linpot3++;
@@ -93,7 +93,7 @@ int main() {
     }
 
     // close the file
-    status = data_logger->FileClose(data_file);
+    status = data_logger->FileClose();
     
     // Unmounting the file system have moved to the deconstructor of the DataLogger. 
     

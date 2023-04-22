@@ -17,11 +17,10 @@
 
 namespace application {
 
-char file_name[16] = "\0";
-
 // block device and file system declarations
 SDBlockDevice block_device_;
 FATFileSystem file_system_;
+FILE* data_file_;
 
 SdDataLogger::SdDataLogger(PinName mosi, PinName miso, PinName sck, PinName cs) 
   : block_device_(mosi, miso, sck, cs) {
@@ -71,20 +70,20 @@ uint8_t SdDataLogger::Unmount() {
 // return 0 = failed to create a file
 // return 1 = opened a pre-existing file
 // return 2 = created a new file with a unique file name
-uint8_t SdDataLogger::FileOpen(FILE** file, char* file_path) {
+uint8_t SdDataLogger::FileOpen(char* file_path) {
     uint8_t status = 0;
-    *file = fopen(file_path, "r+");
+    data_file_ = fopen(file_path, "r+");
 
-    if(!(*file)) {
+    if(!(data_file_)) {
         // create the file if it doesn't exist
-        *file = fopen(file_path, "w+");
+        data_file_ = fopen(file_path, "w+");
         status = 2;
     }
     else {
         status = 1; // file already exists
     }
 
-    if(!(*file)) {
+    if(!(data_file_)) {
         error("error: %s (%d)\n", strerror(errno), -errno);
         status = 0;
     }
@@ -93,8 +92,8 @@ uint8_t SdDataLogger::FileOpen(FILE** file, char* file_path) {
 }
 
 // closes the given file
-uint8_t SdDataLogger::FileClose(FILE* file) {
-    uint8_t status = fclose(file);
+uint8_t SdDataLogger::FileClose() {
+    uint8_t status = fclose(data_file_);
     printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
         error("error: %s (%d)\n", strerror(errno), -errno);
@@ -103,8 +102,8 @@ uint8_t SdDataLogger::FileClose(FILE* file) {
 }
 
 // writes the given input to the given file, to allow a specified format, we use sprintf() to print the format to a write_buffer string and then send the write_buffer to file_write()
-uint8_t SdDataLogger::FileWrite(FILE* file, const char* input) {
-    uint8_t status = fprintf(file, input);
+uint8_t SdDataLogger::FileWrite(const char* input) {
+    uint8_t status = fprintf(data_file_, input);
     if (status < 0) {
         printf("Fail :(\n");
         error("error: %s (%d)\n", strerror(errno), -errno);
