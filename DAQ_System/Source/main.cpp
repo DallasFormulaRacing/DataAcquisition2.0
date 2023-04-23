@@ -37,8 +37,7 @@
 #include "Application/DataLogger/SdDataLogger.hpp"
 #include "Application/I_Data_Logger.hpp"
 
-#define BUFFER_SIZE 128 // 128 is just an arbitrary size for now, we'll run into problems though if this ever exceeds the kBlockSectorByteSize (I think we could also just make that larger, but I'm not sure what effect that would have on writing to the file.)
-
+#define BUFFER_SIZE 21 // (4 linpot integers) * (4 bytes allocated per integer) = 16, 4 commas = 4 chars = 4 bytes, 1 more char & byte for the newline, 16 + 4 + 1 = 21
 using namespace application;
 
 // Entry point for the example
@@ -87,7 +86,7 @@ int main() {
 
     // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
     for(int i = 0; i < 100; i++) {
-        sprintf(write_buffer, "%d, %d, %d, %d, %d\n", i, linpot1, linpot2, linpot3, linpot4);
+        sprintf(write_buffer, "%d,%d,%d,%d,%d\n", i, linpot1, linpot2, linpot3, linpot4);
         status = data_logger->FileWrite(write_buffer);
         linpot1++;
         linpot2++;
