@@ -37,6 +37,8 @@
 #include "Application/DataLogger/SdDataLogger.hpp"
 #include "Application/I_Data_Logger.hpp"
 
+#define BUFFER_SIZE 128 // 128 is just an arbitrary size for now, we'll run into problems though if this ever exceeds the kBlockSectorByteSize (I think we could also just make that larger, but I'm not sure what effect that would have on writing to the file.)
+
 using namespace application;
 
 // Entry point for the example
@@ -59,9 +61,10 @@ int main() {
 
     // mounting the file system has moved to the constructor of the data logger class
 
-    FILE* data_file;
     char file_name[16] = "\0";
     uint8_t file_name_status = 0;
+
+    char write_buffer[BUFFER_SIZE] = "\0";
 
     for(int i = 0; i < 1000; i++) {
         // Increment file_name
@@ -84,8 +87,8 @@ int main() {
 
     // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
     for(int i = 0; i < 100; i++) {
-        snprintf(&data_logger->write_buffer_, sizeof(data_logger->write_buffer_), "%d, %d, %d, %d, %d\n", i, linpot1, linpot2, linpot3, linpot4);
-        status = data_logger->FileWrite(&data_logger->write_buffer_);
+        sprintf(write_buffer, "%d, %d, %d, %d, %d\n", i, linpot1, linpot2, linpot3, linpot4);
+        status = data_logger->FileWrite(write_buffer);
         linpot1++;
         linpot2++;
         linpot3++;

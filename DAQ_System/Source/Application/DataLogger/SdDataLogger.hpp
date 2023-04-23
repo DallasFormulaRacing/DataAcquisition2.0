@@ -33,8 +33,8 @@ class SdDataLogger : public application::I_Data_Logger {
         virtual uint8_t FileClose() override;
         virtual uint8_t FileWrite(const char*) override;
 
-        static constexpr int kBlockSectorByteSize = 512;
-        char write_buffer_[kBlockSectorByteSize]; // write buffer
+        static constexpr int kBlockSectorByteSize = 512; // max write buffer size
+        char write_buffer_[kBlockSectorByteSize] = "\0"; // write buffer
         
     
     private:

@@ -17,23 +17,13 @@
 
 namespace application {
 
-// block device and file system declarations
-SDBlockDevice block_device_;
-FATFileSystem file_system_;
-FILE* data_file_;
-
 SdDataLogger::SdDataLogger(PinName mosi, PinName miso, PinName sck, PinName cs) 
   : block_device_(mosi, miso, sck, cs) {
-    Mount(&block_device_);
-
-    // initialize write buffer used to write to a file
-    char write_buffer[kBlockSectorByteSize];
-    memset(write_buffer, '\0', sizeof(write_buffer));
-
+    Mount(&block_device_); // mount the file system to the defined block device
 }
 
 SdDataLogger::~SdDataLogger() {
-    Unmount();
+    Unmount(); // unmount the file system from the block device
 }
 
 // mounts the filesystem to the given sd block device and checks for errors, reformats the device of no filesystem is found
@@ -103,7 +93,8 @@ uint8_t SdDataLogger::FileClose() {
 
 // writes the given input to the given file, to allow a specified format, we use sprintf() to print the format to a write_buffer string and then send the write_buffer to file_write()
 uint8_t SdDataLogger::FileWrite(const char* input) {
-    uint8_t status = fprintf(data_file_, input);
+    snprintf(write_buffer_, kBlockSectorByteSize, input);
+    uint8_t status = fprintf(data_file_, write_buffer_);
     if (status < 0) {
         printf("Fail :(\n");
         error("error: %s (%d)\n", strerror(errno), -errno);
