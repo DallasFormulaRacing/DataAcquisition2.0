@@ -24,15 +24,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "File.h"
 #include "mbed.h"
-#include <cstdint>
-#include <stdio.h>
-#include <cstdio>
-#include <errno.h>
-
-#include "SDBlockDevice.h"
-#include "FATFileSystem.h"
 
 #include "Application/DataLogger/SdDataLogger.hpp"
 #include "Application/I_Data_Logger.hpp"
@@ -41,7 +33,6 @@
 #define BUFFER_SIZE 21
 
 static InterruptIn button(PC_13);
-
 static bool data_logging_enable = false;
 
 // interrupt routine activated by a falling edge of button input
@@ -86,7 +77,6 @@ int main() {
         // check data logger flag
         if(data_logging_enable) {
 
-
             if(!open_file) {
                 // Create a unique file name
                 for(int i = 0; i < 1000; i++) {
@@ -104,14 +94,11 @@ int main() {
                 }
                 
                 open_file = 1;
-
+                // write the first row to the file with some arbitrary sensor names
+                status = data_logger->FileWrite("Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
             }
 
             printf("Writing to file...\n");
-
-            // write the first row to the file with some arbitrary sensor names
-            status = data_logger->FileWrite("Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
-
             // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
             sprintf(write_buffer, "%d,%d,%d,%d,%d\n", timestamp, linpot1, linpot2, linpot3, linpot4);
             status = data_logger->FileWrite(write_buffer);
@@ -121,7 +108,6 @@ int main() {
             linpot4++;
 
             timestamp++;
-
 
         } else if(!data_logging_enable && open_file) {
              // close the file
