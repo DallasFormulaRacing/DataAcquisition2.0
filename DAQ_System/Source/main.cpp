@@ -37,27 +37,24 @@
 #include "Application/DataLogger/SdDataLogger.hpp"
 #include "Application/I_Data_Logger.hpp"
 
-#define BUFFER_SIZE 21 // (4 linpot integers) * (4 bytes allocated per integer) = 16, 4 commas = 4 chars = 4 bytes, 1 more char & byte for the newline, 16 + 4 + 1 = 21
-using namespace application;
+// (4 linpot integers) * (4 bytes allocated per integer) = 16, 4 commas = 4 chars = 4 bytes, 1 more char & byte for the newline, 16 + 4 + 1 = 21
+#define BUFFER_SIZE 21
 
-InterruptIn pb(PC_13);
+static InterruptIn button(PC_13);
 
-uint8_t data_logger_flag= 0;
+static bool data_logging_enable = false;
 
-// interrupt routine activated by a falling edge of pb input
-void pb_hit_interrupt(void) {
-    data_logger_flag = 1;
+// interrupt routine activated by a falling edge of button input
+void ToggleDataLogging(void) {
+    data_logging_enable = !data_logging_enable;
 }
 
-// Entry point for the example
 int main() {
-
-    shared_ptr<application::I_Data_Logger> data_logger = make_shared<application::SdDataLogger>(PA_7, PA_6, PA_5, PB_6); // mosi, miso, sck, cs
+    shared_ptr<application::I_Data_Logger> data_logger
+        = make_shared<application::SdDataLogger>(PA_7, PA_6, PA_5, PB_6); // mosi, miso, sck, cs
 
     // used for error checking when operating the block device
     uint8_t status = 0;
-
-    // First Log Session:
 
     // sensor values
     int linpot1 = 0;
@@ -73,33 +70,41 @@ int main() {
     char write_buffer[BUFFER_SIZE] = "\0";
     
     // use internal pullup for pushbutton 
-    pb.mode(PullUp);
+    button.mode(PullUp);
     // delay for initial pullup to take effect
     wait_ns(100);
     // attach the address of the interrupt handler routine for pushbutton
-    pb.fall(&pb_hit_interrupt);
+    button.fall(&ToggleDataLogging);
 
     uint8_t open_file = 0;
 
     // super loop
     printf("Entering Super Loop\n");
+    int timestamp = 0;
     while(true) {
         wait_ns(100);
         // check data logger flag
-        if(data_logger_flag && !open_file) {
-            for(int i = 0; i < 1000; i++) {
-                // Increment file_name
-                snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", i);
-                file_name_status = data_logger->FileOpen(file_name);
+        if(data_logging_enable) {
 
-                if (file_name_status == 2) {
-                    // File not found, found a unique name
-                    printf("Opened %s\n", file_name);
-                    break;
-                } else {
-                    // File already exists
-                    data_logger->FileClose();
+
+            if(!open_file) {
+                // Create a unique file name
+                for(int i = 0; i < 1000; i++) {
+                    snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", i);
+                    file_name_status = data_logger->FileOpen(file_name);
+
+                    if (file_name_status == 2) {
+                        // File not found, found a unique name
+                        printf("Opened %s\n", file_name);
+                        break;
+                    } else {
+                        // File already exists
+                        data_logger->FileClose();
+                    }
                 }
+                
+                open_file = 1;
+
             }
 
             printf("Writing to file...\n");
@@ -108,31 +113,24 @@ int main() {
             status = data_logger->FileWrite("Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
 
             // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
-            for(int i = 0; i < 100; i++) {
-                sprintf(write_buffer, "%d,%d,%d,%d,%d\n", i, linpot1, linpot2, linpot3, linpot4);
-                status = data_logger->FileWrite(write_buffer);
-                linpot1++;
-                linpot2++;
-                linpot3++;
-                linpot4++;
-            }
+            sprintf(write_buffer, "%d,%d,%d,%d,%d\n", timestamp, linpot1, linpot2, linpot3, linpot4);
+            status = data_logger->FileWrite(write_buffer);
+            linpot1++;
+            linpot2++;
+            linpot3++;
+            linpot4++;
 
-            // printf("This should write to the file here\n");
+            timestamp++;
 
-            // set flags
-            data_logger_flag = 0;
-            open_file = 1;
-        }
-        else if(data_logger_flag && open_file) {
+
+        } else if(!data_logging_enable && open_file) {
              // close the file
             printf("Closing %s\n", file_name);
             status = data_logger->FileClose();
 
             // set flags
-            data_logger_flag = 0;
             open_file = 0;
         }
     }
         
-    printf("\r\nCSV File Test Done!\n");
 }
