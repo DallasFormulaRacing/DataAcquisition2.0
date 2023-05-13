@@ -23,7 +23,6 @@ static void start_logging() {
 }
 
 
-
 int main() {
     // Init components
     platform::DAQ daq;
@@ -38,14 +37,12 @@ int main() {
 
     // Operate
     while (true) {
-        daq.suspension_pots.front_left->ComputeDisplacementPercentage();
+        daq.Read();
 
         if (logging) {
             // Operate: Writing
             timestamp += kLoggingRate;
-            std::cout << daq.suspension_pots.front_left->GetDisplacementInches() << " in\t"
-                      << daq.suspension_pots.front_left->GetDisplacementMillimeters() << " mm" << std::endl;
-            
+            daq.Write(timestamp);
             logging = false;
         }
     }

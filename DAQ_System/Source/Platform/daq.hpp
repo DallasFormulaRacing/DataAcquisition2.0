@@ -16,7 +16,6 @@
 // DFR Custom Dependancies
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
 
-
 namespace platform {
 
 class DAQ {
@@ -25,6 +24,8 @@ class DAQ {
         ~DAQ();
 
         void Init();
+        void Read();
+        void Write(double timestamp);
 
     // private:
         struct SuspensionPotentiometers {
@@ -35,7 +36,6 @@ class DAQ {
         };
 
         SuspensionPotentiometers suspension_pots;
-
 
 };
 
