@@ -142,7 +142,7 @@
 using AutoReloadTimer = LowPowerTicker;
 
 static bool logging = false;
-static void start_logging() {
+static void logging_signal() {
     logging = true;
 }
 
@@ -155,7 +155,7 @@ int main() {
     // Start timer
     constexpr uint8_t kLoggingRate = 3; // seconds
     AutoReloadTimer timer;
-    timer.attach(&start_logging, std::chrono::seconds(kLoggingRate));
+    timer.attach(&logging_signal, std::chrono::seconds(kLoggingRate));
 
     double timestamp = 0.0f;
 

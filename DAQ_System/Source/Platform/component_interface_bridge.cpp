@@ -39,4 +39,12 @@ std::unique_ptr<adapter::LinearPotentiometer_SLS1322> ComponentInterfaceBridge::
     return std::make_unique<adapter::LinearPotentiometer_SLS1322>(linpot_pin);
 }
 
+std::unique_ptr<application::SdDataLogger> ComponentInterfaceBridge::GetSdDataLogger() {
+    return std::make_unique<application::SdDataLogger>(
+                pins.sd_mosi,
+                pins.sd_miso,
+                pins.sd_sck,
+                pins.sd_cs);
+}
+
 }

@@ -15,6 +15,7 @@
 
 // DFR Custom Dependancies
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
+#include "Application/I_Data_Logger.hpp"
 
 namespace platform {
 
@@ -36,6 +37,7 @@ class DAQ {
         };
 
         SuspensionPotentiometers suspension_pots;
+        std::unique_ptr<application::I_Data_Logger> data_logger;
 
 };
 

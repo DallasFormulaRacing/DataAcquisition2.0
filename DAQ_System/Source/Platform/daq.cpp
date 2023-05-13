@@ -27,6 +27,8 @@ void DAQ::Init() {
     suspension_pots.front_right = bridge.GetLinearPotentiometer(platform::front_right);
     suspension_pots.rear_left   = bridge.GetLinearPotentiometer(platform::rear_left);
     suspension_pots.rear_right  = bridge.GetLinearPotentiometer(platform::rear_right);
+
+    data_logger = bridge.GetSdDataLogger();
 }
 
 void DAQ::Read() {

@@ -13,6 +13,9 @@
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
 #include "Adapter/LinearPotentiometer/linear_potentiometer_sls1322.hpp"
 
+#include "Application/I_Data_Logger.hpp"
+#include "Application/DataLogger/SdDataLogger.hpp"
+
 #include "daq_pin_map.hpp"
 #include <memory>
 
@@ -27,6 +30,8 @@ class ComponentInterfaceBridge {
         ~ComponentInterfaceBridge();
 
         std::unique_ptr<adapter::LinearPotentiometer_SLS1322> GetLinearPotentiometer(LinPotLocation location);
+
+        std::unique_ptr<application::SdDataLogger> GetSdDataLogger();
 
     private:
         DaqPinMap pins;
