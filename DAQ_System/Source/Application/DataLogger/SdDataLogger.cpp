@@ -84,8 +84,8 @@ uint8_t SdDataLogger::FileOpen(char* file_path) {
 // closes the given file
 uint8_t SdDataLogger::FileClose() {
     uint8_t status = fclose(data_file_);
-    printf("%s\n", (status < 0 ? "Fail :(" : "OK"));
     if (status < 0) {
+        printf("Fail :(\n");
         error("error: %s (%d)\n", strerror(errno), -errno);
     }
     return status;
@@ -93,7 +93,7 @@ uint8_t SdDataLogger::FileClose() {
 
 // writes the given input to the given file, to allow a specified format, we use sprintf() to print the format to a write_buffer string and then send the write_buffer to file_write()
 uint8_t SdDataLogger::FileWrite(const char* input) {
-    snprintf(write_buffer_, kBlockSectorByteSize, input);
+    snprintf(write_buffer_, kBlockSectorByteSize, "%s", input);
     uint8_t status = fprintf(data_file_, write_buffer_);
     if (status < 0) {
         printf("Fail :(\n");
