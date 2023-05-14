@@ -16,6 +16,11 @@ struct DaqPinMap {
     PinName analog_linpot_front_right   = PC_1;
     PinName analog_linpot_rear_left     = PB_0;
     PinName analog_linpot_rear_right    = PA_4;
+
+    PinName sd_mosi = PA_7;
+    PinName sd_miso = PA_6;
+    PinName sd_sck  = PA_5;
+    PinName sd_cs   = PB_6;
 };
 
 

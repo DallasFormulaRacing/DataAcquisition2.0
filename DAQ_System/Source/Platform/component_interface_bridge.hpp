@@ -10,11 +10,14 @@
 #ifndef COMPONENT_INTERFACE_BRIDGE_H
 #define COMPONENT_INTERFACE_BRIDGE_H
 
-#include "Adapter/Interfaces/ilinear_potentiometer.hpp"
-#include "Adapter/LinearPotentiometer/linear_potentiometer_sls1322.hpp"
-
-#include "daq_pin_map.hpp"
+// C/C++ Standard Libraries
 #include <memory>
+
+// DFR Custom Dependancies
+#include "Adapter/LinearPotentiometer/linear_potentiometer_sls1322.hpp"
+#include "Application/DataLogger/sd_data_logger.hpp"
+#include "daq_pin_map.hpp"
+
 
 
 namespace platform {
@@ -27,6 +30,8 @@ class ComponentInterfaceBridge {
         ~ComponentInterfaceBridge();
 
         std::unique_ptr<adapter::LinearPotentiometer_SLS1322> GetLinearPotentiometer(LinPotLocation location);
+
+        std::unique_ptr<application::SdDataLogger> GetSdDataLogger();
 
     private:
         DaqPinMap pins;
