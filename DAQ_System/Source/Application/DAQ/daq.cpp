@@ -7,9 +7,10 @@
 * GPL-3.0 License
 */
 
-#include <iostream>
-
 #include "daq.hpp"
+
+// C/C++ Standard Libraries
+#include <iostream>
 
 // DFR Custom Dependancies
 #include "Platform/component_interface_bridge.hpp"
@@ -42,47 +43,52 @@ void DAQ::Read() {
 void DAQ::Write(float timestamp, bool data_logging_enable) {
     if(data_logging_enable) {
 
-        if(!open_file) {
+        if(!file_is_open_) {
             // Create a unique file name
             // TODO: simplify using a while loop
-            for(int i = 0; i < 1000; i++) {
-                snprintf(file_name, sizeof(file_name), "/fs/data%d.csv", i);
-                file_name_status = data_logger->FileOpen(file_name);
 
-                if (file_name_status == 2) {
-                    // File not found, found a unique name
-                    printf("Opened %s\n", file_name);
-                    break;
-                } else {
+            uint8_t file_name_status = 0;
+            uint8_t i = 0;
+            while(file_name_status != 2) {
+                snprintf(file_name_, sizeof(file_name_), "/fs/data%d.csv", i);
+                file_name_status = data_logger->FileOpen(file_name_);
+
+                if (file_name_status != 2) {
                     // File already exists
                     data_logger->FileClose();
                 }
+
+                i++;
             }
+
+            printf("Opened %s\n", file_name_);
+
+
             
-            open_file = 1;
+            file_is_open_ = true;
             // write the first row to the file with some arbitrary sensor names
-            status = data_logger->FileWrite("Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
+            status_ = data_logger->FileWrite("Time (sec), LinPot1 (in/s), LinPot2 (in/s), LinPot3 (in/s), LinPot4 (in/s)\n");
         }
 
         printf("Writing to file...\n");
         // fill the file with arbitrary numbers (this is just a proof of concept, these are intentionally bs)
-        sprintf(write_buffer, "%f,%f,%f,%f,%f\n", timestamp,
+        sprintf(write_buffer_, "%f,%f,%f,%f,%f\n", timestamp,
                                                     suspension_pots.front_left->GetDisplacementInches(),
                                                     suspension_pots.front_right->GetDisplacementInches(),
                                                     suspension_pots.rear_left->GetDisplacementInches(),
                                                     suspension_pots.rear_right->GetDisplacementInches());
         
-        status = data_logger->FileWrite(write_buffer);
+        status_ = data_logger->FileWrite(write_buffer_);
 
         timestamp++;
 
-    } else if(!data_logging_enable && open_file) {
+    } else if(!data_logging_enable && file_is_open_) {
             // close the file
-        printf("Closing %s\n", file_name);
-        status = data_logger->FileClose();
+        printf("Closing %s\n", file_name_);
+        status_ = data_logger->FileClose();
 
         // set flags
-        open_file = 0;
+        file_is_open_ = false;
     }
 }
 

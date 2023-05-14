@@ -43,13 +43,10 @@ class DAQ {
         SuspensionPotentiometers suspension_pots;
         std::unique_ptr<application::IDataLogger> data_logger;
 
-
-        uint8_t open_file = 0;
-        // used for opening a file
-        char file_name[16] = "\0";
-        uint8_t file_name_status = 0;
-        char write_buffer[BUFFER_SIZE] = "\0";
-        uint8_t status = 0;
+        bool file_is_open_ = 0;
+        char file_name_[16] = "\0";
+        char write_buffer_[BUFFER_SIZE] = "\0";
+        uint8_t status_ = 0;
 
 };
 
