@@ -11,9 +11,7 @@
 * GPL-3.0 License
 */
 
-#include "SdDataLogger.hpp"
-#include "FATFileSystem.h"
-#include "SDBlockDevice.h"
+#include "sd_data_logger.hpp"
 
 namespace application {
 

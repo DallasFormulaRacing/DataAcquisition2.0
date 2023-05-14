@@ -15,12 +15,9 @@
 
 // DFR Custom Dependancies
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
-#include "Application/I_Data_Logger.hpp"
+#include "Application/Interfaces/idata_logger.hpp"
 
-namespace platform {
-
-// (4 linpot integers) * (4 bytes allocated per integer) = 16, 4 commas = 4 chars = 4 bytes, 1 more char & byte for the newline, 16 + 4 + 1 = 21
-// #define BUFFER_SIZE 21
+namespace application {
 
 // (4 linpot floats + 1 timestamps float) * (4 bytes allocated per float) +
 // (4 commas + 1 newline) * (1 byte allocated per char) +
@@ -44,7 +41,7 @@ class DAQ {
         };
 
         SuspensionPotentiometers suspension_pots;
-        std::unique_ptr<application::I_Data_Logger> data_logger;
+        std::unique_ptr<application::IDataLogger> data_logger;
 
 
         uint8_t open_file = 0;

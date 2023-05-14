@@ -14,15 +14,17 @@
 #ifndef DATA_LOGGER_H
 #define DATA_LOGGER_H
 
+// External Dependancies
 #include "mbed.h"
 #include "FATFileSystem.h"
 #include "SDBlockDevice.h"
 
-#include "Application/I_Data_Logger.hpp"
+// DFR Custom Dependancies
+#include "Application/Interfaces/idata_logger.hpp"
 
 namespace application {
 
-class SdDataLogger : public application::I_Data_Logger {
+class SdDataLogger : public application::IDataLogger {
     public:
         SdDataLogger(PinName mosi, PinName miso, PinName sck, PinName cs);
         virtual ~SdDataLogger();

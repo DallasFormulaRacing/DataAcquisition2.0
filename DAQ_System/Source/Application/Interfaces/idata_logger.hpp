@@ -19,9 +19,9 @@
 
 namespace application {
     
-class I_Data_Logger {
+class IDataLogger {
     public:
-        virtual ~I_Data_Logger() = default;
+        virtual ~IDataLogger() = default;
 
         virtual uint8_t Mount(BlockDevice*) = 0;
         virtual uint8_t Unmount() = 0;

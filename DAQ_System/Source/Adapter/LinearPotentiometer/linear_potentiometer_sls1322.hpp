@@ -14,10 +14,11 @@
 #ifndef LINEAR_POTENTOMETER_H
 #define LINEAR_POTENTOMETER_H
 
+// External Dependancies
 #include "mbed.h"
 
+// DFR Custom Dependancies
 #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
-#include <cstdint>
 
 
 namespace adapter {
