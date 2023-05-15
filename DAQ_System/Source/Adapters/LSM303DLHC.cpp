@@ -31,11 +31,11 @@ void LSM303DLHC::init()
  
 void LSM303DLHC::read(int a[3], int m[3])
 {
-    readAcc(a);
-    readMag(m);   
+    ReadRawAcceleration(a);
+    ReadRawMagnetometer(m);   
 }
  
-void LSM303DLHC::readAcc(int a[3])
+void LSM303DLHC::ReadRawAcceleration(int a[3])
 {
     _data[0] = OUT_X_L_A | (1<<7);
     _device.write(ACC_ADDRESS, _data, 1);
@@ -47,7 +47,7 @@ void LSM303DLHC::readAcc(int a[3])
     a[2] = (short)(_data[5]<<8 | _data[4]) >> 4;
 }
  
-void LSM303DLHC::readMag(int m[3])
+void LSM303DLHC::ReadRawMagnetometer(int m[3])
 {
     _data[0] = OUT_X_H_M;
     _device.write(MAG_ADDRESS, _data, 1);
@@ -65,7 +65,7 @@ void LSM303DLHC::SetScale(float x, float y, float z)
     scale[2] = z;
 }
  
-void LSM303DLHC::setOffset(float x, float y, float z)
+void LSM303DLHC::SetOffset(float x, float y, float z)
 {
     offset[0] = x;
     offset[1] = y;
@@ -74,7 +74,7 @@ void LSM303DLHC::setOffset(float x, float y, float z)
 
 void LSM303DLHC::doNothing(int a){}
 
-void LSM303DLHC::computeAcc(int in[3], float out[3], float gravity){
+void LSM303DLHC::ComputeAcceleration(int in[3], float out[3], float gravity){
     out[0] = (float)in[0] * 0.001 / gravity;
     out[1] = (float)in[1] * 0.001 / gravity;
     out[2] = (float)in[2] * 0.001 / gravity;
@@ -83,11 +83,10 @@ void LSM303DLHC::computeAcc(int in[3], float out[3], float gravity){
 double LSM303DLHC::calibrate()
 {
     int acc_array[3] = {0,0,0};
-    readAcc(acc_array);
+    ReadRawAcceleration(acc_array);
     
     int acc_value = 0, sampleCount = 100;
-    double acc_magnitude = 0, min_value = 0, max_value = 0, average_array[sampleCount],
-        return_value = 0;
+    double acc_magnitude = 0, min_value = 0, max_value = 0, average_array[sampleCount], return_value = 0;
 
     //collects a number of samples to calibrate for 1G
     for(int i = 0; i < sampleCount; i++){ 

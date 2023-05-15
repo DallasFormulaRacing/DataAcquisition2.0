@@ -33,7 +33,7 @@ int main() {
         ThisThread::sleep_for(50ms);
         
         sensor_obj.doNothing(1);
-        sensor_obj.computeAcc(acc_data, acc_usable, gravityRate);
+        sensor_obj.ComputeAcceleration(acc_data, acc_usable, gravityRate);
 
         //accelerometer values must be 
         std::cout << "ACC:" << 

@@ -86,7 +86,7 @@ class LSM303DLHC {
          * @param z is the offset correction for the z axis
          */
         void init();
-        void setOffset(float x, float y, float z);
+        void SetOffset(float x, float y, float z);
         
         /** sets the scale factor for the x, y, and z axes
          *
@@ -111,13 +111,13 @@ class LSM303DLHC {
          *
          * @param a is the accelerometer 3d vector, written by the function
          */
-        void readAcc(int a[3]);
+        void ReadRawAcceleration(int a[3]);
  
         /** read the calibrated magnetometer values
          *
          * @param m is the magnetometer 3d vector, written by the function
          */
-        void readMag(int m[3]);
+        void ReadRawMagnetometer(int m[3]);
  
         /** sets the I2C bus frequency
          *
