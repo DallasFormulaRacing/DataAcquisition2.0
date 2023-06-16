@@ -86,7 +86,7 @@ class LSM303DLHC {
          * @param z is the offset correction for the z axis
          */
         void init();
-        void setOffset(float x, float y, float z);
+        void SetOffset(float x, float y, float z);
         
         /** sets the scale factor for the x, y, and z axes
          *

@@ -63,7 +63,7 @@ void LSM303DLHC::SetScale(float x, float y, float z) {
     scale_[2] = z;
 }
  
-void LSM303DLHC::setOffset(float x, float y, float z) {
+void LSM303DLHC::SetOffset(float x, float y, float z) {
     offset_[0] = x;
     offset_[1] = y;
     offset_[2] = z;
