@@ -105,41 +105,29 @@ class LSM303DLHC {
          * @param a is the accelerometer 3d vector, written by the function
          * @param m is the magnetometer 3d vector, written by the function
          */
-        void read(int a[3], int m[3]);
+        void Read(int a[3], int m[3]);
         
         /** read the calibrated accelerometer values
          *
          * @param a is the accelerometer 3d vector, written by the function
          */
-        void readAcc(int a[3]);
+        void ReadRawAcceleration(int a[3]);
  
         /** read the calibrated magnetometer values
          *
          * @param m is the magnetometer 3d vector, written by the function
          */
-        void readMag(int m[3]);
- 
-        /** sets the I2C bus frequency
-         *
-         * @param frequency is the I2C bus/clock frequency, either standard (100000) or fast (400000)
-         */
-        void frequency(int hz);
-
-        /** does nothing lol
-         *
-         * @param a is meaningless
-         */
-        void doNothing(int a);
+        void ReadRawMagnetometer(int m[3]);
         
         void computeAcc(int in[3], float out[3], float gravity);
 
         double calibrate();
      
     private:
-        I2C _device;
-        char _data[6];
-        int offset[3];
-        int scale[3];
+        I2C device_;
+        char data_[6];
+        int offset_[3];
+        int scale_[3];
 };
  
 #endif

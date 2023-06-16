@@ -2,19 +2,12 @@
 #include "LSM303DLHC.h"
 #include <iostream>
 
-static float _lsm303Accel_MG_LSB     = 0.001F;
-const int sampleCount = 500;
 
-
-
-// main() runs in its own thread in the OS
 int main() {
 
-    LSM303DLHC sensor_obj(I2C_SDA, I2C_SCL);
-    sensor_obj.init();
+    LSM303DLHC accelerometer(I2C_SDA, I2C_SCL);
+    accelerometer.init();
     
-    // accel_obj.frequency(75);
-
     int acc_data[3] = {0, 0, 0};
     int mag_data[3] = {0, 0, 0};
     float acc_usable[3] = {0,0,0};
@@ -22,18 +15,16 @@ int main() {
     std::cout << "===========New Test" << std::endl;
     ThisThread::sleep_for(500ms);
     
-    double gravityRate = sensor_obj.calibrate();
+    double gravityRate = accelerometer.calibrate();
     
     std::cout << "Gravity conversion = " << gravityRate << endl;
     
     while (true) {
         
-
-        sensor_obj.read(acc_data, mag_data);
+        accelerometer.Read(acc_data, mag_data);
         ThisThread::sleep_for(50ms);
         
-        sensor_obj.doNothing(1);
-        sensor_obj.computeAcc(acc_data, acc_usable, gravityRate);
+        accelerometer.computeAcc(acc_data, acc_usable, gravityRate);
 
         //accelerometer values must be 
         std::cout << "ACC:" << 
