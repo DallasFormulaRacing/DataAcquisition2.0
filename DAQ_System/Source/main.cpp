@@ -87,11 +87,6 @@ int main(){
     while (true){
         if( gyro->ComputeDegreesPerSecond(degrees_per_second, gyro_offset) && gyro->ComputeRadiansPerSecond(radians_per_second, gyro_offset)){
             
-            if(offsetStatus != true){
-                gyro->GyroscopeOffset(gyro_offset);
-                offsetStatus = true; // offset is set so this setting makes it so it wont callibrate every single time.
-            }
-            
             printf("Degrees Per Second: X = %d, Y = %d, Z = %d", degrees_per_second[0], degrees_per_second[1], degrees_per_second[2]);
             printf("   ");
             printf("Radians per second =  X = %f, Y = %f, Z = %f  \n", radians_per_second[0],radians_per_second[1], radians_per_second[2]);

@@ -1,58 +1,43 @@
+ #include "mbed.h"
+ #include "Gyroscope_L3GD20H.hpp"
 
-#include "gyroscope_l3gd20h.hpp"
-#include "L3GD20H.h"
-#include "mbed.h"
-
-#define GYR_ADDRESS 0xD6
-
-
-namespace adapter{
-
-Gyroscope_L3GD20H::Gyroscope_L3GD20H(PinName sda, PinName scl)
-    : _gyroscope(sda, scl){
-    init(sda,scl);
-}
-
-Gyroscope_L3GD20H::~Gyroscope_L3GD20H(){}
-
-void Gyroscope_L3GD20H::init(PinName sda, PinName scl){
-
+adapter::Gyroscope_L3GD20H::Gyroscope_L3GD20H(PinName sda, PinName scl)
+:_L3GD20H_(sda, scl){
     char reg_v;
-    _gyroscope.get_L3GD20H_().frequency(100000);
-
-    // Normal power mode, all axes enabled
-    reg_v = 0;
-    reg_v |= 0x0F;
-    _gyroscope.writeRegister(GYR_ADDRESS, L3GD20_CTRL_REG1, reg_v);
-}
-
-
-void Gyroscope_L3GD20H::GyroscopeOffset(short Offset_average[3]){
-    short gyroscopeL3GD20Hdata[3] = {0}, sum[3] = {0};
-    int averageSampleSize = 15;
-
-    for (int i = 0; i <= averageSampleSize; i++){
-        _gyroscope.read(gyroscopeL3GD20Hdata);
-        sum[0] += gyroscopeL3GD20Hdata[0];
-        sum[1] += gyroscopeL3GD20Hdata[1];
-        sum[2] += gyroscopeL3GD20Hdata[2];
-    }
-
-    Offset_average[0] = sum[0]/averageSampleSize;
-    Offset_average[1] = sum[1]/averageSampleSize;
-    Offset_average[2] = sum[2]/averageSampleSize;
-}
-
-bool Gyroscope_L3GD20H::ComputeDegreesPerSecond(short L3GD20HDataArray[3],short Offset_average[3]){
-
+    _L3GD20H_.frequency(100000);
     
+  // Normal power mode, all axes enabled and calculate average
+    reg_v = 0;    
+    reg_v |= 0x0F;       
+    write_reg(GYR_ADDRESS,L3GD20_CTRL_REG1,reg_v);
+    gyro_offset(offsetAverage);
+
+}
+
+bool adapter::Gyroscope_L3GD20H::read(short g[3]) {
+    char gyr[6];
+ 
+    if (recv(GYR_ADDRESS, L3GD20_OUT_X_L, gyr, 6)) {
+    //scale is 1 dps/digit
+        g[0] = (gyr[1] << 8 | gyr[0]);  
+        g[1] = (gyr[3] << 8 | gyr[2]);
+        g[2] = (gyr[5] << 8 | gyr[4]);
+ 
+        return true;
+    }
+ 
+    return false;
+}
+
+bool adapter::Gyroscope_L3GD20H::ComputeDegreesPerSecond(short L3GD20HDataArray[3]){
+
     short GyroscopeL3GD20HRawData[3];
-    if(_gyroscope.read(GyroscopeL3GD20HRawData)){ // first element is the x-axis, second is the y-axis, and the third element is the z-axis
-        
+    if(read(GyroscopeL3GD20HRawData)){ // first element is the x-axis, second is the y-axis, and the third element is the z-axis
+
         // the next three equations are the conversion of raw data to degrees/second. Equation used is degrees/second = RawData * SensitivityOfFullScalRange. default sensitivity for L3GD20H is 250dps
-        L3GD20HDataArray[0] =  (GyroscopeL3GD20HRawData[0] - Offset_average[0] ) * DPS250Sensitivity;
-        L3GD20HDataArray[1] =  (GyroscopeL3GD20HRawData[1] - Offset_average[1]) * DPS250Sensitivity;
-        L3GD20HDataArray[2] =  (GyroscopeL3GD20HRawData[2] - Offset_average[2]) * DPS250Sensitivity;
+        L3GD20HDataArray[0] =  (GyroscopeL3GD20HRawData[0] - offsetAverage[0]) * DPS250Sensitivity;
+        L3GD20HDataArray[1] =  (GyroscopeL3GD20HRawData[1] - offsetAverage[1]) * DPS250Sensitivity;
+        L3GD20HDataArray[2] =  (GyroscopeL3GD20HRawData[2] - offsetAverage[2]) * DPS250Sensitivity;
 
         return true;
     }
@@ -61,12 +46,12 @@ bool Gyroscope_L3GD20H::ComputeDegreesPerSecond(short L3GD20HDataArray[3],short 
         return false;
 }
 
-bool Gyroscope_L3GD20H::ComputeRadiansPerSecond(float L3GD20HDataArray[3], short Offset_average[3]){
-    
+bool adapter::Gyroscope_L3GD20H::ComputeRadiansPerSecond(float L3GD20HDataArray[3]){
+
     short L3GD20HTempData[3]; // array used for storing intermediary L3GD20H data
 
-    if(_gyroscope.read(L3GD20HTempData)){
-        ComputeDegreesPerSecond(L3GD20HTempData,Offset_average); // Easier to first obtain the degrees/second array then convert it to radians/second
+    if(read(L3GD20HTempData)){
+        ComputeDegreesPerSecond(L3GD20HTempData); // Easier to first obtain the degrees/second array then convert it to radians/second
 
         // conversion of Degrees/second to radians/second using a conversion facotr of (2pi/360)
         L3GD20HDataArray[0] = L3GD20HTempData[0] * DegreesToRadians;
@@ -78,4 +63,42 @@ bool Gyroscope_L3GD20H::ComputeRadiansPerSecond(float L3GD20HDataArray[3], short
     else 
         return false;
 }
+
+void adapter::Gyroscope_L3GD20H::gyro_offset(short offsetAverage[3]){
+    short gyroscopeL3GD20Hdata[3] = {0}, sum[3] = {0};
+    int averageSampleSize = 15;
+
+    for (int i = 0; i <= averageSampleSize; i++){
+        read(gyroscopeL3GD20Hdata);
+        sum[0] += gyroscopeL3GD20Hdata[0];
+        sum[1] += gyroscopeL3GD20Hdata[1];
+        sum[2] += gyroscopeL3GD20Hdata[2];
+    }
+
+    offsetAverage[0] = sum[0]/averageSampleSize;
+    offsetAverage[1] = sum[1]/averageSampleSize;
+    offsetAverage[2] = sum[2]/averageSampleSize;
+    
+}
+
+bool adapter::Gyroscope_L3GD20H::write_reg(int addr_i2c,int addr_reg, char v){
+    char data[2] = {static_cast<char>(addr_reg), v}; 
+    return Gyroscope_L3GD20H::_L3GD20H_.write(addr_i2c, data, 2) == 0;
+}
+
+bool adapter::Gyroscope_L3GD20H::read_reg(int addr_i2c,int addr_reg, char *v){
+    char data = addr_reg; 
+    bool result = false;
+    
+    if ((_L3GD20H_.write(addr_i2c, &data, 1) == 0) && (_L3GD20H_.read(addr_i2c, &data, 1) == 0)){
+        *v = data;
+        result = true;
+    }
+    return result;
+}
+
+bool adapter::Gyroscope_L3GD20H::recv(char sad, char sub, char *buf, int length){
+    if (length > 1) sub |= 0x80;
+ 
+    return _L3GD20H_.write(sad, &sub, 1, true) == 0 && _L3GD20H_.read(sad, buf, length) == 0;
 }
