@@ -17,8 +17,8 @@ class Gyroscope_L3GD20H: public IGyroscope{
         virtual ~Gyroscope_L3GD20H() = default;
 
         bool read(short g[3]);
-        virtual bool ComputeDegreesPerSecond(short L3GD20HDataArray[3])override;
-        virtual bool ComputeRadiansPerSecond(float L3GD20HDataArray[3])override;
+        virtual bool ComputeDegreesPerSecond(short L3GD20HDataArray[3]) override;
+        virtual bool ComputeRadiansPerSecond(float L3GD20HDataArray[3]) override;
 
         
     private:
