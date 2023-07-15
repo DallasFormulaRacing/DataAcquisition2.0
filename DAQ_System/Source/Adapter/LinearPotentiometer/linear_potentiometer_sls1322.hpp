@@ -11,8 +11,8 @@
 * GPL-3.0 License
 */
 
-#ifndef LINEAR_POTENTOMETER_H
-#define LINEAR_POTENTOMETER_H
+#ifndef LINEAR_POTENTOMETER_SLS1322_H
+#define LINEAR_POTENTOMETER_SLS1322_H
 
 #include "mbed.h"
 
@@ -45,4 +45,4 @@ class LinearPotentiometer_SLS1322 : public adapter::ILinear_Potentiometer {
 
 }
 
-#endif // LINEAR_POTENTOMETER_H
+#endif // LINEAR_POTENTOMETER_SLS1322_H

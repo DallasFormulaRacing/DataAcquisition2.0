@@ -68,12 +68,10 @@
 #include "mbed.h"
 #include <cstdio>
 
-
-// Found in: https://os.mbed.com/users/julioefajardo/code/L3GD20H/docs/tip/classL3GD20H.html
-
 #include "gyroscope_l3gd20h.hpp"
 
-adapter::IGyroscope* gyro = new adapter::Gyroscope_L3GD20H(I2C_SDA,I2C_SCL);
+std::unique_ptr<adapter::IGyroscope> gyro = std::make_unique<adapter::Gyroscope_L3GD20H>(I2C_SDA,I2C_SCL);
+
 
 int main(){
     // for the 3 arrays below the first element will deal with purely the x-axis the second element is y and the last element is z. These will be used to calculate an average

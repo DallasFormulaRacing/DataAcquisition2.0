@@ -1,6 +1,21 @@
+/*
+* Gyroscope
+* Authors:       William Lim
+*                Alex Shi    
+* Modified By:   Cristian Cruz
+*          
+* Email:         wll180000@utdallas.edu
+*                ahs190001@utdallas.edu
+*                cris14.alex@gmail.com
+* 
+* (c) 2023 Dallas Formula Racing - Embedded Firmware Team
+* Formula SAE International Collegiate Chapter
+* GPL-3.0 License
+*/
 
-#ifndef IGYROSCOPE
-#define IGYROSCOPE
+
+#ifndef IGYROSCOPE_H
+#define IGYROSCOPE_H
 
 #include "mbed.h"
 
@@ -10,9 +25,9 @@ class IGyroscope{
     public:
         virtual ~IGyroscope() = default;
 
-        virtual bool ComputeDegreesPerSecond(short GyroscopeDataArray[3]) = 0;
-        virtual bool ComputeRadiansPerSecond(float GyroscopeDataArray[3]) = 0;
+        virtual bool ComputeDegreesPerSecond(short angular_velocity[3]) = 0;
+        virtual bool ComputeRadiansPerSecond(float angular_velocity[3]) = 0;
 };
 }
 
-#endif 
+#endif // IGYROSCOPE_H

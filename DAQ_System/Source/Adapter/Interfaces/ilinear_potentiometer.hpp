@@ -11,8 +11,8 @@
 * GPL-3.0 License
 */
 
-#ifndef ILINEAR_POTENTIOMETER
-#define ILINEAR_POTENTIOMETER
+#ifndef ILINEAR_POTENTIOMETER_H
+#define ILINEAR_POTENTIOMETER_H
 
 namespace adapter {
 
@@ -28,4 +28,4 @@ class ILinear_Potentiometer {
 
 }
 
-#endif // ILINEAR_POTENTIOMETER
+#endif // ILINEAR_POTENTIOMETER_H

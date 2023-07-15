@@ -1,6 +1,20 @@
+/*
+* Gyroscope L3GD20H
+* Authors:       William Lim
+*                Alex Shi    
+* Modified By:   Cristian Cruz
+*          
+* Email:         wll180000@utdallas.edu
+*                ahs190001@utdallas.edu
+*                cris14.alex@gmail.com
+* 
+* (c) 2023 Dallas Formula Racing - Embedded Firmware Team
+* Formula SAE International Collegiate Chapter
+* GPL-3.0 License
+*/
 
-#ifndef __L3GD20H_H
-#define __L3GD20H_H
+#ifndef GYROSCOPE_L3GD20H_H
+#define GYROSCOPE_L3GD20H_H
 
 #include "mbed.h"
 #include "igyroscope.hpp"
@@ -9,7 +23,8 @@
 #define L3GD20_OUT_X_L       0x28
 #define GYR_ADDRESS          0xD6
 
-namespace adapter{
+namespace adapter {
+
 class Gyroscope_L3GD20H: public IGyroscope{
     public:
 
@@ -17,10 +32,9 @@ class Gyroscope_L3GD20H: public IGyroscope{
         virtual ~Gyroscope_L3GD20H() = default;
 
         bool read(short g[3]);
-        virtual bool ComputeDegreesPerSecond(short L3GD20HDataArray[3]) override;
-        virtual bool ComputeRadiansPerSecond(float L3GD20HDataArray[3]) override;
+        virtual bool ComputeDegreesPerSecond(short angular_velocity[3]) override;
+        virtual bool ComputeRadiansPerSecond(float angular_velocity[3]) override;
 
-        
     private:
             I2C _L3GD20H_;
         short gx, gy, gz;
@@ -33,6 +47,8 @@ class Gyroscope_L3GD20H: public IGyroscope{
         bool recv(char sad, char sub, char *buf, int length);
         void gyro_offset(short offsetAverage[3]);
 };
+
 }
-#endif
+
+#endif // GYROSCOPE_L3GD20H_H
             
