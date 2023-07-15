@@ -31,21 +31,29 @@ class Gyroscope_L3GD20H: public IGyroscope{
         Gyroscope_L3GD20H(PinName sda, PinName scl);
         virtual ~Gyroscope_L3GD20H() = default;
 
-        bool read(short g[3]);
-        virtual bool ComputeDegreesPerSecond(short angular_velocity[3]) override;
-        virtual bool ComputeRadiansPerSecond(float angular_velocity[3]) override;
+        virtual short* GetDegreesPerSecond() override;
+        virtual float* GetRadiansPerSecond() override;
+        virtual bool ComputeAngularVelocity() override;
 
     private:
-            I2C _L3GD20H_;
-        short gx, gy, gz;
-        static constexpr float DPS250Sensitivity = .00875f;
-        static constexpr float DegreesToRadians = 0.01745329251f;
-        short offsetAverage[3];
+        bool ReadRawData(short g[3]);
 
-        bool write_reg(int addr_i2c,int addr_reg, char v);
-        bool read_reg(int addr_i2c,int addr_reg, char *v);
-        bool recv(char sad, char sub, char *buf, int length);
-        void gyro_offset(short offsetAverage[3]);
+        bool WriteReg(int addr_i2c,int addr_reg, char v);
+        bool ReadReg(int addr_i2c,int addr_reg, char *v);
+        bool Receive(char sad, char sub, char *buf, int length);
+        void ComputeInitialOffset();
+
+        static constexpr float DPS_250_Sensitivity = .00875f;
+        static constexpr float DegreesToRadians = 0.01745329251f; //Conversion facotr of (2pi/360)
+
+        I2C i2c_bus_;
+        // First element is the x-axis
+        // Second element is the y-axis
+        // Third element is the z-axis
+        short degrees_per_second_[3] = {0};
+        float radians_per_second_[3] = {0};
+        short angular_velocity_[3] = {0};
+        short offset_average_[3] = {0};   
 };
 
 }

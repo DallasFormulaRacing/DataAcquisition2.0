@@ -72,27 +72,20 @@
 
 std::unique_ptr<adapter::IGyroscope> gyro = std::make_unique<adapter::Gyroscope_L3GD20H>(I2C_SDA,I2C_SCL);
 
-
 int main(){
     // for the 3 arrays below the first element will deal with purely the x-axis the second element is y and the last element is z. These will be used to calculate an average
     // that will be used for the offeset for the callibration of the gyroscope. Int n is used to control the sample size for the average.
-    short degrees_per_second[3] = {0};
-    float radians_per_second[3] = {0};
-    // logical conditions to determine the branches that will exeute in the code
-    bool offsetStatus = false;
+    short* degrees_per_second;
+    float* radians_per_second;
     
-    while (true){
-        if( gyro->ComputeDegreesPerSecond(degrees_per_second) && gyro->ComputeRadiansPerSecond(radians_per_second)){
-            
-            printf("Degrees Per Second: X = %d, Y = %d, Z = %d", degrees_per_second[0], degrees_per_second[1], degrees_per_second[2]);
-            printf("   ");
-            printf("Radians per second =  X = %f, Y = %f, Z = %f  \n", radians_per_second[0],radians_per_second[1], radians_per_second[2]);
-        }
-        else {
-            printf( "It's not Gyroin Time =( \n");
-        }
+    while (true) {
+        gyro->ComputeAngularVelocity();
+        degrees_per_second = gyro->GetDegreesPerSecond();
+        radians_per_second = gyro->GetRadiansPerSecond();
+   
+        printf("Degrees Per Second: X = %d, Y = %d, Z = %d", degrees_per_second[0], degrees_per_second[1], degrees_per_second[2]);
+        printf("   ");
+        printf("Radians per second =  X = %f, Y = %f, Z = %f  \n", radians_per_second[0],radians_per_second[1], radians_per_second[2]);
+        printf( "It's Gyroin Time =( \n");
     }             
 }
-
-
-

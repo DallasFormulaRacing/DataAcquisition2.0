@@ -25,8 +25,9 @@ class IGyroscope{
     public:
         virtual ~IGyroscope() = default;
 
-        virtual bool ComputeDegreesPerSecond(short angular_velocity[3]) = 0;
-        virtual bool ComputeRadiansPerSecond(float angular_velocity[3]) = 0;
+        virtual short* GetDegreesPerSecond() = 0;
+        virtual float* GetRadiansPerSecond() = 0;
+        virtual bool ComputeAngularVelocity() = 0;
 };
 }
 
