@@ -17,7 +17,7 @@
 #define GYROSCOPE_L3GD20H_H
 
 #include "mbed.h"
-#include "igyroscope.hpp"
+#include "Interfaces/igyroscope.hpp"
 
 #define L3GD20_CTRL_REG1     0x20
 #define L3GD20_OUT_X_L       0x28

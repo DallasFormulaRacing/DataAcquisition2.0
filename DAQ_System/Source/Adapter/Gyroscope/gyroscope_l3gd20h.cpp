@@ -13,10 +13,10 @@
 * GPL-3.0 License
 */
 
- #include "mbed.h"
- #include "Gyroscope_L3GD20H.hpp"
-#include <cstdint>
+#include "mbed.h"
 
+#include "gyroscope_l3gd20h.hpp"
+#include <cstdint>
 
 namespace adapter {
 

@@ -68,7 +68,7 @@
 #include "mbed.h"
 #include <cstdio>
 
-#include "gyroscope_l3gd20h.hpp"
+#include "Adapter/Gyroscope/gyroscope_l3gd20h.hpp"
 
 std::unique_ptr<adapter::IGyroscope> gyro = std::make_unique<adapter::Gyroscope_L3GD20H>(I2C_SDA,I2C_SCL);
 
