@@ -1,5 +1,5 @@
 #include "mbed.h"
-#include "LSM303DLHC.h"
+#include "accelerometer_lsm303dlhc.h"
 #include "stdio.h"
 #include <cstdint>
 #include <locale>
@@ -8,38 +8,38 @@
 #define ACC_ADDRESS  0x32
   
  
-LSM303DLHC::LSM303DLHC(PinName sda, PinName scl)
-  : device_(sda, scl) {
+Accelerometer_LSM303DLHC::Accelerometer_LSM303DLHC(PinName sda, PinName scl)
+  : i2c_bus_(sda, scl) {
     // the I2C bus/clock frequency, either standard (100000) or fast (400000)
-    device_.frequency(400000);
+    i2c_bus_.frequency(400000);
 }
  
-void LSM303DLHC::init() {
+void Accelerometer_LSM303DLHC::init() {
     // init mag
     // continuous conversion mode
     data_[0] = MR_REG_M;
     data_[1] = 0x00;
-    device_.write(MAG_ADDRESS, data_, 2);
+    i2c_bus_.write(MAG_ADDRESS, data_, 2);
     // data rate 75hz
     data_[0] = CRA_REG_M;
     data_[1] = 0x18; // 0b00011000
-    device_.write(MAG_ADDRESS, data_, 2);
+    i2c_bus_.write(MAG_ADDRESS, data_, 2);
     // init acc
     // data rate 100hz 
     data_[0] = CTRL_REG1_A;
     data_[1] = 0x2F; // 0b00101111
-    device_.write(ACC_ADDRESS, data_, 2);
+    i2c_bus_.write(ACC_ADDRESS, data_, 2);
 }
  
-void LSM303DLHC::Read(int a[3], int m[3]) {
+void Accelerometer_LSM303DLHC::Read(int a[3], int m[3]) {
     ReadRawAcceleration(a);
     ReadRawMagnetometer(m);   
 }
  
-void LSM303DLHC::ReadRawAcceleration(int a[3]) {
+void Accelerometer_LSM303DLHC::ReadRawAcceleration(int a[3]) {
     data_[0] = OUT_X_L_A | (1<<7);
-    device_.write(ACC_ADDRESS, data_, 1);
-    device_.read(ACC_ADDRESS, data_, 6);
+    i2c_bus_.write(ACC_ADDRESS, data_, 1);
+    i2c_bus_.read(ACC_ADDRESS, data_, 6);
  
     // 12-bit values
     a[0] = (short)(data_[1]<<8 | data_[0]) >> 4;
@@ -47,23 +47,23 @@ void LSM303DLHC::ReadRawAcceleration(int a[3]) {
     a[2] = (short)(data_[5]<<8 | data_[4]) >> 4;
 }
  
-void LSM303DLHC::ReadRawMagnetometer(int m[3]) {
+void Accelerometer_LSM303DLHC::ReadRawMagnetometer(int m[3]) {
     data_[0] = OUT_X_H_M;
-    device_.write(MAG_ADDRESS, data_, 1);
-    device_.read(MAG_ADDRESS, data_, 6);
+    i2c_bus_.write(MAG_ADDRESS, data_, 1);
+    i2c_bus_.read(MAG_ADDRESS, data_, 6);
     
     m[0] = (short) (data_[0]<<8 | data_[1]); // X
     m[1] = (short) (data_[4]<<8 | data_[5]); // Y
     m[2] = (short) (data_[2]<<8 | data_[3]); // Z
  }
 
-void LSM303DLHC::SetScale(float x, float y, float z) {
+void Accelerometer_LSM303DLHC::SetScale(float x, float y, float z) {
     scale_[0] = x;
     scale_[1] = y;
     scale_[2] = z;
 }
  
-void LSM303DLHC::SetOffset(float x, float y, float z) {
+void Accelerometer_LSM303DLHC::SetOffset(float x, float y, float z) {
     offset_[0] = x;
     offset_[1] = y;
     offset_[2] = z;
@@ -72,13 +72,13 @@ void LSM303DLHC::SetOffset(float x, float y, float z) {
 
 static constexpr float _lsm303Accel_MG_LSB = 0.001F;
 
-void LSM303DLHC::computeAcc(int raw_data[3], float real_data[3], float gravity_adjustment_conversion_factor) {
+void Accelerometer_LSM303DLHC::computeAcc(int raw_data[3], float real_data[3], float gravity_adjustment_conversion_factor) {
     real_data[0] = raw_data[0] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
     real_data[1] = raw_data[1] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
     real_data[2] = raw_data[2] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
 }
 
-double LSM303DLHC::calibrate() {
+double Accelerometer_LSM303DLHC::calibrate() {
     int acc_array[3] = {0,0,0};
     constexpr uint8_t sampleCount = 100;
 

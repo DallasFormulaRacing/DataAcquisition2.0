@@ -1,11 +1,11 @@
 #include "mbed.h"
-#include "LSM303DLHC.h"
+#include "Adapters/Accelerometer/accelerometer_lsm303dlhc.h"
 #include <iostream>
 
 
 int main() {
 
-    LSM303DLHC accelerometer(I2C_SDA, I2C_SCL);
+    Accelerometer_LSM303DLHC accelerometer(I2C_SDA, I2C_SCL);
     accelerometer.init();
     
     int acc_data[3] = {0, 0, 0};

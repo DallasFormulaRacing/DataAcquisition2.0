@@ -66,11 +66,11 @@
  *
  * @endcode
  */
-class LSM303DLHC {
+class Accelerometer_LSM303DLHC {
  
     public:
        
-        LSM303DLHC(PinName sda, PinName scl);
+        Accelerometer_LSM303DLHC(PinName sda, PinName scl);
  
         /** sets the x, y, and z offset corrections for hard iron calibration
          * 
@@ -124,7 +124,7 @@ class LSM303DLHC {
         double calibrate();
      
     private:
-        I2C device_;
+        I2C i2c_bus_;
         char data_[6];
         int offset_[3];
         int scale_[3];
