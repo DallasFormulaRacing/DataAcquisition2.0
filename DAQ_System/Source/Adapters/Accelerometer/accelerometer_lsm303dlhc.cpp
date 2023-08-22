@@ -41,14 +41,17 @@ void Accelerometer_LSM303DLHC::init() {
 
  
 void Accelerometer_LSM303DLHC::ReadRawAcceleration() {
-    data_[0] = OUT_X_L_A | (1<<7);
-    i2c_bus_.write(ACC_ADDRESS, data_, 1);
-    i2c_bus_.read(ACC_ADDRESS, data_, 6);
+    char command[1];
+    command[0] = OUT_X_L_A | (1<<7);
+    i2c_bus_.write(ACC_ADDRESS, command, 1);
+
+    char bytes_received[6];
+    i2c_bus_.read(ACC_ADDRESS, bytes_received, 6);
  
     // 12-bit values
-    raw_acceleration_data_[0] = (short)(data_[1]<<8 | data_[0]) >> 4;
-    raw_acceleration_data_[1] = (short)(data_[3]<<8 | data_[2]) >> 4;
-    raw_acceleration_data_[2] = (short)(data_[5]<<8 | data_[4]) >> 4;
+    raw_acceleration_data_[0] = (short)(bytes_received[1]<<8 | bytes_received[0]) >> 4;
+    raw_acceleration_data_[1] = (short)(bytes_received[3]<<8 | bytes_received[2]) >> 4;
+    raw_acceleration_data_[2] = (short)(bytes_received[5]<<8 | bytes_received[4]) >> 4;
 }
  
 void Accelerometer_LSM303DLHC::ReadRawMagnetometer(int m[3]) {
@@ -90,15 +93,12 @@ float* Accelerometer_LSM303DLHC::getAcc() {
 }
 
 void Accelerometer_LSM303DLHC::calibrate() {
-    int acc_array[3] = {0,0,0};
-    constexpr uint8_t sampleCount = 100;
-
+    static constexpr uint8_t kSampleCount = 100;
     double acc_magnitude = 0;
-    double average_array[sampleCount];
+    double average_array[kSampleCount];
     
-
     //collects a number of samples to calibrate for 1G
-    for(int i = 0; i < sampleCount; i++) {
+    for(int i = 0; i < kSampleCount; i++) {
         ReadRawAcceleration();
         acc_magnitude = sqrt(raw_acceleration_data_[0] * raw_acceleration_data_[0] + raw_acceleration_data_[1] * raw_acceleration_data_[1] + raw_acceleration_data_[2] * raw_acceleration_data_[2]);
         average_array[i] = acc_magnitude * 0.001;
@@ -109,7 +109,7 @@ void Accelerometer_LSM303DLHC::calibrate() {
     double max_value = -1;
     
     //finds the largest and smallest magnitudes
-    for(int j = 2; j < sampleCount; j++) {
+    for(int j = 2; j < kSampleCount; j++) {
         if(average_array[j] <= min_value) {
             min_value = average_array[j];
         
@@ -124,11 +124,11 @@ void Accelerometer_LSM303DLHC::calibrate() {
 
     if (max_value - min_value < 0.09) {
         double total_array = 0;
-	    for(int i = 0; i < sampleCount; i++) {
+	    for(int i = 0; i < kSampleCount; i++) {
 		    total_array += average_array[i];
 	    }
 
-	    gravity_adjustment_conversion_factor_ = total_array / sampleCount;
+	    gravity_adjustment_conversion_factor_ = total_array / kSampleCount;
     } else {
         gravity_adjustment_conversion_factor_ = 1.028;
     }

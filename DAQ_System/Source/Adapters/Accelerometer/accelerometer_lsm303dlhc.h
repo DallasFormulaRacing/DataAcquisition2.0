@@ -106,11 +106,7 @@ class Accelerometer_LSM303DLHC {
          * @param m is the magnetometer 3d vector, written by the function
          */
         
-        /** read the calibrated accelerometer values
-         *
-         * @param a is the accelerometer 3d vector, written by the function
-         */
-        void ReadRawAcceleration();
+        
  
         /** read the calibrated magnetometer values
          *
@@ -120,13 +116,21 @@ class Accelerometer_LSM303DLHC {
         
         void computeAcc();
 
-        void calibrate();
+        
 
         float* getAcc();
         
         float gravity_adjustment_conversion_factor_;
      
     private:
+        /** read the calibrated accelerometer values
+         *
+         * @param a is the accelerometer 3d vector, written by the function
+         */
+        void ReadRawAcceleration();
+
+        void calibrate();
+
         I2C i2c_bus_;
         char data_[6];
         int offset_[3];
