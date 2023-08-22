@@ -15,20 +15,25 @@ Accelerometer_LSM303DLHC::Accelerometer_LSM303DLHC(PinName sda, PinName scl)
 }
  
 void Accelerometer_LSM303DLHC::init() {
+    static constexpr uint8_t kNumBytes = 2;
+    char commands[kNumBytes];
+
     // init mag
     // continuous conversion mode
-    data_[0] = MR_REG_M;
-    data_[1] = 0x00;
-    i2c_bus_.write(MAG_ADDRESS, data_, 2);
+    commands[0] = MR_REG_M;
+    commands[1] = 0x00;
+    i2c_bus_.write(MAG_ADDRESS, commands, kNumBytes);
+    
     // data rate 75hz
-    data_[0] = CRA_REG_M;
-    data_[1] = 0x18; // 0b00011000
-    i2c_bus_.write(MAG_ADDRESS, data_, 2);
+    commands[0] = CRA_REG_M;
+    commands[1] = 0x18; // 0b00011000
+    i2c_bus_.write(MAG_ADDRESS, commands, kNumBytes);
+    
     // init acc
     // data rate 100hz 
-    data_[0] = CTRL_REG1_A;
-    data_[1] = 0x2F; // 0b00101111
-    i2c_bus_.write(ACC_ADDRESS, data_, 2);
+    commands[0] = CTRL_REG1_A;
+    commands[1] = 0x2F; // 0b00101111
+    i2c_bus_.write(ACC_ADDRESS, commands, kNumBytes);
 }
  
 void Accelerometer_LSM303DLHC::Read(int a[3], int m[3]) {
