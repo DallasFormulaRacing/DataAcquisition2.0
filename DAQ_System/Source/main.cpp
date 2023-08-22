@@ -21,16 +21,15 @@ int main() {
     
     while (true) {
         
-        accelerometer.Read(acc_data, mag_data);
-        ThisThread::sleep_for(50ms);
-        
-        accelerometer.computeAcc(acc_data, acc_usable, gravityRate);
+        accelerometer.ReadRawAcceleration();        
+        accelerometer.computeAcc(acc_usable, gravityRate);
 
         //accelerometer values must be 
         std::cout << "ACC:" << 
                      "\tX: " << acc_usable[0] <<
                      "\tY: " << acc_usable[1] <<
-                     "\tZ: " << acc_usable[2] << std::endl;
+                     "\tZ: " << acc_usable[2] <<
+                     "\tRate: " << gravityRate << std::endl;
 
         /*std::cout << "MAG:" << 
                      "\tX: " << mag_data[0] <<

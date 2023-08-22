@@ -36,20 +36,17 @@ void Accelerometer_LSM303DLHC::init() {
     i2c_bus_.write(ACC_ADDRESS, commands, kNumBytes);
 }
  
-void Accelerometer_LSM303DLHC::Read(int a[3], int m[3]) {
-    ReadRawAcceleration(a);
-    ReadRawMagnetometer(m);   
-}
+
  
-void Accelerometer_LSM303DLHC::ReadRawAcceleration(int a[3]) {
+void Accelerometer_LSM303DLHC::ReadRawAcceleration() {
     data_[0] = OUT_X_L_A | (1<<7);
     i2c_bus_.write(ACC_ADDRESS, data_, 1);
     i2c_bus_.read(ACC_ADDRESS, data_, 6);
  
     // 12-bit values
-    a[0] = (short)(data_[1]<<8 | data_[0]) >> 4;
-    a[1] = (short)(data_[3]<<8 | data_[2]) >> 4;
-    a[2] = (short)(data_[5]<<8 | data_[4]) >> 4;
+    raw_acceleration_data_[0] = (short)(data_[1]<<8 | data_[0]) >> 4;
+    raw_acceleration_data_[1] = (short)(data_[3]<<8 | data_[2]) >> 4;
+    raw_acceleration_data_[2] = (short)(data_[5]<<8 | data_[4]) >> 4;
 }
  
 void Accelerometer_LSM303DLHC::ReadRawMagnetometer(int m[3]) {
@@ -77,10 +74,10 @@ void Accelerometer_LSM303DLHC::SetOffset(float x, float y, float z) {
 
 static constexpr float _lsm303Accel_MG_LSB = 0.001F;
 
-void Accelerometer_LSM303DLHC::computeAcc(int raw_data[3], float real_data[3], float gravity_adjustment_conversion_factor) {
-    real_data[0] = raw_data[0] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
-    real_data[1] = raw_data[1] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
-    real_data[2] = raw_data[2] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
+void Accelerometer_LSM303DLHC::computeAcc(float real_data[3], float gravity_adjustment_conversion_factor) {
+    real_data[0] = raw_acceleration_data_[0] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
+    real_data[1] = raw_acceleration_data_[1] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
+    real_data[2] = raw_acceleration_data_[2] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
 }
 
 double Accelerometer_LSM303DLHC::calibrate() {
@@ -93,8 +90,8 @@ double Accelerometer_LSM303DLHC::calibrate() {
 
     //collects a number of samples to calibrate for 1G
     for(int i = 0; i < sampleCount; i++) {
-        ReadRawAcceleration(acc_array);
-        acc_magnitude = sqrt(acc_array[0] * acc_array[0] + acc_array[1] * acc_array[1] + acc_array[2] * acc_array[2]);
+        ReadRawAcceleration();
+        acc_magnitude = sqrt(raw_acceleration_data_[0] * raw_acceleration_data_[0] + raw_acceleration_data_[1] * raw_acceleration_data_[1] + raw_acceleration_data_[2] * raw_acceleration_data_[2]);
         average_array[i] = acc_magnitude * 0.001;
     }
 
