@@ -34,6 +34,8 @@ void Accelerometer_LSM303DLHC::init() {
     commands[0] = CTRL_REG1_A;
     commands[1] = 0x2F; // 0b00101111
     i2c_bus_.write(ACC_ADDRESS, commands, kNumBytes);
+
+    calibrate();
 }
  
 
@@ -72,15 +74,22 @@ void Accelerometer_LSM303DLHC::SetOffset(float x, float y, float z) {
 }
 
 
-static constexpr float _lsm303Accel_MG_LSB = 0.001F;
 
-void Accelerometer_LSM303DLHC::computeAcc(float real_data[3], float gravity_adjustment_conversion_factor) {
-    real_data[0] = raw_acceleration_data_[0] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
-    real_data[1] = raw_acceleration_data_[1] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
-    real_data[2] = raw_acceleration_data_[2] * _lsm303Accel_MG_LSB / gravity_adjustment_conversion_factor;
+
+void Accelerometer_LSM303DLHC::computeAcc() {
+    ReadRawAcceleration();
+    
+    static constexpr float kMG_LSB = 0.001F;
+    real_acceleration_data_[0] = raw_acceleration_data_[0] * kMG_LSB / gravity_adjustment_conversion_factor_;
+    real_acceleration_data_[1] = raw_acceleration_data_[1] * kMG_LSB / gravity_adjustment_conversion_factor_;
+    real_acceleration_data_[2] = raw_acceleration_data_[2] * kMG_LSB / gravity_adjustment_conversion_factor_;
 }
 
-double Accelerometer_LSM303DLHC::calibrate() {
+float* Accelerometer_LSM303DLHC::getAcc() {
+    return real_acceleration_data_;
+}
+
+void Accelerometer_LSM303DLHC::calibrate() {
     int acc_array[3] = {0,0,0};
     constexpr uint8_t sampleCount = 100;
 
@@ -111,7 +120,7 @@ double Accelerometer_LSM303DLHC::calibrate() {
 
     /*checks that the maximum deviation is below a certain threshold. If it is too large, the conversion factor
     * will be set to a previously determined convesion factor */
-    double gravity_adjustment_conversion_factor = 0;
+    gravity_adjustment_conversion_factor_ = 0;
 
     if (max_value - min_value < 0.09) {
         double total_array = 0;
@@ -119,10 +128,8 @@ double Accelerometer_LSM303DLHC::calibrate() {
 		    total_array += average_array[i];
 	    }
 
-	    gravity_adjustment_conversion_factor = total_array / sampleCount;
+	    gravity_adjustment_conversion_factor_ = total_array / sampleCount;
     } else {
-        gravity_adjustment_conversion_factor = 1.028;
+        gravity_adjustment_conversion_factor_ = 1.028;
     }
-
-    return gravity_adjustment_conversion_factor;
 }

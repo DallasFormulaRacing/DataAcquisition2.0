@@ -118,10 +118,13 @@ class Accelerometer_LSM303DLHC {
          */
         void ReadRawMagnetometer(int m[3]);
         
-        void computeAcc(float out[3], float gravity);
+        void computeAcc();
 
-        double calibrate();
+        void calibrate();
+
+        float* getAcc();
         
+        float gravity_adjustment_conversion_factor_;
      
     private:
         I2C i2c_bus_;
@@ -130,6 +133,8 @@ class Accelerometer_LSM303DLHC {
         int scale_[3];
 
         short raw_acceleration_data_[3] = {0, 0, 0};
+        float real_acceleration_data_[3] = {0, 0, 0};
+        
 };
  
 #endif
