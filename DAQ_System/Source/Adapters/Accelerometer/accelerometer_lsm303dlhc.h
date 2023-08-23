@@ -114,11 +114,11 @@ class Accelerometer_LSM303DLHC {
          */
         void ReadRawMagnetometer(int m[3]);
         
-        void computeAcc();
+        void ComputeAcceleration();
 
         
 
-        float* getAcc();
+        float* GetAcceleration();
         
         float gravity_adjustment_conversion_factor_;
      

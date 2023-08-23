@@ -4,11 +4,9 @@
 
 
 int main() {
-
     Accelerometer_LSM303DLHC accelerometer(I2C_SDA, I2C_SCL);
     accelerometer.init();
     
-    // int acc_data[3] = {0, 0, 0};
     float* acc_data;
     int mag_data[3] = {0, 0, 0};
 
@@ -19,8 +17,8 @@ int main() {
     
     while (true) {
         
-        accelerometer.computeAcc();
-        acc_data = accelerometer.getAcc();
+        accelerometer.ComputeAcceleration();
+        acc_data = accelerometer.GetAcceleration();
 
         //accelerometer values must be 
         std::cout << "ACC:" << 
