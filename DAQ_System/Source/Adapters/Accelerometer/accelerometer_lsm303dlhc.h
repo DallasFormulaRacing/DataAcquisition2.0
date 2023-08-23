@@ -45,6 +45,9 @@
 #define IRA_REG_M         0x0A
 #define IRB_REG_M         0x0B
 #define IRC_REG_M         0x0C
+
+#define MAG_ADDRESS  0x3C
+#define ACC_ADDRESS  0x32
    
 /** Tilt-compensated compass interface Library for the STMicro LSM303DLm 3-axis magnetometer, 3-axis acceleromter
  * @author Michael Shimniok http://www.bot-thoughts.com/
@@ -67,11 +70,19 @@
  * @endcode
  */
 class Accelerometer_LSM303DLHC {
- 
     public:
-       
         Accelerometer_LSM303DLHC(PinName sda, PinName scl);
- 
+        // Initialize the device
+        void init();
+
+        float* GetAcceleration();
+        float* GetMagnetometerData();
+        
+        void ComputeAcceleration();
+        void ComputeMagnetometer();
+
+
+//========================================Todo & Unused=======================================
         /** sets the x, y, and z offset corrections for hard iron calibration
          * 
          * Calibration details here:
@@ -85,7 +96,7 @@ class Accelerometer_LSM303DLHC {
          * @param y is the offset correction for the y axis
          * @param z is the offset correction for the z axis
          */
-        void init();
+        
         void SetOffset(float x, float y, float z);
         
         /** sets the scale factor for the x, y, and z axes
@@ -99,46 +110,23 @@ class Accelerometer_LSM303DLHC {
          * same max/min values
          */
         void SetScale(float x, float y, float z);
- 
-        /** read the calibrated accelerometer and magnetometer values
-         *
-         * @param a is the accelerometer 3d vector, written by the function
-         * @param m is the magnetometer 3d vector, written by the function
-         */
-        
-        
- 
-        /** read the calibrated magnetometer values
-         *
-         * @param m is the magnetometer 3d vector, written by the function
-         */
-        void ReadRawMagnetometer(int m[3]);
-        
-        void ComputeAcceleration();
+//==============================================================================================
 
-        
-
-        float* GetAcceleration();
-        
-        float gravity_adjustment_conversion_factor_;
-     
     private:
-        /** read the calibrated accelerometer values
-         *
-         * @param a is the accelerometer 3d vector, written by the function
-         */
-        void ReadRawAcceleration();
-
         void calibrate();
+        void ReadRawAcceleration();
+        void ReadRawMagnetometer();
 
         I2C i2c_bus_;
-        char data_[6];
         int offset_[3];
         int scale_[3];
+        float gravity_adjustment_conversion_factor_;
 
         short raw_acceleration_data_[3] = {0, 0, 0};
         float real_acceleration_data_[3] = {0, 0, 0};
-        
+
+        short raw_magnetometer_data_[3] = {0, 0, 0};
+        float real_magnetometer_data_[3] = {0, 0, 0};
 };
  
 #endif

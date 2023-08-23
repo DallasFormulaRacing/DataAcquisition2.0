@@ -24,8 +24,7 @@ int main() {
         std::cout << "ACC:" << 
                      "\tX: " << acc_data[0] <<
                      "\tY: " << acc_data[1] <<
-                     "\tZ: " << acc_data[2] <<
-                     "\tRate: " << accelerometer.gravity_adjustment_conversion_factor_ << std::endl;
+                     "\tZ: " << acc_data[2] << std::endl;
 
         /*std::cout << "MAG:" << 
                      "\tX: " << mag_data[0] <<

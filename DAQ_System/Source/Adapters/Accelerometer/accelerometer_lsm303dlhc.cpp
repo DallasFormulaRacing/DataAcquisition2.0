@@ -1,12 +1,5 @@
 #include "mbed.h"
 #include "accelerometer_lsm303dlhc.h"
-#include "stdio.h"
-#include <cstdint>
-#include <locale>
- 
-#define MAG_ADDRESS  0x3C
-#define ACC_ADDRESS  0x32
-  
  
 Accelerometer_LSM303DLHC::Accelerometer_LSM303DLHC(PinName sda, PinName scl)
   : i2c_bus_(sda, scl) {
@@ -16,7 +9,7 @@ Accelerometer_LSM303DLHC::Accelerometer_LSM303DLHC(PinName sda, PinName scl)
  
 void Accelerometer_LSM303DLHC::init() {
     static constexpr uint8_t kNumBytes = 2;
-    char commands[kNumBytes];
+    char commands[kNumBytes] = "";
 
     // init mag
     // continuous conversion mode
@@ -106,8 +99,7 @@ void Accelerometer_LSM303DLHC::ComputeAcceleration() {
 }
 
 void Accelerometer_LSM303DLHC::ReadRawAcceleration() {
-    char command[1];
-    command[0] = OUT_X_L_A | (1<<7);
+    char command[1] = { OUT_X_L_A | (1<<7) };
     i2c_bus_.write(ACC_ADDRESS, command, 1);
 
     char bytes_received[6];
@@ -118,13 +110,26 @@ void Accelerometer_LSM303DLHC::ReadRawAcceleration() {
     raw_acceleration_data_[1] = (short)(bytes_received[3]<<8 | bytes_received[2]) >> 4;
     raw_acceleration_data_[2] = (short)(bytes_received[5]<<8 | bytes_received[4]) >> 4;
 }
+
+//======================================================================================
+
+float* Accelerometer_LSM303DLHC::GetMagnetometerData() {
+    // TODO: Rename this method after the unit returned by the magnetometer
+    return real_acceleration_data_;
+}
  
-void Accelerometer_LSM303DLHC::ReadRawMagnetometer(int m[3]) {
-    data_[0] = OUT_X_H_M;
-    i2c_bus_.write(MAG_ADDRESS, data_, 1);
-    i2c_bus_.read(MAG_ADDRESS, data_, 6);
+void Accelerometer_LSM303DLHC::ReadRawMagnetometer() {
+    char command[1] = {OUT_X_H_M};
+    i2c_bus_.write(MAG_ADDRESS, command, 1);
+
+    char bytes_received[6];
+    i2c_bus_.read(MAG_ADDRESS, bytes_received, 6);
     
-    m[0] = (short) (data_[0]<<8 | data_[1]); // X
-    m[1] = (short) (data_[4]<<8 | data_[5]); // Y
-    m[2] = (short) (data_[2]<<8 | data_[3]); // Z
+    raw_magnetometer_data_[0] = (short) (bytes_received[0]<<8 | bytes_received[1]); // X
+    raw_magnetometer_data_[1] = (short) (bytes_received[4]<<8 | bytes_received[5]); // Y
+    raw_magnetometer_data_[2] = (short) (bytes_received[2]<<8 | bytes_received[3]); // Z
+ }
+
+ void Accelerometer_LSM303DLHC::ComputeMagnetometer() {
+     // TODO: post-process raw_magnetometer_data_ & store results in real_magnetometer_data_
  }
