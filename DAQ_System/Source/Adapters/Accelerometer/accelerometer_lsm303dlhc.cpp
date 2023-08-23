@@ -69,6 +69,7 @@ void Accelerometer_LSM303DLHC::calibrate() {
 
 	    gravity_adjustment_conversion_factor_ = total_array / kSampleCount;
     } else {
+        // Testing found that ~1.028 is about 1G
         gravity_adjustment_conversion_factor_ = 1.028;
     }
 }
