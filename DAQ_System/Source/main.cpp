@@ -11,8 +11,9 @@
 
 // External Dependancies
 #include "mbed.h"
+
+// DFR Custom Dependancies
 #include "Adapter/Accelerometer/accelerometer_lsm303dlhc.hpp"
-#include <iostream>
 
 
 int main() {
