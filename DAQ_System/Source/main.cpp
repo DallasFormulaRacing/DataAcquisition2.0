@@ -11,19 +11,21 @@
 
 // External Dependancies
 #include "mbed.h"
-#include "Adapters/Accelerometer/accelerometer_lsm303dlhc.h"
+#include "Adapter/Accelerometer/accelerometer_lsm303dlhc.hpp"
 #include <iostream>
 
 
 int main() {
-    Accelerometer_LSM303DLHC accelerometer(I2C_SDA, I2C_SCL);
-    accelerometer.init();    
     float* acceleration = nullptr;
+    std::unique_ptr<adapter::IAccelerometer> accelerometer
+        = std::make_unique<adapter::Accelerometer_LSM303DLHC>(I2C_SDA, I2C_SCL);
+
+    accelerometer->init();
 
     std::cout << "===========New Test===========" << std::endl;
     while (true) {
-        accelerometer.ComputeAcceleration();
-        acceleration = accelerometer.GetAcceleration();
+        accelerometer->ComputeAcceleration();
+        acceleration = accelerometer->GetAcceleration();
 
         //accelerometer values must be 
         std::cout << "ACC:" << 

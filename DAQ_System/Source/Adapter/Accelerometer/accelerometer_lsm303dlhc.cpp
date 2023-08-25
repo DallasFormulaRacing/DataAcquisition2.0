@@ -1,6 +1,20 @@
-#include "mbed.h"
-#include "accelerometer_lsm303dlhc.h"
- 
+/*
+* Accelerometer LSM303DLHC
+* Authors:        Nathaniel Ho
+*                 Cristian Cruz    
+*          
+* Email:         nathanielho712@gmail.com
+*                cris14.alex@gmail.com
+* 
+* (c) 2023 Dallas Formula Racing - Embedded Firmware Team
+* Formula SAE International Collegiate Chapter
+* GPL-3.0 License
+*/
+
+#include "accelerometer_lsm303dlhc.hpp"
+
+namespace adapter {
+
 Accelerometer_LSM303DLHC::Accelerometer_LSM303DLHC(PinName sda, PinName scl)
   : i2c_bus_(sda, scl) {
     // the I2C bus/clock frequency, either standard (100000) or fast (400000)
@@ -129,8 +143,10 @@ void Accelerometer_LSM303DLHC::ReadRawMagnetometer() {
     raw_magnetometer_data_[0] = (short) (bytes_received[0]<<8 | bytes_received[1]); // X
     raw_magnetometer_data_[1] = (short) (bytes_received[4]<<8 | bytes_received[5]); // Y
     raw_magnetometer_data_[2] = (short) (bytes_received[2]<<8 | bytes_received[3]); // Z
- }
+}
 
- void Accelerometer_LSM303DLHC::ComputeMagnetometer() {
-     // TODO: post-process raw_magnetometer_data_ & store results in real_magnetometer_data_
- }
+void Accelerometer_LSM303DLHC::ComputeMagnetometer() {
+    // TODO: post-process raw_magnetometer_data_ & store results in real_magnetometer_data_
+}
+
+}

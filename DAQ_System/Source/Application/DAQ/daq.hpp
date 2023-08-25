@@ -34,10 +34,10 @@ class DAQ {
 
     // private:
         struct SuspensionPotentiometers {
-            std::unique_ptr<adapter::ILinear_Potentiometer> front_left;
-            std::unique_ptr<adapter::ILinear_Potentiometer> front_right;
-            std::unique_ptr<adapter::ILinear_Potentiometer> rear_left;
-            std::unique_ptr<adapter::ILinear_Potentiometer> rear_right;
+            std::unique_ptr<adapter::ILinearPotentiometer> front_left;
+            std::unique_ptr<adapter::ILinearPotentiometer> front_right;
+            std::unique_ptr<adapter::ILinearPotentiometer> rear_left;
+            std::unique_ptr<adapter::ILinearPotentiometer> rear_right;
         };
 
         SuspensionPotentiometers suspension_pots;
@@ -47,7 +47,6 @@ class DAQ {
         char file_name_[16] = "\0";
         char write_buffer_[BUFFER_SIZE] = "\0";
         uint8_t status_ = 0;
-
 };
 
 

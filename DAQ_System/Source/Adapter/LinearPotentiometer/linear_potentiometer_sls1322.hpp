@@ -23,7 +23,7 @@
 
 namespace adapter {
 
-class LinearPotentiometer_SLS1322 : public adapter::ILinear_Potentiometer {
+class LinearPotentiometer_SLS1322 : public ILinearPotentiometer {
     public:
         LinearPotentiometer_SLS1322(PinName analog_pin);
         virtual ~LinearPotentiometer_SLS1322();

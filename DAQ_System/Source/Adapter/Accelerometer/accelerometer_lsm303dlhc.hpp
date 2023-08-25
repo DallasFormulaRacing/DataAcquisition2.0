@@ -1,85 +1,51 @@
-#ifndef __LSM303DLHC_H
-#define __LSM303DLHC_H
- 
+/*
+* Accelerometer LSM303DLHC
+* Authors:       Nathaniel Ho
+*                Cristian Cruz    
+*          
+* Email:         nathanielho712@gmail.com
+*                cris14.alex@gmail.com
+* 
+* (c) 2023 Dallas Formula Racing - Embedded Firmware Team
+* Formula SAE International Collegiate Chapter
+* GPL-3.0 License
+*/
+
+#ifndef ACCELEROMETER_LSM303DLHC_H
+#define ACCELEROMETER_LSM303DLHC_H
+
+// External Dependancies
 #include "mbed.h"
- 
-// register addresses
- 
-#define CTRL_REG1_A       0x20
-#define CTRL_REG2_A       0x21
-#define CTRL_REG3_A       0x22
-#define CTRL_REG4_A       0x23
-#define CTRL_REG5_A       0x24
-#define CTRL_REG6_A       0x25 // DLHC only
-#define REFERENCE_A       0x26
-#define STATUS_REG_A      0x27
- 
-#define OUT_X_L_A         0x28
-#define OUT_X_H_A         0x29
-#define OUT_Y_L_A         0x2A
-#define OUT_Y_H_A         0x2B
-#define OUT_Z_L_A         0x2C
-#define OUT_Z_H_A         0x2D
- 
-#define INT1_CFG_A        0x30
-#define INT1_SRC_A        0x31
-#define INT1_THS_A        0x32
-#define INT1_DURATION_A   0x33
-#define INT2_CFG_A        0x34
-#define INT2_SRC_A        0x35
-#define INT2_THS_A        0x36
-#define INT2_DURATION_A   0x37
- 
-#define CRA_REG_M         0x00
-#define CRB_REG_M         0x01
-#define MR_REG_M          0x02
- 
-#define OUT_X_H_M         0x03
-#define OUT_X_L_M         0x04
-#define OUT_Y_H_M         0x07
-#define OUT_Y_L_M         0x08
-#define OUT_Z_H_M         0x05
-#define OUT_Z_L_M         0x06
- 
-#define SR_REG_M          0x09
-#define IRA_REG_M         0x0A
-#define IRB_REG_M         0x0B
-#define IRC_REG_M         0x0C
+
+// DFR Custom Dependancies
+#include "Adapter/Interfaces/iaccelerometer.hpp"
+
+
+namespace adapter {
 
 #define MAG_ADDRESS  0x3C
 #define ACC_ADDRESS  0x32
-   
-/** Tilt-compensated compass interface Library for the STMicro LSM303DLm 3-axis magnetometer, 3-axis acceleromter
- * @author Michael Shimniok http://www.bot-thoughts.com/
- *
- * This is an early revision; I've not yet implemented heading calculation and the interface differs from my
- * earlier LSM303DLH; I hope to make this library drop in compatible at some point in the future.
- * setScale() and setOffset() have no effect at this time.
- *
- * @code
- * #include "mbed.h"
- * #include "LSM303DLM.h"
- *
- * LSM303DLM compass(p28, p27);
- * ...
- * int a[3], m[3];
- * ...
- * compass.readAcc(a);
- * compass.readMag(m);
- *
- * @endcode
- */
-class Accelerometer_LSM303DLHC {
+
+// Register Addresses
+#define MR_REG_M          0x02
+
+#define CRA_REG_M         0x00
+#define CTRL_REG1_A       0x20
+
+#define OUT_X_L_A         0x28
+#define OUT_X_H_M         0x03
+
+class Accelerometer_LSM303DLHC: public IAccelerometer {
     public:
         Accelerometer_LSM303DLHC(PinName sda, PinName scl);
         // Initialize the device
-        void init();
+        void init() override;
 
-        float* GetAcceleration();
-        float* GetMagnetometerData();
+        float* GetAcceleration() override;
+        float* GetMagnetometerData() override;
         
-        void ComputeAcceleration();
-        void ComputeMagnetometer();
+        void ComputeAcceleration() override;
+        void ComputeMagnetometer() override;
 
 
 //========================================Todo & Unused=======================================
@@ -113,7 +79,7 @@ class Accelerometer_LSM303DLHC {
 //==============================================================================================
 
     private:
-        void calibrate();
+        void calibrate() override;
         void ReadRawAcceleration();
         void ReadRawMagnetometer();
 
@@ -128,5 +94,7 @@ class Accelerometer_LSM303DLHC {
         short raw_magnetometer_data_[3] = {0, 0, 0};
         float real_magnetometer_data_[3] = {0, 0, 0};
 };
- 
-#endif
+
+}
+
+#endif // ACCELEROMETER_LSM303DLHC_H
