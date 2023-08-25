@@ -1,4 +1,4 @@
-# DataAcquisition2.0
+# `DataAcquisition2.0`
 🏁 For documentation, checkout our [Wiki](https://github.com/DallasFormulaRacing/DataAcquisition2.0/wiki)!
 
 ## Objective:
