@@ -1,10 +1,12 @@
 /*
 * Accelerometer LSM303DLHC
 * Authors:       Nathaniel Ho
-*                Cristian Cruz    
+*                Cristian Cruz
+*                Chad Melhem    
 *          
 * Email:         nathanielho712@gmail.com
 *                cris14.alex@gmail.com
+*                chad.melhem@utdallas.edu
 * 
 * (c) 2023 Dallas Formula Racing - Embedded Firmware Team
 * Formula SAE International Collegiate Chapter
