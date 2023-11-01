@@ -16,9 +16,9 @@
 
 namespace adapter {
 
-class ILinear_Potentiometer {
+class ILinearPotentiometer {
     public:
-        virtual ~ILinear_Potentiometer() = default;
+        virtual ~ILinearPotentiometer() = default;
         
         virtual float GetDisplacementInches() = 0;
         virtual float GetDisplacementMillimeters() = 0;

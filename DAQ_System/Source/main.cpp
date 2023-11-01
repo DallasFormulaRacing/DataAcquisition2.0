@@ -5,68 +5,6 @@
 // * GPL-3.0 License
 // */
 
-// // C/C++ Standard Libraries
-// #include <iostream>
-// #include <memory>
-
-// // External Dependancies
-// #include "mbed.h"
-
-// // DFR Custom Dependancies
-// #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
-// #include "Platform/component_interface_bridge.hpp"
-
-// using AutoReloadTimer = LowPowerTicker;
-
-// static bool logging = false;
-// static void start_logging() {
-//     logging = true;
-// }
-
-// struct SuspensionPotentiometers {
-//     std::unique_ptr<adapter::ILinear_Potentiometer> front_left;
-//     std::unique_ptr<adapter::ILinear_Potentiometer> front_right;
-//     std::unique_ptr<adapter::ILinear_Potentiometer> rear_left;
-//     std::unique_ptr<adapter::ILinear_Potentiometer> rear_right;
-// };
-
-// int main() {
-//     // Init components
-//     platform::ComponentInterfaceBridge bridge;
-
-//     SuspensionPotentiometers suspension_pots;
-//     suspension_pots.front_left  = bridge.GetLinearPotentiometer(platform::front_left);
-//     suspension_pots.front_right = bridge.GetLinearPotentiometer(platform::front_right);
-//     suspension_pots.rear_left   = bridge.GetLinearPotentiometer(platform::rear_left);
-//     suspension_pots.rear_right  = bridge.GetLinearPotentiometer(platform::rear_right);
-    
-//     // Start timer
-//     constexpr uint8_t kLoggingRate = 3; // seconds
-//     AutoReloadTimer timer;
-//     timer.attach(&start_logging, std::chrono::seconds(kLoggingRate));
-
-//     double timestamp = 0.0f;
-
-//     // Operate
-//     while (true) {
-//         suspension_pots.front_left->ComputeDisplacementPercentage();
-
-//         if (logging) {
-//             // Operate: Writing
-//             timestamp += kLoggingRate;
-//             std::cout << suspension_pots.front_left->GetDisplacementInches() << " in\t"
-//                       << suspension_pots.front_left->GetDisplacementMillimeters() << " mm" << std::endl;
-            
-//             logging = false;
-//         }
-//     }
-// }
-
-
-//==================================================================================
-
-#include "mbed.h"
-
 // DFR Custom Dependancies
 #include "Application/DAQ/daq.hpp"
 
