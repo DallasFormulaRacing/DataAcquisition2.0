@@ -1,8 +1,8 @@
-*/.build
-*/.mbed
-*/projectfiles
-*/*.py*
-*/BUILD
-.vscode/
+Mbed_DAQ/.build
+Mbed_DAQ/.mbed
+Mbed_DAQ/projectfiles
+Mbed_DAQ/*.py*
+Mbed_DAQ/BUILD
 
-*/*-backups/
+
+Mbed_DAQ/*-backups/
