@@ -1,8 +1,5 @@
-Mbed_DAQ/.build
-Mbed_DAQ/.mbed
-Mbed_DAQ/projectfiles
-Mbed_DAQ/*.py*
-Mbed_DAQ/BUILD
-
-
-Mbed_DAQ/*-backups/
+Archive/Mbed_DAQ/.build
+Archive/Mbed_DAQ/.mbed
+Archive/Mbed_DAQ/projectfiles
+Archive/Mbed_DAQ/*.py*
+Archive/Mbed_DAQ/BUILD
