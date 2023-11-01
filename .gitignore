@@ -3,4 +3,6 @@
 */projectfiles
 */*.py*
 */BUILD
+.vscode/
 
+*/*-backups/
