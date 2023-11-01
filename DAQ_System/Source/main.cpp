@@ -5,87 +5,54 @@
 // * GPL-3.0 License
 // */
 
-// // C/C++ Standard Libraries
-// #include <iostream>
-// #include <memory>
+// DFR Custom Dependancies
+#include "Application/DAQ/daq.hpp"
 
-// // External Dependancies
-// #include "mbed.h"
+using AutoReloadTimer = LowPowerTicker;
 
-// // DFR Custom Dependancies
-// #include "Adapter/Interfaces/ilinear_potentiometer.hpp"
-// #include "Platform/component_interface_bridge.hpp"
+static InterruptIn button(PC_13);
+static bool data_logging_enable = false;
+static bool logging = false;
 
-// using AutoReloadTimer = LowPowerTicker;
+static void logging_signal() {
+    logging = true;
+}
 
-// static bool logging = false;
-// static void start_logging() {
-//     logging = true;
-// }
+// interrupt routine activated by a falling edge of button input
+void ToggleDataLogging(void) {
+    data_logging_enable = !data_logging_enable;
+}
 
-// struct SuspensionPotentiometers {
-//     std::unique_ptr<adapter::ILinear_Potentiometer> front_left;
-//     std::unique_ptr<adapter::ILinear_Potentiometer> front_right;
-//     std::unique_ptr<adapter::ILinear_Potentiometer> rear_left;
-//     std::unique_ptr<adapter::ILinear_Potentiometer> rear_right;
-// };
-
-// int main() {
-//     // Init components
-//     platform::ComponentInterfaceBridge bridge;
-
-//     SuspensionPotentiometers suspension_pots;
-//     suspension_pots.front_left  = bridge.GetLinearPotentiometer(platform::front_left);
-//     suspension_pots.front_right = bridge.GetLinearPotentiometer(platform::front_right);
-//     suspension_pots.rear_left   = bridge.GetLinearPotentiometer(platform::rear_left);
-//     suspension_pots.rear_right  = bridge.GetLinearPotentiometer(platform::rear_right);
+int main() {
+    // Init components
+    application::DAQ daq;
+    daq.Init();
     
-//     // Start timer
-//     constexpr uint8_t kLoggingRate = 3; // seconds
-//     AutoReloadTimer timer;
-//     timer.attach(&start_logging, std::chrono::seconds(kLoggingRate));
+    // Start timer
+    constexpr uint8_t kLoggingRate = 3; // seconds
+    AutoReloadTimer timer;
+    timer.attach(&logging_signal, std::chrono::seconds(kLoggingRate));
 
-//     double timestamp = 0.0f;
+    // use internal pullup for pushbutton 
+    button.mode(PullUp);
+    wait_ns(100);
+    button.fall(&ToggleDataLogging);
 
-//     // Operate
-//     while (true) {
-//         suspension_pots.front_left->ComputeDisplacementPercentage();
-
-//         if (logging) {
-//             // Operate: Writing
-//             timestamp += kLoggingRate;
-//             std::cout << suspension_pots.front_left->GetDisplacementInches() << " in\t"
-//                       << suspension_pots.front_left->GetDisplacementMillimeters() << " mm" << std::endl;
-            
-//             logging = false;
-//         }
-//     }
-// }
+    uint8_t open_file = 0;
+    float timestamp = 0.0f;
 
 
-//==================================================================================
-
-#include "mbed.h"
-#include <cstdio>
-
-#include "Adapter/Gyroscope/gyroscope_l3gd20h.hpp"
-
-std::unique_ptr<adapter::IGyroscope> gyro = std::make_unique<adapter::Gyroscope_L3GD20H>(I2C_SDA,I2C_SCL);
-
-int main(){
-    // for the 3 arrays below the first element will deal with purely the x-axis the second element is y and the last element is z. These will be used to calculate an average
-    // that will be used for the offeset for the callibration of the gyroscope. Int n is used to control the sample size for the average.
-    short* degrees_per_second;
-    float* radians_per_second;
-    
+    printf("Entering Super Loop\n");
+    // Operate
     while (true) {
-        gyro->ComputeAngularVelocity();
-        degrees_per_second = gyro->GetDegreesPerSecond();
-        radians_per_second = gyro->GetRadiansPerSecond();
-   
-        printf("Degrees Per Second: X = %d, Y = %d, Z = %d", degrees_per_second[0], degrees_per_second[1], degrees_per_second[2]);
-        printf("   ");
-        printf("Radians per second =  X = %f, Y = %f, Z = %f  \n", radians_per_second[0],radians_per_second[1], radians_per_second[2]);
-        printf( "It's Gyroin Time =( \n");
-    }             
+        daq.Read();
+
+        // TODO: De-couple this condition. It should not take 3 to close the file
+        if (logging) {
+            // Operate: Writing
+            timestamp += kLoggingRate;
+            daq.Write(timestamp, data_logging_enable);
+            logging = false;
+        }
+    }
 }
