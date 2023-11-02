@@ -25,7 +25,8 @@
 ## Hardware and Equipment
 The STM32 Nucleo F429ZI microcontroller development board is used as the current target device for code merge to the `main` and `develop` branches. Theoretically, other Arm Cortex M4 based STM32 devices with the necessary peripherals should be able to run the same program.
 
-<img src="https://www.st.com/bin/ecommerce/api/image.PF262637.en.feature-description-include-personalized-no-cpn-medium.jpg" alt="STM32 Nucleo F429ZI Microcontroller Development Board" width="300">
+![image](https://github.com/DallasFormulaRacing/DataAcquisition2.0/assets/71054319/00c8cfe3-c1f8-499c-8c72-fe8f191a8108)
+
 
 ## Future Plans
 - Developing for a dual-core STM32H7 microcontroller.
@@ -35,4 +36,4 @@ The STM32 Nucleo F429ZI microcontroller development board is used as the current
   - Both cores may be communicate and synchronize using the OpenAMP framework.
 
 ## Deprecated Technologies
-Initially, this project ran a program consisting of a simple super loop and interfaced with the hardware using the Mbed framework. This allowed us to focus on building the team knowledge base for developing custom drivers to support sensors. In favor of our long term goals, we have transitioned to supporting the above Firmware Tech Stack for the DAQ.
+Initially, this project ran a program consisting of a simple super loop and interfaced with the hardware using the Mbed framework. This allowed us to focus on building the team knowledge base for developing custom drivers to support sensors. In favor of our long term goals, we have transitioned to supporting the above [Firmware Tech Stack](https://github.com/DallasFormulaRacing/DataAcquisition2.0/tree/feature/134_rtos-cubeide-project#firmware-tech-stack) for the DAQ.
