@@ -1,6 +1,9 @@
 # `DataAcquisition2.0`
 🏁 For documentation, checkout our [Wiki](https://github.com/DallasFormulaRacing/DataAcquisition2.0/wiki)!
 
+## Table of Contents
+1. [Objective](#Objective)
+
 ## Objective:
 - A Data Acquisition (DAQ) System for interfacing with the vehicle ECU and additional sensors.
 - Build the first fully-fledged DAQ with re-usable code through:
@@ -9,7 +12,7 @@
     - Hardware abstraction
 - Efficiently record data to a CSV file for system testing & refinement of other vehicle components via analyses.
 - Make sensor data conveniently accessible for the whole DFR organization.
-- To be used in tandem with DFR's [DataAnalyzer](https://github.com/DallasFormulaRacing/DataAnalyzer)
+- To be used in tandem with DFR's [DataAnalyzer](https://github.com/DallasFormulaRacing/DataAnalyzer).
 
 ## Firmware Tech Stack
 - STM32 Hardware Abstraction Layer ([HAL](https://www.st.com/resource/en/user_manual/um1725-description-of-stm32f4-hal-and-lowlayer-drivers-stmicroelectronics.pdf))
@@ -26,11 +29,12 @@
   - Allows users to access the resulting CSV file on any device
 
 ## Hardware and Equipment
-The [STM32 Nucleo F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html) microcontroller development board is used as the current target device for code merge to the `main` and `develop` branches. Theoretically, other Arm Cortex M4 based STM32 devices with the necessary peripherals should be able to run the same program.
+The [STM32 Nucleo F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.html) microcontroller development board is used as the current target device for code merged to the `main` and `develop` branches. Theoretically, other Arm Cortex M4 based STM32 devices with the necessary peripherals should be able to run the same program.
 
 ![image](https://github.com/DallasFormulaRacing/DataAcquisition2.0/assets/71054319/00c8cfe3-c1f8-499c-8c72-fe8f191a8108)
 
-## Supported Features
+
+## Supported User Features
 Output:
 - [x] Data logging to a micro-SD card
 - [ ] Data logging to a USB flash drive
@@ -46,20 +50,42 @@ Input
 - [ ] Strain Gauges: Steering Column Torque
 - [ ] Tire Temperature
 - [ ] ECU
-  - [ ] todo
-  - [ ] todo 
+  - [ ] RPM
+  - [ ] TPS
+  - [ ] Fuel Open Time
+  - [ ] Ignition Angle
+  - [ ] Barometer
+  - [ ] MAP
+  - [ ] Lambda 
 
 ## Resulting Output
-todo
+
+| Computed Output                | Supported Units                                         |
+| :----------------------------- |:------------------------------------------------------- |
+| Suspension Travel Displacement | - Inches <br /> - Millimeters                           |
+| Acceleration (3 DoF)           | - m/s^2 <br /> - Gs                                     |
+| Rotational Velocity (3 DoF)    | - Degrees per second <br /> - Radians per second        |
+| Location Coordinates           | - Altitude <br /> - Latitude <br /> - Longitude         |
+| External Force                 | - Stress <br /> - Torque <br /> - Pressure              |
+| Tire Temperature               | - Farenheit <br /> - Celsius                            |
+| Motor Shaft Speed              | - Revolutions per Minute (RPM)                          |
+| Throttle Position              | - Percentage                                            |
+| Fuel Open Time                 | - Milliseconds                                          |
+| Ignition Angle                 | - Degrees                                               |
+| Atmospheric Pressure           | - Pound per Square Inch (PSI) <br /> - Kilopascal (kPa) |
+| Intake Manifold Pressure       | - Pound per Square Inch (PSI) <br /> - Kilopascal (kPa) |
+| Exhaust Oxygen                 | - Lambda                                                |
+
 
 ## Future Plans
 - Developing for a dual-core STM32H7 microcontroller.
   - The Cortex M4 core may focus on sampling data from sensors.
   - The Cortex M7 core may focus on outputting the processed data.
   - Both cores may run FreeRTOS for organizational purposes.
-  - Both cores may be communicate and synchronize using the OpenAMP framework.
+  - Both cores may communicate and synchronize with each other using the OpenAMP framework.
 - Developing on a custom PCB microcontroller.
   - Currently in progress and led by our Electrical Team.
+  - Ideal for mounting on the vehicle.
 
 ## Deprecated Technologies
 Initially, this project ran a program consisting of a simple super loop and interfaced with the hardware using the Mbed framework. This allowed us to focus on building the team knowledge base for developing custom drivers to support sensors. In favor of our long term goals, we have transitioned to supporting the above [Firmware Tech Stack](https://github.com/DallasFormulaRacing/DataAcquisition2.0/tree/feature/134_rtos-cubeide-project#firmware-tech-stack) for the DAQ.
