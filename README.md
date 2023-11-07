@@ -2,7 +2,13 @@
 🏁 For documentation, checkout our [Wiki](https://github.com/DallasFormulaRacing/DataAcquisition2.0/wiki)!
 
 ## Table of Contents
-1. [Objective](#Objective)
+1. [Objective](#objective)
+2. [Firmware Tech Stack](#firmware-tec-stack)
+3. [Hardware and Equipment](#hardware-and-equipment)
+4. [Supported User Features](#supported-user-features)
+5. [Resulting Output](#resulting-output)
+6. [Future Plans](#future-plans)
+7. [Deprecated Technologies](#deprecated-technologies)
 
 ## Objective:
 - A Data Acquisition (DAQ) System for interfacing with the vehicle ECU and additional sensors.
@@ -88,4 +94,4 @@ Input
   - Ideal for mounting on the vehicle.
 
 ## Deprecated Technologies
-Initially, this project ran a program consisting of a simple super loop and interfaced with the hardware using the Mbed framework. This allowed us to focus on building the team knowledge base for developing custom drivers to support sensors. In favor of our long term goals, we have transitioned to supporting the above [Firmware Tech Stack](https://github.com/DallasFormulaRacing/DataAcquisition2.0/tree/feature/134_rtos-cubeide-project#firmware-tech-stack) for the DAQ.
+Initially, this project ran a program consisting of a simple super loop and interfaced with the hardware using the Mbed framework. This allowed us to focus on building the team knowledge base for developing custom drivers to support sensors. In favor of our long term goals, we have transitioned to supporting the above [Firmware Tech Stack](#firmware-tech-stack) for the DAQ.
