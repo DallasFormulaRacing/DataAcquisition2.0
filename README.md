@@ -3,7 +3,7 @@
 
 ## Table of Contents
 1. [Objective](#objective)
-2. [Firmware Tech Stack](#firmware-tec-stack)
+2. [Firmware Tech Stack](#firmware-tech-stack)
 3. [Hardware and Equipment](#hardware-and-equipment)
 4. [Supported User Features](#supported-user-features)
 5. [Resulting Output](#resulting-output)
