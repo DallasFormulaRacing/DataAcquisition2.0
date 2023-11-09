@@ -3,3 +3,10 @@ Archive/Mbed_DAQ/.mbed
 Archive/Mbed_DAQ/projectfiles
 Archive/Mbed_DAQ/*.py*
 Archive/Mbed_DAQ/BUILD
+
+# stm32 on CubeIDE
+DAQ_System/Debug/
+
+# stm32 on VSCode
+DAQ_System/build/
+DAQ_System/cmake/
