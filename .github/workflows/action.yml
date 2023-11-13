@@ -20,5 +20,5 @@ jobs:
             uses: xanderhendriks/action-build-stm32cubeide@v10.0
             with:
               project-path: 'DAQ_System'
-              project-target: 'DAQ_System'
+              project-target: 'DAQ_System/Debug'
             
