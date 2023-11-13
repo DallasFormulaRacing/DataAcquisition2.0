@@ -104,8 +104,8 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
 
 	Task1Handle = osThreadNew(Task1_init, NULL, &Task1_attributes);
-	//Task2Handle = osThreadNew(Task2_init, NULL, &Task2_attributes);
-	//Task3Handle = osThreadNew(Task3_init, NULL, &Task3_attributes);
+	Task2Handle = osThreadNew(Task2_init, NULL, &Task2_attributes);
+	Task3Handle = osThreadNew(Task3_init, NULL, &Task3_attributes);
 
 	// Avoid initializing the auto-generated default task
 	return;
@@ -162,39 +162,27 @@ void StartDefaultTask(void *argument)
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 void Task1_init(void *argument) {
-	RetargetInit(&huart3);
-	uint32_t value_adc = 0;
-
 	while (true) {
-//		uint8_t data[] = "Hello TASK1\n";
-//		HAL_UART_Transmit(&huart3, data, 12, 1000);
-//		osDelay(1000);
-		printf("\r\nADC Value: ");
-		printf("%" PRIu32 "\n", value_adc);
-
-		HAL_Delay(100);
-		HAL_ADC_Start(&hadc1);
-		HAL_ADC_PollForConversion(&hadc1, 1);
-		value_adc = HAL_ADC_GetValue(&hadc1);
-
-
+		uint8_t data[] = "Hello TASK1\n";
+		HAL_UART_Transmit(&huart3, data, 12, 1000);
+		osDelay(1000);
 	}
 }
 
-//void Task2_init(void *argument) {
-//	while (true) {
-//		uint8_t data[] = "Hello TASK2\n";
-//		HAL_UART_Transmit(&huart3, data, 12, 1000);
-//		osDelay(1000);
-//	}
-//}
-//
-//void Task3_init(void *argument) {
-//	while (true) {
-//		uint8_t data[] = "Hello TASK3\n";
-//		HAL_UART_Transmit(&huart3, data, 12, 1000);
-//		osDelay(1000);
-//	}
-//}
+void Task2_init(void *argument) {
+	while (true) {
+		uint8_t data[] = "Hello TASK2\n";
+		HAL_UART_Transmit(&huart3, data, 12, 1000);
+		osDelay(1000);
+	}
+}
+
+void Task3_init(void *argument) {
+	while (true) {
+		uint8_t data[] = "Hello TASK3\n";
+		HAL_UART_Transmit(&huart3, data, 12, 1000);
+		osDelay(1000);
+	}
+}
 /* USER CODE END Application */
 

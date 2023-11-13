@@ -27,7 +27,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "../../Program/app.hpp"
+#include "retarget.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -96,6 +97,8 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
+//  RetargetInit(&huart3);
+  cppMain();
 
   /* USER CODE END 2 */
 
