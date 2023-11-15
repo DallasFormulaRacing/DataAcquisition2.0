@@ -67,8 +67,7 @@ jobs:
               project-path: 'DAQ_System'
               project-target: 'DAQ_System/Debug'
     
-      run-unit-tests:
-        needs: checkout-our-repo
+    run-unit-tests:
         runs-on: ubuntu-latest
         steps:
 
