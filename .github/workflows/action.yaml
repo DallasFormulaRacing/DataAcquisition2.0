@@ -28,9 +28,11 @@ jobs:
             - name: Check out this repo
               uses: actions/checkout@v3
 
+            - name: Install Ninja
+              run: sudo apt-get install ninja-build
+
             - name: Run Google Test
               run: |
-                  sudo apt-get install ninja-build
                   cd DAQ_System/Tests
                   python3 run_tests.py
             
