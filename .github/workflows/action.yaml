@@ -31,6 +31,7 @@ jobs:
 
             - name: Run Google Test
               run: |
+                  apt-get install ninja-build
                   cd DAQ_System/Tests
                   python3 run_tests.py
             
