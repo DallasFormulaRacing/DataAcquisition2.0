@@ -1,8 +1,7 @@
 name: Build Workflow
 
 # Define the trigger event(s)
-# on: pull_request
-on: [push]
+on: [push, pull_request]
 
 # Jobs run in parallel by default, each runs steps in sequence
 jobs:
@@ -31,7 +30,7 @@ jobs:
 
             - name: Run Google Test
               run: |
-                  apt-get install ninja-build
+                  sudo apt-get install ninja-build
                   cd DAQ_System/Tests
                   python3 run_tests.py
             
