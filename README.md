@@ -22,7 +22,7 @@
 
 ## User Features
 | Supported Logging Method | Library Completion    |
-| :----------------------- | :---------------------|
+| :----------------------- | :--------------------:|
 | Micro-SD Card            | <span>&#10004;</span> |
 | USB Flash Drive          |                       |
 | Wireless Transmission    |                       |
