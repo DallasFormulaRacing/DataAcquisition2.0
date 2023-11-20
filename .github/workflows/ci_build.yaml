@@ -1,7 +1,7 @@
 name: CI Build
 
 # Define the trigger event(s)
-on: [push, pull_request]
+on: push
 
 # Jobs run in parallel by default, each runs steps in sequence
 jobs:
