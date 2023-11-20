@@ -35,7 +35,7 @@ The [STM32 Nucleo F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.h
 
 ### Input
 | Component Type        | Supported Hardware Device                                                                                            | Library Completion    |
-| :-------------------- |:-------------------------------------------------------------------------------------------------------------------- | :---------------------|
+| :-------------------- |:-------------------------------------------------------------------------------------------------------------------- | :--------------------:|
 | Linear Potentiometer  | - [SLS 1322-3](https://www.activesensors.com/products/linear-position-sensors/general-purpose-linear-potentiometers) | <span>&#10004;</span> |
 | Accelerometer         | - [LSM303DLHC](https://www.adafruit.com/product/1714)                                                                | <span>&#10004;</span> |
 | Gyroscope             | - [L3GD20H](https://www.adafruit.com/product/1714)                                                                   | <span>&#10004;</span> |
