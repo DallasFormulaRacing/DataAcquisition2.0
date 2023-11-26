@@ -31,6 +31,21 @@
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "label": "Erase",
+      "command": "STM32_Programmer_CLI",
+      "args": [
+        "-c",
+        "port=SWD",
+        "freq=4000",
+        "-e",
+        "all",
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }

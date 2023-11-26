@@ -5,6 +5,8 @@
 
 #include "../Core/Inc/retarget.h"
 
+#include "gpio.h"
+
 #include "usart.h"
 extern UART_HandleTypeDef huart3;
 
@@ -18,6 +20,9 @@ void cppMain() {
 
 	// Main Loop
 	for(;;) {
+		// HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
+		// HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
+		// HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
 
 		printf("\r\nADC Value: ");
 		printf("%" PRIu32 "\n", value_adc);
