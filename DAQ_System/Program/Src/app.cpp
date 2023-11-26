@@ -21,8 +21,8 @@ extern ADC_HandleTypeDef hadc1;
 
 // DFR Custom Dependencies
 #include "app.hpp"
-#include "../Core/Inc/retarget.h"
-#include "Src/Sensor/LinearPotentiometer/sls1322.hpp"
+#include "../../Core/Inc/retarget.h"
+#include "Sensor/LinearPotentiometer/sls1322.hpp"
 
 
 void cppMain() {
@@ -39,6 +39,6 @@ void cppMain() {
 
 		displacement_inches = lin_pot.DisplacementInches();
 		HAL_Delay(1000);
-//		printf("\n Percentage: %f", displacement_inches);
+		printf("\n Percentage: %f", displacement_inches);
 	}
 }
