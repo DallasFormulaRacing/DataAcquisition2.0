@@ -1,10 +1,16 @@
-#include "app.hpp"
+/*
+* DataAcquisition2.0 — 2023 Vehicle
+* (c) 2022 Dallas Formula Racing - Embedded Firmware Team
+* Formula SAE International Collegiate Chapter
+* GPL-3.0 License
+*/
 
+
+// Standard Libraries
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "../Core/Inc/retarget.h"
-
+// ST HAL Dependencies
 #include "gpio.h"
 
 #include "usart.h"
@@ -13,24 +19,26 @@ extern UART_HandleTypeDef huart3;
 #include "adc.h"
 extern ADC_HandleTypeDef hadc1;
 
+// DFR Custom Dependencies
+#include "app.hpp"
+#include "../Core/Inc/retarget.h"
+#include "Src/Sensor/LinearPotentiometer/sls1322.hpp"
+
+
 void cppMain() {
-
+	// Enable `printf()` using USART
 	RetargetInit(&huart3);
-	uint32_t value_adc = 0;
 
-	// Main Loop
+	sensor::SLS1322 lin_pot(hadc1);
+	float displacement_inches = 0.0f;
+
 	for(;;) {
 		// HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 		// HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 		// HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
 
-		printf("\r\nADC Value: ");
-		printf("%" PRIu32 "\n", value_adc);
-
-		HAL_Delay(100);
-		HAL_ADC_Start(&hadc1);
-		HAL_ADC_PollForConversion(&hadc1, 1);
-		value_adc = HAL_ADC_GetValue(&hadc1);
-
+		displacement_inches = lin_pot.DisplacementInches();
+		HAL_Delay(1000);
+//		printf("\n Percentage: %f", displacement_inches);
 	}
 }
