@@ -16,7 +16,7 @@ jobs:
           - name: Build stm32CubeIDE project
             uses: xanderhendriks/action-build-stm32cubeide@v10.0
             with:
-              project-path: 'DAQ_System'
+              project-path: 'Project/DAQ_System'
               project-target: 'DAQ_System/Debug'
     
     run-unit-tests:
@@ -31,7 +31,7 @@ jobs:
 
             - name: Build and run unit tests
               run: |
-                  cd DAQ_System/Tests
+                  cd Project/Tests
                   cmake -G "Ninja" -S . -B ./build
                   cd build
                   ninja
