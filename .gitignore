@@ -5,11 +5,11 @@ Archive/Mbed_DAQ/*.py*
 Archive/Mbed_DAQ/BUILD
 
 # stm32 on CubeIDE firmware builds
-DAQ_System/Debug/
+Project/DAQ_System/Debug/
 
 # stm32 on VSCode firmware builds
-DAQ_System/build/
-DAQ_System/cmake/
+Project/DAQ_System/build/
+Project/DAQ_System/cmake/
 
 # unit test builds
-DAQ_System/Tests/build/
+Project/Tests/build/
