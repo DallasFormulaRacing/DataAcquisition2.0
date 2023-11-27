@@ -91,4 +91,10 @@ int _fstat(int fd, struct stat* st) {
   return 0;
 }
 
+
+int _kill(int pid, int sig) { return 0; }
+int _getpid() { return 0; }
+// Added a forever loop to supress warning: "the 'noreturn' function does return"
+void _exit(int) { for(;;) { } }
+
 #endif //#if !defined(OS_USE_SEMIHOSTING)

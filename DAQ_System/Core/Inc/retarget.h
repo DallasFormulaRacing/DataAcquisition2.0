@@ -19,6 +19,11 @@ int _lseek(int fd, int ptr, int dir);
 int _read(int fd, char* ptr, int len);
 int _fstat(int fd, struct stat* st);
 
+// These three functions must be implemented when enabling printf with foating point values
+int _kill(int pid, int sig);
+int _getpid();
+void _exit(int);
+
 #ifdef __cplusplus
 }
 #endif
