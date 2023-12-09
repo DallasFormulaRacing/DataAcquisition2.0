@@ -15,7 +15,7 @@
 
 namespace sensor {
 
-SLS1322::SLS1322(ADC_HandleTypeDef& hadc) : adc(hadc) { }
+SLS1322::SLS1322(ADC_HandleTypeDef& hadc) : adc_(hadc) { }
 SLS1322::~SLS1322() { }
 
 float SLS1322::DisplacementInches() {
@@ -35,9 +35,9 @@ float SLS1322::DisplacementRatio() {
 }
 
 uint32_t SLS1322::ReadQuantizedInput() {
-	HAL_ADC_Start(&adc);
-	HAL_ADC_PollForConversion(&adc, 1);
-	return HAL_ADC_GetValue(&adc);
+	HAL_ADC_Start(&adc_);
+	HAL_ADC_PollForConversion(&adc_, 1);
+	return HAL_ADC_GetValue(&adc_);
 }
 
 }

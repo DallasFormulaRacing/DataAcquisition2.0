@@ -40,7 +40,7 @@ class SLS1322 : public ILinearPotentiometer {
         // Returns an ADC reading within a range of 0.0 to 1.0.
         float DisplacementRatio();
 
-        ADC_HandleTypeDef& adc;
+        ADC_HandleTypeDef& adc_;
 
         static constexpr uint16_t kMaxResolution = 0x0FFF; // 2^(12 bits) - 1
         static constexpr uint8_t kMaxLengthInches = 3;
