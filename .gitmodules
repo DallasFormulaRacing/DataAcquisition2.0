@@ -1,3 +1,0 @@
-[submodule "Archive/Mbed_DAQ/mbed-os"]
-	path = Archive/Mbed_DAQ/mbed-os
-	url = https://github.com/ARMmbed/mbed-os.git
