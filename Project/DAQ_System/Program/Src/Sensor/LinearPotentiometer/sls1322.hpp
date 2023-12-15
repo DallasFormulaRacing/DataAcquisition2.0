@@ -23,12 +23,16 @@
 
 namespace sensor {
 
+/// SLS1322
 class SLS1322 : public ILinearPotentiometer {
     public:
 		SLS1322();
 		SLS1322(ADC_HandleTypeDef& hadc);
         virtual ~SLS1322();
 
+        /// DisplacementInches 
+        /// @param None
+        /// @return Displacement as inches
         float DisplacementInches() override;
         float DisplacementMillimeters() override;
 
