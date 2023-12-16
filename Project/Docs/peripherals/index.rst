@@ -1,6 +1,6 @@
 .. _peripherals:
 
-Pin Map
+Peripherals
 ====================
 .. toctree::
     :maxdepth: 2

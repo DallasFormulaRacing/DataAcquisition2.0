@@ -2,5 +2,6 @@
 
 Interface
 =========
+
 .. doxygenfile:: ilinear_potentiometer.hpp
    :project: Data Acquisition 2.0

@@ -1,10 +1,10 @@
 /*
 * Linear Potentiometer SLS1300
-* Author:        Manuel DJC
-* Modified By:   Cristian Cruz
+* Author:   Manuel DJC
+*           Cristian Cruz
 *
-* Email:         Manuel.DeJesusContreras@UTDallas.edu
-*                cris14.alex@gmail.com
+* Email:    Manuel.DeJesusContreras@UTDallas.edu
+*           cris14.alex@gmail.com
 *
 * (c) 2022 Dallas Formula Racing - Embedded Firmware Team
 * Formula SAE International Collegiate Chapter
@@ -28,16 +28,16 @@ float SLS1322::DisplacementMillimeters() {
 	return displacement_ratio * kMaxLengthMillimeters;
 }
 
-float SLS1322::DisplacementRatio() {
-	uint32_t quantized_count = ReadQuantizedInput();
-	float retraction_ratio = (float)(quantized_count) / kMaxResolution;
-	return 1 - retraction_ratio;
-}
-
 uint32_t SLS1322::ReadQuantizedInput() {
 	HAL_ADC_Start(&adc_);
 	HAL_ADC_PollForConversion(&adc_, 1);
 	return HAL_ADC_GetValue(&adc_);
+}
+
+float SLS1322::DisplacementRatio() {
+	uint32_t quantized_count = ReadQuantizedInput();
+	float retraction_ratio = (float)(quantized_count) / kMaxResolution;
+	return 1 - retraction_ratio;
 }
 
 }
