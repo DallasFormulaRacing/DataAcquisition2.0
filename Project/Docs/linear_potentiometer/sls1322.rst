@@ -1,4 +1,4 @@
-.. _api_sls1322:
+.. _linear_potentiometer_sls1322:
 
 SLS1322
 =======

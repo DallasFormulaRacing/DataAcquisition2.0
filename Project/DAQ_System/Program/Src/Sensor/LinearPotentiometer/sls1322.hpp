@@ -32,7 +32,7 @@ class SLS1322 : public ILinearPotentiometer {
 
         /// DisplacementInches 
         /// @param None
-        /// @return Displacement as inches
+        /// @return Displacement as inches HAHAHA HUHH?!
         float DisplacementInches() override;
         float DisplacementMillimeters() override;
 
