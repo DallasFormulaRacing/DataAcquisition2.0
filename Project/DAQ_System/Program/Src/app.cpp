@@ -22,16 +22,21 @@ extern UART_HandleTypeDef huart3;
 extern ADC_HandleTypeDef hadc1;
 
 #include "can.h"
+
+
 extern CAN_HandleTypeDef hcan1;
 CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
+CAN_FilterTypeDef CAN;
+
 
 // DFR Custom Dependencies
 #include "app.hpp"
 #include "../../Core/Inc/retarget.h"
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
-// variables
+
+// CAN variables
 uint8_t TxData[8] = {0};
 int counter = 0;
 uint32_t TxMailbox;
@@ -59,15 +64,29 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan1)
     }
 }
 
-
-
 void cppMain() {
+	HAL_CAN_Start(&hcan1); // starts the CAN bus
+	HAL_CAN_ActivateNotification( &hcan1, CAN_IT_RX_FIFO0_MSG_PENDING); // activate RX message interrupts
+
+	// Filter initialization
+	CAN.FilterIdHigh = 0x103;
+	CAN.FilterIdLow = 0;
+	CAN.FilterMaskIdHigh = 0xFFFF;
+	CAN.FilterMaskIdLow = 0;
+	CAN.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	CAN.FilterBank = 13;
+	CAN.FilterMode = CAN_FILTERMODE_IDMASK;
+	CAN.FilterScale = CAN_FILTERSCALE_16BIT;
+	CAN.FilterActivation = CAN_FILTER_ENABLE;
+	HAL_CAN_ConfigFilter(&hcan1,&CAN);
+
 	// handling TX message
 	TxHeader.ExtId = 0x102;
 	TxHeader.DLC = 8;
 	TxHeader.IDE = CAN_ID_EXT;
 	TxHeader.RTR = CAN_RTR_DATA;
 	TxHeader.TransmitGlobalTime = DISABLE;
+
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
 

@@ -103,24 +103,6 @@ int main(void)
   MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
 
-  	// CAN initialization
-	HAL_CAN_Start(&hcan1); // starts the CAN bus
-	HAL_CAN_ActivateNotification( &hcan1, CAN_IT_RX_FIFO0_MSG_PENDING); // activate interrupt notifications
-
-
-	CAN_FilterTypeDef CAN;
-	CAN.FilterIdHigh = 0x103;
-	CAN.FilterIdLow = 0;
-	CAN.FilterMaskIdHigh = 0xFFFF;
-	CAN.FilterMaskIdLow = 0;
-	CAN.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	CAN.FilterBank = 13;
-	CAN.FilterMode = CAN_FILTERMODE_IDMASK;
-	CAN.FilterScale = CAN_FILTERSCALE_16BIT;
-	CAN.FilterActivation = CAN_FILTER_ENABLE;
-
-	HAL_CAN_ConfigFilter(&hcan1,&CAN);
-
 
 
 //  RetargetInit(&huart3);
