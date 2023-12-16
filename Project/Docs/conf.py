@@ -36,7 +36,7 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.inheritance_diagram',
-    'breathe'
+    'breathe',
     'myst_parser'
 ]
 
