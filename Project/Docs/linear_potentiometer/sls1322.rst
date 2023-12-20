@@ -1,0 +1,6 @@
+.. _linear_potentiometer_sls1322:
+
+SLS1322
+=======
+.. doxygenfile:: sls1322.hpp
+   :project: Data Acquisition 2.0
