@@ -13,3 +13,6 @@ Project/DAQ_System/cmake/
 
 # unit test builds
 Project/Tests/build/
+
+# doc builds
+Project/Docs/_build/

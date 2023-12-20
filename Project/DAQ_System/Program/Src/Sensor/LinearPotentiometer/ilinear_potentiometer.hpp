@@ -1,10 +1,10 @@
 /*
-* Linear Potentiometer
-* Authors:        Cristian Cruz
-*                 Manuel DJC
+* Linear Potentiometer SLS1300
+* Author:   Manuel DJC
+*           Cristian Cruz
 *
-* Email:          cris14.alex@gmail.com
-*                 Manuel.DeJesusContreras@UTDallas.edu
+* Email:    Manuel.DeJesusContreras@UTDallas.edu
+*           cris14.alex@gmail.com
 *
 * (c) 2022 Dallas Formula Racing - Embedded Firmware Team
 * Formula SAE International Collegiate Chapter
