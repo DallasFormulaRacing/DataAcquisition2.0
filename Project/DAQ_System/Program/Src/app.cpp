@@ -22,12 +22,14 @@ extern UART_HandleTypeDef huart3;
 extern ADC_HandleTypeDef hadc1;
 
 #include "can.h"
-
-
 extern CAN_HandleTypeDef hcan1;
 CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 CAN_FilterTypeDef CAN;
+
+#include "i2c.h"
+extern I2C_HandleTypeDef hi2c1;
+
 
 
 // DFR Custom Dependencies
@@ -35,11 +37,17 @@ CAN_FilterTypeDef CAN;
 #include "../../Core/Inc/retarget.h"
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
+#include "Sensor/GyroScope/igyroscope.hpp"
+#include "Sensor/GyroScope/l3gd20h.hpp"
 
 // CAN variables
 uint8_t TxData[8] = {0};
 int counter = 0;
 uint32_t TxMailbox;
+
+// Gyroscope variables
+short *GyroData; // first element is X-axis, the second element is the Y-axis, and the third element is the z-axis.
+
 
 // CallBack functions
 
@@ -65,6 +73,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan1)
 }
 
 void cppMain() {
+
+
+
 	HAL_CAN_Start(&hcan1); // starts the CAN bus
 	HAL_CAN_ActivateNotification( &hcan1, CAN_IT_RX_FIFO0_MSG_PENDING); // activate RX message interrupts
 
@@ -93,6 +104,9 @@ void cppMain() {
 	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
 	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
 
+	IGyroscope *l3gd20h = new Gyroscope_L3GD20H();
+
+
 	float displacement_inches = 0.0f;
 
 	for(;;) {
@@ -101,7 +115,13 @@ void cppMain() {
 		// HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
 
 		displacement_inches = lin_pot->DisplacementInches();
-		HAL_Delay(1000);
-		printf("\n Percentage: %f", displacement_inches);
+		//HAL_Delay(250);
+		//printf("\n Percentage: %f", displacement_inches);
+		GyroData = l3gd20h -> GetDegreesPerSecond();
+		printf("x = %hd\t",GyroData[0]);
+		printf("y = %hd\t",GyroData[1]);
+		printf("z = %hd\t",GyroData[2]);
+		printf("\n");
+		printf("\r");
 	}
 }

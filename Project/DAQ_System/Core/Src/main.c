@@ -22,6 +22,7 @@
 #include "adc.h"
 #include "can.h"
 #include "eth.h"
+#include "i2c.h"
 #include "usart.h"
 #include "usb_otg.h"
 #include "gpio.h"
@@ -101,6 +102,7 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_ADC1_Init();
   MX_CAN1_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
 
@@ -111,7 +113,9 @@ int main(void)
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
+  osKernelInitialize();
+
+  /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
 
   /* Start scheduler */
