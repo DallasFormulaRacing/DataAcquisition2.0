@@ -117,12 +117,12 @@ void cppMain() {
 
 
 		//printf("\n Percentage: %f", displacement_inches);
-
+		//HAL_Delay(150);
 		if(CANMessageReceivedFlag){
 			__disable_irq();
 			canParseDataFrame();
-			if(CanID == 0x0CFFF048){
-				printf("\t\t 0x0CFFF048 \n");
+			if(CanID == 0x0CFFF148){
+				printf("\t\t 0x0CFFF148 \n");
 				printf("\r");
 				printf("RPM = %.2f ", DecodeDataFrame[0]);
 				printf("TPS = %.2f ", DecodeDataFrame[2]);
@@ -139,8 +139,8 @@ void cppMain() {
 				printf("Temp Type = %.2f \n", DecodeDataFrame[6]);
 				printf("\r");
 			}
+			CANMessageReceivedFlag = false; // reseting the flag
 			__enable_irq();
-
 		}
 	}
 }
