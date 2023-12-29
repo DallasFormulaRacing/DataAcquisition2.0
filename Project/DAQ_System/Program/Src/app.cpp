@@ -74,7 +74,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan1)
 
 void cppMain() {
 
-
+	short *GyroData; // first element is X-axis, the second element is the Y-axis, and the third element is the z-axis.
 
 	HAL_CAN_Start(&hcan1); // starts the CAN bus
 	HAL_CAN_ActivateNotification( &hcan1, CAN_IT_RX_FIFO0_MSG_PENDING); // activate RX message interrupts
@@ -104,7 +104,8 @@ void cppMain() {
 	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
 	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
 
-	IGyroscope *l3gd20h = new Gyroscope_L3GD20H();
+	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
+	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
 
 
 	float displacement_inches = 0.0f;
@@ -117,7 +118,7 @@ void cppMain() {
 		displacement_inches = lin_pot->DisplacementInches();
 		//HAL_Delay(250);
 		//printf("\n Percentage: %f", displacement_inches);
-		GyroData = l3gd20h -> GetDegreesPerSecond();
+		GyroData = gyroscope -> GetDegreesPerSecond();
 		printf("x = %hd\t",GyroData[0]);
 		printf("y = %hd\t",GyroData[1]);
 		printf("z = %hd\t",GyroData[2]);

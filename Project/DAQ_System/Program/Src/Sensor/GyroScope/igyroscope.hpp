@@ -17,7 +17,7 @@
 #ifndef IGYROSCOPE_H
 #define IGYROSCOPE_H
 
-
+namespace sensor{
 
 class IGyroscope{
     public:
@@ -25,8 +25,10 @@ class IGyroscope{
 
         virtual short* GetDegreesPerSecond() = 0;
         virtual float* GetRadiansPerSecond() = 0;
+    private:
         virtual bool ComputeAngularVelocity() = 0;
 };
 
+}
 
 #endif // IGYROSCOPE_H
