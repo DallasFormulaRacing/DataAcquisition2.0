@@ -21,13 +21,14 @@ namespace sensor {
 
 static constexpr uint8_t kByteArrayMaxLength = 8;
 
-static void CollectFields(const uint8_t rx_buffer[kByteArrayMaxLength], const uint8_t &kNumOfBytePairs, std::vector<int16_t> &fields);
-
 enum class TypeBit : uint8_t {
 	kUnknown,
 	kHigh,
 	kLow,
 };
+
+static void CollectFields(const uint8_t rx_buffer[kByteArrayMaxLength], std::vector<int16_t> &fields);
+static void CollectTypeBit(const uint8_t rx_buffer[kByteArrayMaxLength], TypeBit &type);
 
 /*
 Data type  | DLC | Data Breakdown | Length
@@ -40,12 +41,14 @@ Data type  | DLC | Data Breakdown | Length
 struct FrameFormat1 {
 	FrameFormat1(uint8_t rx_buffer[kByteArrayMaxLength]) {
 		fields = std::vector<int16_t>(kNumOfFields);
-		CollectFields(rx_buffer, kNumOfFields, fields);
+		CollectFields(rx_buffer, fields);
 	}
 
 	static constexpr uint8_t kNumOfFields = 4;
 	std::vector<int16_t> fields;
 };
+
+
 
 /*
 Data type  | DLC | Data Breakdown | Length
@@ -57,7 +60,7 @@ Data type  | DLC | Data Breakdown | Length
 struct FrameFormat2 {
 	FrameFormat2(uint8_t rx_buffer[kByteArrayMaxLength]) {
 		fields = std::vector<int16_t>(kNumOfFields);
-		CollectFields(rx_buffer, kNumOfFields, fields);
+		CollectFields(rx_buffer, fields);
 	}
 
 	static constexpr uint8_t kNumOfFields = 3;
@@ -79,11 +82,11 @@ Data type | DLC | Data Breakdown | Length
 */
 struct FrameFormat3 {
 	FrameFormat3(uint8_t rx_buffer[kByteArrayMaxLength]) {
-		fields = std::vector<int16_t>(kNumOfFields);
-		CollectFields(rx_buffer, kNumOfFields, fields);
+		for (int i = 0; i < kByteArrayMaxLength; i++) {
+			fields.push_back(rx_buffer[i]);
+		}
 	}
 
-	static constexpr uint8_t kNumOfFields = 8;
 	std::vector<int16_t> fields;
 };
 
@@ -98,12 +101,16 @@ Data type | DLC | Data Breakdown | Length
 struct FrameFormat4 {
 	FrameFormat4(uint8_t rx_buffer[kByteArrayMaxLength]) {
 		fields = std::vector<int16_t>(kNumOfFields);
-		CollectFields(rx_buffer, kNumOfFields, fields);
+		CollectFields(rx_buffer, fields);
+		CollectTypeBit(rx_buffer, type);
 	}
 
 	static constexpr uint8_t kNumOfFields = 3;
 	std::vector<int16_t> fields;
 	TypeBit type = TypeBit::kUnknown;
+
+private:
+	static constexpr uint8_t kNumOfBytePairs = 3;
 };
 
 /*
@@ -119,14 +126,11 @@ Data type | DLC | Data Breakdown | Length
 struct FrameFormat5 {
 	FrameFormat5(uint8_t rx_buffer[kByteArrayMaxLength]) {
 		fields = std::vector<int16_t>(kNumOfFields);
-		CollectFields(rx_buffer, kNumOfBytePairs, fields);
+		CollectFields(rx_buffer, fields);
 	}
 
 	static constexpr uint8_t kNumOfFields = 2; // The remaining fields are "don't cares"
 	std::vector<int16_t> fields;
-
-private:
-	static constexpr uint8_t kNumOfBytePairs = 2;
 };
 
 }

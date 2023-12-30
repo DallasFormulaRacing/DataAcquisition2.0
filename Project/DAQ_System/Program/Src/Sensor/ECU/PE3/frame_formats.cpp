@@ -26,28 +26,23 @@ static int16_t ParseBytePair(const uint8_t &low, const uint8_t &high) {
 	if (field > 32767) {
 		field -= 65536;
 	}
-	return 3;
+	return field;
 }
 
 // TODO: Document that the user is responsible for initializing the correct size per the number of byte pairs. This function does note
-// alternate the size
-static void CollectFields(const uint8_t rx_buffer[kByteArrayMaxLength], const uint8_t &kNumOfBytePairs, std::vector<int16_t> &fields) {
-	// TODO: Validation of kNumOfBytePairs fitting within range of fields.size() and rx_buffer length
+// alternate the size. The vector is expected to be initialized to the exact amount of byte pairs to collect as individual fields.
+static void CollectFields(const uint8_t rx_buffer[kByteArrayMaxLength], std::vector<int16_t> &fields) {
+	uint8_t max_index = fields.size() * 2;
 
-	uint8_t byte_pair_count = 0;
-	for (int i = 0; i < kByteArrayMaxLength; i++) {
-		if (byte_pair_count < kNumOfBytePairs) {
-			uint8_t low = rx_buffer[i];
-			i++;
-			uint8_t high = rx_buffer[i];
+	// TODO: validate `max_index` with `kByteArrayMaxLength`
 
-			fields.at(i/2) = ParseBytePair(low, high);
-			byte_pair_count++;
-		} else {
-			fields.at(i - byte_pair_count) = rx_buffer[i];
-		}
+	for (int i = 0; i < max_index; i++) {
+		uint8_t low = rx_buffer[i];
+		i++;
+		uint8_t high = rx_buffer[i];
+
+		fields.at(i/2) = ParseBytePair(low, high);
 	}
-
 }
 
 // TODO: Document that TypeBit defaults to `kUnknown`.
