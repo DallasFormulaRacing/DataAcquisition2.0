@@ -1,5 +1,5 @@
 /*
-* ECU PE3
+* ECU PE3 Frames
 * Author:   William Lim
 *           Cristian Cruz
 *
@@ -11,15 +11,12 @@
 * GPL-3.0 License
 */
 
-#ifndef ECU_PE3_H
-#define ECU_PE3_H
+#ifndef ECU_PE3_FRAMES_H
+#define ECU_PE3_FRAMES_H
+
+#include "frame_formats.hpp"
 
 namespace sensor {
 
-class Pe3 {
 
-};
-
-}
-
-#endif // ECU_PE3_H
+#endif // ECU_PE3_FRAMES_H
