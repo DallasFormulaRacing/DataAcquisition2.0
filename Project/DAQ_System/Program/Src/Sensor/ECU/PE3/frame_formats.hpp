@@ -14,6 +14,7 @@
 #ifndef ECU_PE3_FRAME_FORMATS_H
 #define ECU_PE3_FRAME_FORMATS_H
 
+// Standard Libraries
 #include <stdint.h>
 #include <vector>
 
@@ -27,6 +28,7 @@ enum class TypeBit : uint8_t {
 	kLow,
 };
 
+// Parsing helper functions
 static void CollectFields(const uint8_t rx_buffer[kByteArrayMaxLength], std::vector<int16_t> &fields);
 static void CollectTypeBit(const uint8_t rx_buffer[kByteArrayMaxLength], TypeBit &type);
 

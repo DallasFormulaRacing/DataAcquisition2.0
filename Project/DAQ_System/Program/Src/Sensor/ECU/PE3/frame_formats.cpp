@@ -19,6 +19,12 @@ namespace sensor {
 
 static int16_t ParseBytePair(const uint8_t &low, const uint8_t &high) {
 	// TODO: Revisit the meaning and significants of 32767, 65536
+	// Update: https://www.quora.com/Why-is-32767-the-highest-value-number-that-can-be-made-into-binary-code-How-can-I-represent-any-higher-values-using-binary-code
+	// The variable `field` is combining bytes into a form of Two's Complements
+	// i.e., the data is actually 15 bits: 2^15 - 1 = 32,767 for a highest possible value
+	// Overflow must be handled for 15 bits, not 16.
+	// `field` is a signed variable, so it's range is (from -32,767 to +32,767) = (32,767 * 2) = 65,536 possible values
+	// Subtracting by 65,536 resets the variable to the bottom
 
 	// Combine bytes
 	int16_t field = (high << 8) + low;
