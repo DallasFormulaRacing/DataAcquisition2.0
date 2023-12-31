@@ -15,7 +15,7 @@
 #define ECU_PE3_FRAME_FORMATS_H
 
 // Standard Libraries
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 
 namespace sensor {
@@ -29,8 +29,8 @@ enum class TypeBit : uint8_t {
 };
 
 // Parsing helper functions
-static void CollectFields(const uint8_t rx_buffer[kByteArrayMaxLength], std::vector<int16_t> &fields);
-static void CollectTypeBit(const uint8_t rx_buffer[kByteArrayMaxLength], TypeBit &type);
+static bool CollectFields(const uint8_t rx_buffer[kByteArrayMaxLength], std::vector<int16_t> &fields);
+static TypeBit CollectTypeBit(const uint8_t rx_buffer[kByteArrayMaxLength]);
 
 /*
 Data type  | DLC | Data Breakdown | Length
@@ -104,7 +104,7 @@ struct FrameFormat4 {
 	FrameFormat4(uint8_t rx_buffer[kByteArrayMaxLength]) {
 		fields = std::vector<int16_t>(kNumOfFields);
 		CollectFields(rx_buffer, fields);
-		CollectTypeBit(rx_buffer, type);
+		type = CollectTypeBit(rx_buffer);
 	}
 
 	static constexpr uint8_t kNumOfFields = 3;
