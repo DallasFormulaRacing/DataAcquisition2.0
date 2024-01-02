@@ -29,8 +29,8 @@ enum class TypeBit : uint8_t {
 };
 
 // Parsing helper functions
-static bool CollectFields(const uint8_t rx_buffer[kByteArrayMaxLength], std::vector<int16_t> &fields);
-static TypeBit CollectTypeBit(const uint8_t rx_buffer[kByteArrayMaxLength]);
+bool ParseFields(const uint8_t rx_buffer[kByteArrayMaxLength], std::vector<int32_t> &fields);
+static TypeBit ParseTypeBit(const uint8_t rx_buffer[kByteArrayMaxLength]);
 
 /*
 Data type  | DLC | Data Breakdown | Length
@@ -42,12 +42,12 @@ Data type  | DLC | Data Breakdown | Length
 */
 struct FrameFormat1 {
 	FrameFormat1(uint8_t rx_buffer[kByteArrayMaxLength]) {
-		fields = std::vector<int16_t>(kNumOfFields);
-		CollectFields(rx_buffer, fields);
+		fields = std::vector<int32_t>(kNumOfFields);
+		ParseFields(rx_buffer, fields);
 	}
 
 	static constexpr uint8_t kNumOfFields = 4;
-	std::vector<int16_t> fields;
+	std::vector<int32_t> fields;
 };
 
 
@@ -61,12 +61,12 @@ Data type  | DLC | Data Breakdown | Length
 */
 struct FrameFormat2 {
 	FrameFormat2(uint8_t rx_buffer[kByteArrayMaxLength]) {
-		fields = std::vector<int16_t>(kNumOfFields);
-		CollectFields(rx_buffer, fields);
+		fields = std::vector<int32_t>(kNumOfFields);
+		ParseFields(rx_buffer, fields);
 	}
 
 	static constexpr uint8_t kNumOfFields = 3;
-	std::vector<int16_t> fields;
+	std::vector<int32_t> fields;
 };
 
 
@@ -89,7 +89,7 @@ struct FrameFormat3 {
 		}
 	}
 
-	std::vector<int16_t> fields;
+	std::vector<int32_t> fields;
 };
 
 /*
@@ -102,17 +102,14 @@ Data type | DLC | Data Breakdown | Length
 */
 struct FrameFormat4 {
 	FrameFormat4(uint8_t rx_buffer[kByteArrayMaxLength]) {
-		fields = std::vector<int16_t>(kNumOfFields);
-		CollectFields(rx_buffer, fields);
-		type = CollectTypeBit(rx_buffer);
+		fields = std::vector<int32_t>(kNumOfFields);
+		ParseFields(rx_buffer, fields);
+		type = ParseTypeBit(rx_buffer);
 	}
 
 	static constexpr uint8_t kNumOfFields = 3;
-	std::vector<int16_t> fields;
+	std::vector<int32_t> fields;
 	TypeBit type = TypeBit::kUnknown;
-
-private:
-	static constexpr uint8_t kNumOfBytePairs = 3;
 };
 
 /*
@@ -127,12 +124,12 @@ Data type | DLC | Data Breakdown | Length
 */
 struct FrameFormat5 {
 	FrameFormat5(uint8_t rx_buffer[kByteArrayMaxLength]) {
-		fields = std::vector<int16_t>(kNumOfFields);
-		CollectFields(rx_buffer, fields);
+		fields = std::vector<int32_t>(kNumOfFields);
+		ParseFields(rx_buffer, fields);
 	}
 
 	static constexpr uint8_t kNumOfFields = 2; // The remaining fields are "don't cares"
-	std::vector<int16_t> fields;
+	std::vector<int32_t> fields;
 };
 
 }

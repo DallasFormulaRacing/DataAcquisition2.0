@@ -18,7 +18,7 @@
 
 namespace sensor {
 
-class FramePE11 : public FrameFormat2 {
+class FramePE11 : public FrameFormat1 {
 public:
 	FramePE11(uint8_t rx_buffer[kByteArrayMaxLength])
 	  : FrameFormat1(rx_buffer) {}
@@ -30,5 +30,7 @@ public:
 private:
 	static constexpr float kResolutionPerBit = 0.1f;
 };
+
+}
 
 #endif // ECU_PE3_FRAMES_FRAMEPE11_H

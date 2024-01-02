@@ -21,7 +21,7 @@ namespace sensor {
 class FramePE9 : public FrameFormat2 {
 public:
 	FramePE9(uint8_t rx_buffer[kByteArrayMaxLength])
-	  : FrameFormat1(rx_buffer) {}
+	  : FrameFormat2(rx_buffer) {}
 
 	float Lambda(uint8_t index) {
 		return fields.at(index) * kResolutionPerBit;
@@ -32,5 +32,7 @@ public:
 private:
 	static constexpr float kResolutionPerBit = 0.01f;
 };
+
+}
 
 #endif // ECU_PE3_FRAMES_FRAMEPE9_H

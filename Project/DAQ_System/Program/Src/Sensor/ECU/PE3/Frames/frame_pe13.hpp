@@ -35,4 +35,6 @@ private:
 	static constexpr float kResolutionPerBit = 0.1f;
 };
 
+}
+
 #endif // ECU_PE3_FRAMES_FRAMEPE13_H

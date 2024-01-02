@@ -46,4 +46,6 @@ private:
 	static constexpr float kTempResolutionPerBit = 0.1f;
 };
 
+}
+
 #endif // ECU_PE3_FRAMES_FRAMEPE6_H

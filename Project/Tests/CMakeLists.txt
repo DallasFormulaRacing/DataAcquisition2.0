@@ -20,6 +20,28 @@ enable_testing()
 add_executable(
   daq-unit-tests
   Src/hello_test.cc
+
+  # PE3 ECU CAN Bus Messaging Tests
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/frame_formats.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/frame_formats.cpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe1.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe2.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe3.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe4.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe5.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe6.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe7.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe8.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe9.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe10.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe11.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe12.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe13.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe14.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe15.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe16.hpp
+  Src/Sensor/ECU/PE3/frame_parsing_tests.cpp
+  Src/Sensor/ECU/PE3/frame_formats_tests.cpp
 )
 
 # Linking with `gtest_main` instead of `gtest` allows us to bypass having

@@ -21,7 +21,7 @@ namespace sensor {
 class FramePE10 : public FrameFormat3 {
 public:
 	FramePE10(uint8_t rx_buffer[kByteArrayMaxLength])
-	  : FrameFormat1(rx_buffer) {}
+	  : FrameFormat3(rx_buffer) {}
 
 	float PulseWidthModulationDutyCycle(uint8_t index) {
 		return fields.at(index) * kResolutionPerBit;
@@ -30,5 +30,7 @@ public:
 private:
 	static constexpr float kResolutionPerBit = 0.5f;
 };
+
+}
 
 #endif // ECU_PE3_FRAMES_FRAMEPE10_H
