@@ -24,31 +24,32 @@ namespace sensor {
 // Overflow must be handled for 15 bits, not 16.
 // `field` is a signed variable, so it's range is (from -32,767 to +32,767) = (32,767 * 2) = 65,536 possible values
 // Subtracting by 65,536 resets the variable to the bottom
-static int32_t ParseBytePair(const uint8_t &low, const uint8_t &high) {
-	static constexpr int k15BitTotalRange = pow(2, 15) * 2;
+int16_t ParseBytePair(const uint8_t &low, const uint8_t &high) {
+	static constexpr int k15BitDataTotalRange = pow(2, 15) * 2; // 65,536
 
 	// Combine bytes
 	int32_t field = (high << 8) + low;
 
-	// Check and account for overflow
+	// Check and account for 15-bit data overflow
 	if (field > INT16_MAX) {
-		field -= k15BitTotalRange;
+		field -= k15BitDataTotalRange;
 	}
 
-	return field;
+	// Provide only the 16 bits
+	return field & 0xFFFF;
 }
 
 // TODO: Document that the user is responsible for initializing the correct size per the number of byte pairs. This function does not
 // alternate the size. The vector is expected to be initialized to the exact amount of byte pairs to collect as individual fields.
 //
 // Returns false when failed to parse due to incorrect indexing
-bool ParseFields(const uint8_t rx_buffer[kByteArrayMaxLength], std::vector<int32_t> &fields) {
-	uint8_t max_index = fields.size() * 2;
+bool ParseFields(const uint8_t rx_buffer[kByteArrayMaxLength], std::vector<int16_t> &fields) {
+	uint8_t max_index = (fields.size() * 2) - 1;
 	if (max_index >= kByteArrayMaxLength) {
 		return false;
 	}
 
-	for (int i = 0; i < max_index; i++) {
+	for (int i = 0; i <= max_index; i++) {
 		uint8_t low = rx_buffer[i];
 		i++;
 		uint8_t high = rx_buffer[i];
@@ -64,7 +65,7 @@ bool ParseFields(const uint8_t rx_buffer[kByteArrayMaxLength], std::vector<int32
 //
 // ECU datasheet describes one "bit", but it is actually a whole byte of 1s (0xFF).
 // This may be a "bit" in the sense that the byte will only have two possible values (hence, binary bit).
-static TypeBit ParseTypeBit(const uint8_t rx_buffer[kByteArrayMaxLength]) {
+TypeBit ParseTypeBit(const uint8_t rx_buffer[kByteArrayMaxLength]) {
 	static constexpr uint8_t kHigh = 0xFF;
 	static constexpr uint8_t kLow = 0;
 

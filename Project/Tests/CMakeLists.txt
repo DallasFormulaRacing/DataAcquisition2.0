@@ -49,6 +49,7 @@ add_executable(
 target_link_libraries(
   daq-unit-tests
   GTest::gtest_main
+  GTest::gmock_main
 )
 
 include(GoogleTest)

@@ -1,78 +1,123 @@
-#include <gtest/gtest.h>
+/*
+* ECU PE3 Frame Parsing Unit Tests
+* Author:   Cristian Cruz
+*
+* Email:    cris14.alex@gmail.com
+*
+* (c) 2024 Dallas Formula Racing - Embedded Firmware Team
+* Formula SAE International Collegiate Chapter
+* GPL-3.0 License
+*/
 
+// Standard Libraries
+#include <cmath>
+#include <vector>
+
+// Unit Testing Framework
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
+// DFR Custom Dependencies
 #include "../../../../../../DAQ_System/Program/Src/Sensor/ECU/PE3/frame_formats.hpp"
 
-TEST(EcuFrameFieldsParsing, ParseBytePairOutput) {
-    // Give dummy data and evaluate output
+namespace sensor {
+
+/*****************Byte Parsing Tests******************/
+TEST(EcuByteParsing, ParseBytePairOutput) {
+    static constexpr uint8_t kLowByte = 0x1E;
+    static constexpr uint8_t kHighByte = 0x05;
+    int16_t field_result = ParseBytePair(kLowByte, kHighByte);
+
+    static constexpr int16_t kExpectedResult = 1310;
+    EXPECT_EQ(field_result, kExpectedResult);
+}
+
+TEST(EcuByteParsing, ParseBytePairInputOverflow) {
+    static constexpr uint8_t kLowByte = UINT8_MAX; // 255
+    static constexpr uint8_t kHighByte = 150;
+    int16_t field_result = ParseBytePair(kLowByte, kHighByte);
+
+    // Check that the result is within proper range
+    static constexpr int16_t kMaximumValue = INT16_MAX; // 32,767
+    static constexpr int16_t kMinimumValue = INT16_MIN; // -32,768
+    EXPECT_LT(field_result, kMaximumValue + 1);
+    EXPECT_GT(field_result, kMinimumValue - 1);
+
+    static constexpr int16_t kExpectedResult = -26881;
+    EXPECT_EQ(field_result, kExpectedResult);
+}
+
+/******************Field Parsing Tests******************/
+class EcuFrameFieldParsingFixture : public testing::Test {
+protected:
+    std::vector<int16_t> fields;
+
+    // Sample data
+    static constexpr uint8_t kByteArrayMaxLength = 8;
+    uint8_t rx_buffer[kByteArrayMaxLength] = {  0x1E, 0x05,
+                                                0xBB, 0x05,
+                                                0x8F, 0x03,
+                                                0x00, 0xFF  };
     
-    // Check if >= than 15-bit minum and <= than 12-bit max
+    // Expected output
+    const int16_t kExpectedField1 = 1310;
+    const int16_t kExpectedField2 = 1467;
+    const int16_t kExpectedField3 = 911;
+    const int16_t kExpectedField4 = 65280;
+};
+
+TEST_F(EcuFrameFieldParsingFixture, ParseFieldsOutput) {
+    static constexpr uint8_t kNumOfFields = 3;
+    fields = std::vector<int16_t>(kNumOfFields);
+
+    EXPECT_TRUE(ParseFields(rx_buffer, fields)) << "Failed to parse: vector is too large.";
+    EXPECT_EQ(fields.size(), kNumOfFields);
+    EXPECT_THAT(fields, testing::ElementsAre(kExpectedField1, kExpectedField2, kExpectedField3));
 }
 
-TEST(EcuFrameFieldsParsing, ParseBytePairInputOverflow) {
-    // Give dummy data that causes overflow and evaluate output
+TEST_F(EcuFrameFieldParsingFixture, MaximumFieldsRequested) {
+    static constexpr uint8_t kNumOfFields = 4;
+    fields = std::vector<int16_t>(kNumOfFields);
 
-    // Check if >= than 15-bit minum and <= than 12-bit max
-
-    // Check that it is not the value if overflow was not handled
+    EXPECT_TRUE(ParseFields(rx_buffer, fields)) << "Failed to parse: vector is too large.";
+    EXPECT_EQ(fields.size(), kNumOfFields);
+    EXPECT_THAT(fields, testing::ElementsAre(kExpectedField1, kExpectedField2, kExpectedField3, kExpectedField4));
 }
 
-TEST(EcuFrameFieldsParsing, ParseFieldsOutput) {
-    // Init vector with size of 2 or 3 (inclusively)
+TEST_F(EcuFrameFieldParsingFixture, MinimumFieldsRequested) {
+    static constexpr uint8_t kNumOfFields = 1;
+    fields = std::vector<int16_t>(kNumOfFields);
 
-    // Check successful return status
-
-    // Check that vector is unaltered
-    
-    // Check that all values are correct
+    EXPECT_TRUE(ParseFields(rx_buffer, fields)) << "Failed to parse: vector is too large.";
+    EXPECT_EQ(fields.size(), kNumOfFields);
+    EXPECT_THAT(fields, testing::ElementsAre(kExpectedField1));
 }
 
-TEST(EcuFrameFieldsParsing, ParseFieldsMaxFieldsRequested) {
-    // Init vector with size of 4
-
-    // Check successful return status
-
-    // Check that vector is unaltered
-    
-    // Check that all values are correct
+TEST_F(EcuFrameFieldParsingFixture, NoFieldsRequested) {
+    // Using an un-initialized, empty vector
+    EXPECT_FALSE(ParseFields(rx_buffer, fields));
+    EXPECT_EQ(fields.size(), 0);
 }
 
-TEST(EcuFrameFieldsParsing, ParseFieldsMinFieldsRequested) {
-    // Init vector with size of 1
+TEST_F(EcuFrameFieldParsingFixture, ExcessiveFieldsRequested) {
+    static constexpr uint8_t kNumOfFields = 5;
+    fields = std::vector<int16_t>(kNumOfFields);
 
-    // Check successful return status
-
-    // Check that vector is unaltered
-    
-    // Check that all values are correct
+    EXPECT_FALSE(ParseFields(rx_buffer, fields));
 }
 
-TEST(EcuFrameFieldsParsing, ParseFieldsNoFieldsRequested) {
-    // Declare vector, do not initialize (size 0)
-
-    // Check failed return status
-
-    // Check that vector is unaltered
+TEST_F(EcuFrameFieldParsingFixture, ParseTypeBitUnkown) {
+    rx_buffer[7] = 0xA0;
+    EXPECT_EQ(ParseTypeBit(rx_buffer), TypeBit::kUnknown);
 }
 
-TEST(EcuFrameFieldsParsing, ParseFieldsExcessiveNumberOfFieldsRequested) {
-    // Init vector with size greater than 4
-
-    // Check failed return status
-
-    // Check that vector is unaltered
-    
-    // Check that all values are of default value (zero)
+TEST_F(EcuFrameFieldParsingFixture, ParseTypeBitHigh) {
+    EXPECT_EQ(ParseTypeBit(rx_buffer), TypeBit::kHigh);
 }
 
-
-TEST(EcuFrameFieldsParsing, ParseTypeBitUnkown) {
-
+TEST_F(EcuFrameFieldParsingFixture, ParseTypeBitLow) {
+    rx_buffer[7] = 0;
+    EXPECT_EQ(ParseTypeBit(rx_buffer), TypeBit::kLow);
 }
 
-TEST(EcuFrameFieldsParsing, ParseTypeBitHigh) {
-    
-}
-
-TEST(EcuFrameFieldsParsing, ParseTypeBitLow) {
-    
 }
