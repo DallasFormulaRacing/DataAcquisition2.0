@@ -11,9 +11,7 @@
 * GPL-3.0 License
 */
 
-#include "frame_formats.hpp"
-
-#include <cmath>
+#include "frame_parsing.hpp"
 
 namespace sensor {
 

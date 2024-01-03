@@ -11,12 +11,13 @@
 * GPL-3.0 License
 */
 
-#ifndef ECU_PE3_FRAME_FORMATS_H
-#define ECU_PE3_FRAME_FORMATS_H
+#ifndef ECU_PE3_FRAME_PARSING_H
+#define ECU_PE3_FRAME_PARSING_H
 
 // Standard Libraries
 #include <cstdint>
 #include <vector>
+#include <cmath>
 
 namespace sensor {
 
@@ -135,4 +136,4 @@ struct FrameFormat5 {
 
 }
 
-#endif // ECU_PE3_FRAME_FORMATS_H
+#endif // ECU_PE3_FRAME_PARSING_H
