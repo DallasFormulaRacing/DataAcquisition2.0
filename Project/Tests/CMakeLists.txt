@@ -21,9 +21,12 @@ add_executable(
   daq-unit-tests
   Src/hello_test.cc
 
-  # PE3 ECU CAN Bus Messaging Tests
+  # PE3 ECU CAN Bus Byte Parsing Tests
   ../DAQ_System/Program/Src/Sensor/ECU/PE3/frame_parsing.hpp
   ../DAQ_System/Program/Src/Sensor/ECU/PE3/frame_parsing.cpp
+  Src/Sensor/ECU/PE3/frame_parsing_tests.cpp
+
+  # PE3 ECU Frame Accessibility Tests
   ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe1.hpp
   ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe2.hpp
   ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe3.hpp
@@ -40,7 +43,7 @@ add_executable(
   ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe14.hpp
   ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe15.hpp
   ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe16.hpp
-  Src/Sensor/ECU/PE3/frame_parsing_tests.cpp
+  Src/Sensor/ECU/PE3/pe_frames_tests.cpp
 )
 
 # Linking with `gtest_main` instead of `gtest` allows us to bypass having

@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE9_H
 #define ECU_PE3_FRAMES_FRAMEPE9_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 
@@ -23,7 +23,11 @@ public:
 	FramePE9(uint8_t rx_buffer[kByteArrayMaxLength])
 	  : FrameFormat2(rx_buffer) {}
 
-	float Lambda(uint8_t index) {
+	float LambdaMeasured(uint8_t index) {
+		if (index >= 2) {
+			return 0.0f;
+		}
+		
 		return fields.at(index) * kResolutionPerBit;
 	}
 

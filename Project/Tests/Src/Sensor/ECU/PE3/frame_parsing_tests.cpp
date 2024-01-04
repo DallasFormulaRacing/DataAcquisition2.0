@@ -1,8 +1,10 @@
 /*
 * ECU PE3 Frame Parsing Unit Tests
-* Author:   Cristian Cruz
+* Author:   William Lim
+*           Cristian Cruz
 *
-* Email:    cris14.alex@gmail.com
+* Email:    wll180000@utdallas.edu
+*           cris14.alex@gmail.com
 *
 * (c) 2024 Dallas Formula Racing - Embedded Firmware Team
 * Formula SAE International Collegiate Chapter
@@ -23,7 +25,7 @@
 namespace sensor {
 
 /*****************Byte Parsing Tests******************/
-TEST(EcuByteParsing, ParseBytePairOutput) {
+TEST(Pe3EcuByteParsing, ParseBytePairOutput) {
     static constexpr uint8_t kLowByte = 0x1E;
     static constexpr uint8_t kHighByte = 0x05;
     int16_t field_result = ParseBytePair(kLowByte, kHighByte);
@@ -32,7 +34,7 @@ TEST(EcuByteParsing, ParseBytePairOutput) {
     EXPECT_EQ(field_result, kExpectedResult);
 }
 
-TEST(EcuByteParsing, ParseBytePairInputOverflow) {
+TEST(Pe3EcuByteParsing, ParseBytePairInputOverflow) {
     static constexpr uint8_t kLowByte = UINT8_MAX; // 255
     static constexpr uint8_t kHighByte = 150;
     int16_t field_result = ParseBytePair(kLowByte, kHighByte);
@@ -48,25 +50,25 @@ TEST(EcuByteParsing, ParseBytePairInputOverflow) {
 }
 
 /******************Field Parsing Tests******************/
-class EcuFrameFieldParsingFixture : public testing::Test {
+class Pe3EcuFrameFieldParsingFixture : public testing::Test {
 protected:
     std::vector<int16_t> fields;
 
     // Sample data
     static constexpr uint8_t kByteArrayMaxLength = 8;
-    uint8_t rx_buffer[kByteArrayMaxLength] = {  0x1E, 0x05,
+    uint8_t rx_buffer[kByteArrayMaxLength] = {  0xBE, 0x05,
                                                 0xBB, 0x05,
                                                 0x8F, 0x03,
                                                 0x00, 0xFF  };
     
     // Expected output
-    const int16_t kExpectedField1 = 1310;
+    const int16_t kExpectedField1 = 1470;
     const int16_t kExpectedField2 = 1467;
     const int16_t kExpectedField3 = 911;
     const int16_t kExpectedField4 = 65280;
 };
 
-TEST_F(EcuFrameFieldParsingFixture, ParseFieldsOutput) {
+TEST_F(Pe3EcuFrameFieldParsingFixture, ParseFieldsOutput) {
     static constexpr uint8_t kNumOfFields = 3;
     fields = std::vector<int16_t>(kNumOfFields);
 
@@ -75,7 +77,7 @@ TEST_F(EcuFrameFieldParsingFixture, ParseFieldsOutput) {
     EXPECT_THAT(fields, testing::ElementsAre(kExpectedField1, kExpectedField2, kExpectedField3));
 }
 
-TEST_F(EcuFrameFieldParsingFixture, MaximumFieldsRequested) {
+TEST_F(Pe3EcuFrameFieldParsingFixture, MaximumFieldsRequested) {
     static constexpr uint8_t kNumOfFields = 4;
     fields = std::vector<int16_t>(kNumOfFields);
 
@@ -84,7 +86,7 @@ TEST_F(EcuFrameFieldParsingFixture, MaximumFieldsRequested) {
     EXPECT_THAT(fields, testing::ElementsAre(kExpectedField1, kExpectedField2, kExpectedField3, kExpectedField4));
 }
 
-TEST_F(EcuFrameFieldParsingFixture, MinimumFieldsRequested) {
+TEST_F(Pe3EcuFrameFieldParsingFixture, MinimumFieldsRequested) {
     static constexpr uint8_t kNumOfFields = 1;
     fields = std::vector<int16_t>(kNumOfFields);
 
@@ -93,29 +95,29 @@ TEST_F(EcuFrameFieldParsingFixture, MinimumFieldsRequested) {
     EXPECT_THAT(fields, testing::ElementsAre(kExpectedField1));
 }
 
-TEST_F(EcuFrameFieldParsingFixture, NoFieldsRequested) {
+TEST_F(Pe3EcuFrameFieldParsingFixture, NoFieldsRequested) {
     // Using an un-initialized, empty vector
     EXPECT_FALSE(ParseFields(rx_buffer, fields));
     EXPECT_EQ(fields.size(), 0);
 }
 
-TEST_F(EcuFrameFieldParsingFixture, ExcessiveFieldsRequested) {
+TEST_F(Pe3EcuFrameFieldParsingFixture, ExcessiveFieldsRequested) {
     static constexpr uint8_t kNumOfFields = 5;
     fields = std::vector<int16_t>(kNumOfFields);
 
     EXPECT_FALSE(ParseFields(rx_buffer, fields));
 }
 
-TEST_F(EcuFrameFieldParsingFixture, ParseTypeBitUnkown) {
+TEST_F(Pe3EcuFrameFieldParsingFixture, ParseTypeBitUnkown) {
     rx_buffer[7] = 0xA0;
     EXPECT_EQ(ParseTypeBit(rx_buffer), TypeBit::kUnknown);
 }
 
-TEST_F(EcuFrameFieldParsingFixture, ParseTypeBitHigh) {
+TEST_F(Pe3EcuFrameFieldParsingFixture, ParseTypeBitHigh) {
     EXPECT_EQ(ParseTypeBit(rx_buffer), TypeBit::kHigh);
 }
 
-TEST_F(EcuFrameFieldParsingFixture, ParseTypeBitLow) {
+TEST_F(Pe3EcuFrameFieldParsingFixture, ParseTypeBitLow) {
     rx_buffer[7] = 0;
     EXPECT_EQ(ParseTypeBit(rx_buffer), TypeBit::kLow);
 }

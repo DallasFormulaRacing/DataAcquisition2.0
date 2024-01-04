@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE5_H
 #define ECU_PE3_FRAMES_FRAMEPE5_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 
@@ -23,12 +23,17 @@ public:
 	FramePE5(uint8_t rx_buffer[kByteArrayMaxLength])
 	  : FrameFormat1(rx_buffer) {}
 
-	float Frequency(uint8_t index) {
+	float FrequencyHertz(uint8_t index) {
+		if (index >= kNumOfFields) {
+			return 0.0f;
+		}
+		
 		return fields.at(index) * kResolutionPerBit;
 	}
 
 private:
 	static constexpr float kResolutionPerBit = 0.2f;
+	static constexpr uint8_t kNumOfChannels = 4;
 };
 
 }

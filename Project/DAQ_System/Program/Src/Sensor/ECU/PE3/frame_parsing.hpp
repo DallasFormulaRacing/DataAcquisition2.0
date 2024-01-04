@@ -91,6 +91,7 @@ struct FrameFormat3 {
 		}
 	}
 
+	static constexpr uint8_t kNumOfFields = kByteArrayMaxLength;
 	std::vector<int16_t> fields;
 };
 

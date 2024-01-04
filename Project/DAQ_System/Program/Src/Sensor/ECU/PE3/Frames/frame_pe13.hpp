@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE13_H
 #define ECU_PE3_FRAMES_FRAMEPE13_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 
@@ -24,10 +24,19 @@ public:
 	  : FrameFormat1(rx_buffer) {}
 
 	float DrivenWheelSpeed(uint8_t index) {
+		if (index >= 2) {
+			return 0.0f;
+		}
+
 		return fields.at(index) * kResolutionPerBit;
 	}
 
 	float NonDrivenWheelSpeed(uint8_t index) {
+		index += 2;
+		if (index <= 1 || index >= kNumOfFields) {
+			return 0.0f;
+		}
+
 		return fields.at(index) * kResolutionPerBit;
 	}
 

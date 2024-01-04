@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE2_H
 #define ECU_PE3_FRAMES_FRAMEPE2_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 
@@ -29,11 +29,11 @@ public:
 	FramePE2(uint8_t rx_buffer[kByteArrayMaxLength])
 	  : FrameFormat4(rx_buffer) {}
 
-	float Barometer()					{ return fields.at(0) * kResolutionPerBit; }
+	float BarometerPressure()			{ return fields.at(0) * kResolutionPerBit; }
 	float ManifoldAbsolutePressure()	{ return fields.at(1) * kResolutionPerBit; }
 	float Lambda()						{ return fields.at(2) * kResolutionPerBit; }
 
-	PressureType PressureType() {
+	PressureType PressureUnit() {
 		switch(type) {
 			case(TypeBit::kUnknown): return PressureType::kUnknown;
 			case(TypeBit::kHigh): return PressureType::kKiloPascal;

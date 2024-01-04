@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE1_H
 #define ECU_PE3_FRAMES_FRAMEPE1_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 
@@ -23,10 +23,10 @@ public:
 	FramePE1(uint8_t rx_buffer[kByteArrayMaxLength])
 	  : FrameFormat1(rx_buffer) {}
 
-	float RevolutionsPerMinute()	{ return fields.at(0); } // Resolution per Bit = 1
-	float ThrottlePosition()		{ return fields.at(1) * kResolutionPerBit; }
-	float FuelOpenTime()			{ return fields.at(2) * kResolutionPerBit; }
-	float IgnitionAngle()			{ return fields.at(3) * kResolutionPerBit; }
+	int16_t RevolutionsPerMinute()		{ return fields.at(0); } // Resolution per Bit = 1
+	float ThrottlePosition()			{ return fields.at(1) * kResolutionPerBit; }
+	float FuelOpenTime()				{ return fields.at(2) * kResolutionPerBit; }
+	float IgnitionAngle()				{ return fields.at(3) * kResolutionPerBit; }
 
 private:
 	static constexpr float kResolutionPerBit = 0.1f;

@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE14_H
 #define ECU_PE3_FRAMES_FRAMEPE14_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 

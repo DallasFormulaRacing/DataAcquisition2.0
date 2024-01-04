@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE10_H
 #define ECU_PE3_FRAMES_FRAMEPE10_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 
@@ -23,7 +23,11 @@ public:
 	FramePE10(uint8_t rx_buffer[kByteArrayMaxLength])
 	  : FrameFormat3(rx_buffer) {}
 
-	float PulseWidthModulationDutyCycle(uint8_t index) {
+	float PwmDutyCycle(uint8_t index) {
+		if (index >= kNumOfFields) {
+			return 0.0f;
+		}
+		
 		return fields.at(index) * kResolutionPerBit;
 	}
 

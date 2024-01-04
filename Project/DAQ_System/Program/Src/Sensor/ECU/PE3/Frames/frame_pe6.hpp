@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE6_H
 #define ECU_PE3_FRAMES_FRAMEPE6_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 
@@ -33,7 +33,7 @@ public:
 	float AirTemperature()		{ return fields.at(1) * kTempResolutionPerBit; }
 	float CoolantTemperature()	{ return fields.at(2) * kTempResolutionPerBit; }
 
-	TemperatureType TemperatureType() {
+	TemperatureType TemperatureUnit() {
 		switch(type) {
 			case(TypeBit::kUnknown): return TemperatureType::kUnknown;
 			case(TypeBit::kHigh): return TemperatureType::kCelsius;

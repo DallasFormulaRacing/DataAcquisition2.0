@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE7_H
 #define ECU_PE3_FRAMES_FRAMEPE7_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 
@@ -23,12 +23,16 @@ public:
 	FramePE7(uint8_t rx_buffer[kByteArrayMaxLength])
 	  : FrameFormat5(rx_buffer) {}
 
-	float AnalogInput(uint8_t index) {
+	float AnalogInputVoltage(uint8_t index) {
+		if (index >= kNumOfFields) {
+			return 0.0f;
+		}
+
 		return fields.at(index) * kResolutionPerBit;
 	}
 
 	// TODO: Determine Celsius or Farenheit
-	// Does this rely on FRame PE6's TemperatureType bit?
+	// Does this rely on Frame PE6's TemperatureType bit?
 private:
 	static constexpr float kResolutionPerBit = 0.1f;
 };

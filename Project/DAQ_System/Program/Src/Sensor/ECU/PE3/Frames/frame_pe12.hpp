@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE12_H
 #define ECU_PE3_FRAMES_FRAMEPE12_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 
@@ -26,7 +26,7 @@ public:
 	float DrivenAverageWheelSpeed()		{ return fields.at(0) * kResolutionPerBit; }
 	float NonDrivenAverageWheelSpeed()	{ return fields.at(1) * kResolutionPerBit; }
 	float IgnitionCompensation()		{ return fields.at(2) * kResolutionPerBit; }
-	float IgnitionCut()			{ return fields.at(3) * kResolutionPerBit; }
+	float IgnitionCutPercentage()		{ return fields.at(3) * kResolutionPerBit; }
 
 private:
 	static constexpr float kResolutionPerBit = 0.1f;

@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE4_H
 #define ECU_PE3_FRAMES_FRAMEPE4_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 
@@ -23,7 +23,11 @@ public:
 	FramePE4(uint8_t rx_buffer[kByteArrayMaxLength])
 	  : FrameFormat1(rx_buffer) {}
 
-	float AnalogInput(uint8_t index) {
+	float AnalogInputVoltage(uint8_t index) {
+		if (index >= kNumOfFields) {
+			return 0.0f;
+		}
+
 		return fields.at(index) * kResolutionPerBit;
 	}
 

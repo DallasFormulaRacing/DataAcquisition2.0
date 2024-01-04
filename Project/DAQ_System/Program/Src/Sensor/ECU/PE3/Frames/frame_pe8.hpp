@@ -14,7 +14,7 @@
 #ifndef ECU_PE3_FRAMES_FRAMEPE8_H
 #define ECU_PE3_FRAMES_FRAMEPE8_H
 
-#include "../frame_formats.hpp"
+#include "../frame_parsing.hpp"
 
 namespace sensor {
 
@@ -24,7 +24,7 @@ public:
 	  : FrameFormat1(rx_buffer) {}
 
 	float RevolutionsPerMinuteRate()		{ return fields.at(0); }
-	float ThrottlePositionRate()			{ return fields.at(1); }
+	float ThrottlePositionPercentageRate()	{ return fields.at(1); }
 	float ManifoldAbsolutePressureRate()	{ return fields.at(2); }
 	float MassAirFlowLoadRate()				{ return fields.at(3) * kResolutionPerBit; }
 
