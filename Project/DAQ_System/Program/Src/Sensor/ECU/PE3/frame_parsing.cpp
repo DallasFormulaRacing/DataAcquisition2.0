@@ -64,10 +64,10 @@ bool ParseFields(const uint8_t rx_buffer[kByteArrayMaxLength], std::vector<int16
 // ECU datasheet describes one "bit", but it is actually a whole byte of 1s (0xFF).
 // This may be a "bit" in the sense that the byte will only have two possible values (hence, binary bit).
 TypeBit ParseTypeBit(const uint8_t rx_buffer[kByteArrayMaxLength]) {
-	static constexpr uint8_t kHigh = 0xFF;
+	static constexpr uint8_t kHigh = 0x01;
 	static constexpr uint8_t kLow = 0;
 
-	uint8_t type_bit = rx_buffer[kByteArrayMaxLength - 1];
+	uint8_t type_bit = rx_buffer[kByteArrayMaxLength - 2];
 
 	if (type_bit == kHigh) {
 		return TypeBit::kHigh;

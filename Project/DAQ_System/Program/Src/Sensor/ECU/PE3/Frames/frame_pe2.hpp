@@ -39,6 +39,8 @@ public:
 			case(TypeBit::kHigh): return PressureType::kKiloPascal;
 			case(TypeBit::kLow): return PressureType::kPoundsPerSquareInch;
 		}
+
+		return PressureType::kUnknown;
 	}
 
 private:

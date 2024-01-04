@@ -39,6 +39,8 @@ public:
 			case(TypeBit::kHigh): return TemperatureType::kCelsius;
 			case(TypeBit::kLow): return TemperatureType::kFarenheit;
 		}
+
+		return TemperatureType::kUnknown;
 	}
 
 private:
