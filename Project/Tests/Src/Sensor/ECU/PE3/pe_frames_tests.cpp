@@ -63,7 +63,7 @@ TEST(Pe3EcuFrames, FramePe2PressureKiloPascal) {
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xBE, 0x05,
                                                 0xBB, 0x05,
                                                 0x8F, 0x03,
-                                                0x00, 0xFF  };
+                                                0x01, 0xFF  };
     FramePE2 frame(rx_buffer);
 
     static constexpr float kExpectedBarometerPressure = 14.7f;
@@ -82,7 +82,7 @@ TEST(Pe3EcuFrames, FramePe2PressurePoundsPerSquareInch) {
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xBE, 0x05,
                                                 0xBB, 0x05,
                                                 0x8F, 0x03,
-                                                0x00, 0x00  };
+                                                0x00, 0xFF  };
     FramePE2 frame(rx_buffer);
 
     static constexpr PressureType kExpectedPressureUnit = PressureType::kPoundsPerSquareInch;
@@ -94,7 +94,7 @@ TEST(Pe3EcuFrames, FramePe2PressureUnkown) {
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xBE, 0x05,
                                                 0xBB, 0x05,
                                                 0x8F, 0x03,
-                                                0x00, 0x0A  };
+                                                0x0A, 0xFF  };
     FramePE2 frame(rx_buffer);
 
     static constexpr PressureType kExpectedPressureUnit = PressureType::kUnknown;
@@ -202,7 +202,7 @@ TEST(Pe3EcuFrames, FramePe6TempCelsius) {
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x14, 0x05,
                                                 0xAA, 0x02,
                                                 0xCE, 0x02,
-                                                0x00, 0xFF  };
+                                                0x01, 0xFF  };
     FramePE6 frame(rx_buffer);
 
     static constexpr float kExpectedBatteryVoltage = 13.0f;
@@ -228,12 +228,12 @@ TEST(Pe3EcuFrames, FramePe6TempFaranheit) {
     EXPECT_EQ(frame.TemperatureUnit(), kExpectedTemperatureUnit);
 }
 
-TEST(Pe3EcuFrames, FramePe6TempUnkown) {
+TEST(Pe3EcuFrames, FramePe6TempUnknown) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x14, 0x05,
                                                 0xAA, 0x02,
                                                 0xCE, 0x02,
-                                                0x00, 0x0C  };
+                                                0xCC, 0xFF  };
     FramePE6 frame(rx_buffer);
 
     static constexpr TemperatureType kExpectedTemperatureUnit = TemperatureType::kUnknown;

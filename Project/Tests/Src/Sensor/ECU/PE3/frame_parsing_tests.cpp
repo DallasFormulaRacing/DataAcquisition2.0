@@ -59,13 +59,13 @@ protected:
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xBE, 0x05,
                                                 0xBB, 0x05,
                                                 0x8F, 0x03,
-                                                0x00, 0xFF  };
+                                                0x01, 0xFF  };
     
     // Expected output
     const int16_t kExpectedField1 = 1470;
     const int16_t kExpectedField2 = 1467;
     const int16_t kExpectedField3 = 911;
-    const int16_t kExpectedField4 = 65280;
+    const int16_t kExpectedField4 = 65281;
 };
 
 TEST_F(Pe3EcuFrameFieldParsingFixture, ParseFieldsOutput) {
@@ -108,8 +108,8 @@ TEST_F(Pe3EcuFrameFieldParsingFixture, ExcessiveFieldsRequested) {
     EXPECT_FALSE(ParseFields(rx_buffer, fields));
 }
 
-TEST_F(Pe3EcuFrameFieldParsingFixture, ParseTypeBitUnkown) {
-    rx_buffer[7] = 0xA0;
+TEST_F(Pe3EcuFrameFieldParsingFixture, ParseTypeBitUnknown) {
+    rx_buffer[kByteArrayMaxLength - 2] = 0xA0;
     EXPECT_EQ(ParseTypeBit(rx_buffer), TypeBit::kUnknown);
 }
 
@@ -118,7 +118,7 @@ TEST_F(Pe3EcuFrameFieldParsingFixture, ParseTypeBitHigh) {
 }
 
 TEST_F(Pe3EcuFrameFieldParsingFixture, ParseTypeBitLow) {
-    rx_buffer[7] = 0;
+    rx_buffer[kByteArrayMaxLength - 2] = 0;
     EXPECT_EQ(ParseTypeBit(rx_buffer), TypeBit::kLow);
 }
 
