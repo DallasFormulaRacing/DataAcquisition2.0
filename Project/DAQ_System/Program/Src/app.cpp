@@ -27,12 +27,15 @@ CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 CAN_FilterTypeDef CAN;
 
+#include "i2c.h"
+extern I2C_HandleTypeDef hi2c1;
 
 // DFR Custom Dependencies
 #include "app.hpp"
 #include "../../Core/Inc/retarget.h"
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
+#include "Sensor/Accelerometer/lsm303dlhc.hpp"
 
 // CAN variables
 uint8_t TxData[8] = {0};
@@ -105,6 +108,11 @@ void cppMain() {
 
 	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
 	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
+	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
+	accelerometer = std::make_unique<sensor::LSM303DLHC>(hi2c1);
+
+	float* AccelerometerData = 0;
+	accelerometer ->init();
 
 	float displacement_inches = 0.0f;
 
@@ -112,6 +120,15 @@ void cppMain() {
 		// HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 		// HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 		// HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
+
+		accelerometer ->ComputeAcceleration();
+		AccelerometerData = accelerometer -> GetAcceleration();
+
+		printf("the x-axis is %lf \t\t " , AccelerometerData[0]);
+		printf("the y-axis is %lf \t\t " , AccelerometerData[1]);
+		printf("the z-axis is %lf " , AccelerometerData[2]);
+		printf("\r");
+		printf("\n");
 
 		displacement_inches = lin_pot->DisplacementInches();
 
