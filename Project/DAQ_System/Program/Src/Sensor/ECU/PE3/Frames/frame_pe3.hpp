@@ -11,8 +11,8 @@
 * GPL-3.0 License
 */
 
-#ifndef ECU_PE3_FRAMES_FRAMEPE3_H
-#define ECU_PE3_FRAMES_FRAMEPE3_H
+#ifndef ECU_PE3_FRAMES_PE3_H
+#define ECU_PE3_FRAMES_PE3_H
 
 #include "../frame_parsing.hpp"
 
@@ -37,4 +37,4 @@ private:
 
 }
 
-#endif // ECU_PE3_FRAMES_FRAMEPE3_H
+#endif // ECU_PE3_FRAMES_PE3_H
