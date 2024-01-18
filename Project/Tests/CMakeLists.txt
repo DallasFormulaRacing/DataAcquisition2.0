@@ -20,6 +20,30 @@ enable_testing()
 add_executable(
   daq-unit-tests
   Src/hello_test.cc
+
+  # PE3 ECU CAN Bus Byte Parsing Tests
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/frame_parsing.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/frame_parsing.cpp
+  Src/Sensor/ECU/PE3/frame_parsing_tests.cpp
+
+  # PE3 ECU Frame Accessibility Tests
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe1.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe2.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe3.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe4.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe5.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe6.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe7.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe8.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe9.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe10.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe11.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe12.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe13.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe14.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe15.hpp
+  ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe16.hpp
+  Src/Sensor/ECU/PE3/pe_frames_tests.cpp
 )
 
 # Linking with `gtest_main` instead of `gtest` allows us to bypass having
@@ -27,6 +51,7 @@ add_executable(
 target_link_libraries(
   daq-unit-tests
   GTest::gtest_main
+  GTest::gmock_main
 )
 
 include(GoogleTest)

@@ -1,5 +1,5 @@
 /*
-* Linear Potentiometer SLS1300
+* Linear Potentiometer Abstract Interface
 * Author:   Manuel DJC
 *           Cristian Cruz
 *
