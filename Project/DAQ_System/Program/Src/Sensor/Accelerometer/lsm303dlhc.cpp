@@ -18,8 +18,6 @@
 #include <cmath>
 #include <limits>
 
-#include "i2c.h"
-extern I2C_HandleTypeDef hi2c1;
 
 namespace sensor{
 
@@ -129,11 +127,15 @@ void LSM303DLHC::ComputeAcceleration() {
 }
 
 void LSM303DLHC::ReadRawAcceleration() {
-    uint8_t command[1] = { OUT_X_L_A | 0x80 };
-    HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, command,1, HAL_MAX_DELAY);
+	static constexpr int ByteArraySize = 6;
+	static constexpr int I2CWriteSize = 1;
+	static constexpr int I2CReadSize = 6;
 
-    uint8_t bytes_received[6];
-    HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, bytes_received,6, HAL_MAX_DELAY);
+    uint8_t command[1] = { OUT_X_L_A | 0x80 };
+    HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, command,I2CWriteSize, HAL_MAX_DELAY);
+
+    uint8_t bytes_received[ByteArraySize];
+    HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, bytes_received,I2CReadSize, HAL_MAX_DELAY);
 
     // 16-bit values
     raw_acceleration_data_[0] = (bytes_received[1] <<8 | bytes_received[0]);
@@ -141,30 +143,8 @@ void LSM303DLHC::ReadRawAcceleration() {
     raw_acceleration_data_[2] = (bytes_received[5] <<8 | bytes_received[4]);
 }
 
-//======================================================================================
-
-float* LSM303DLHC::GetMagnetometerData() {
-    // TODO: Rename this method after the unit returned by the magnetometer
-    return real_acceleration_data_;
 }
 
-void LSM303DLHC::ReadRawMagnetometer() {
-    uint8_t command[1] = {OUT_X_H_M};
-    HAL_I2C_Master_Transmit(&i2c_,MAG_ADDRESS, command,1, HAL_MAX_DELAY);
-
-    uint8_t bytes_received[6];
-    HAL_I2C_Master_Receive(&i2c_,MAG_ADDRESS, bytes_received,6, HAL_MAX_DELAY);
-
-    raw_magnetometer_data_[0] = (short) (bytes_received[0]<<8 | bytes_received[1]); // X
-    raw_magnetometer_data_[1] = (short) (bytes_received[4]<<8 | bytes_received[5]); // Y
-    raw_magnetometer_data_[2] = (short) (bytes_received[2]<<8 | bytes_received[3]); // Z
-}
-
-void LSM303DLHC::ComputeMagnetometer() {
-    // TODO: post-process raw_magnetometer_data_ & store results in real_magnetometer_data_
-}
-
-}
 
 
 

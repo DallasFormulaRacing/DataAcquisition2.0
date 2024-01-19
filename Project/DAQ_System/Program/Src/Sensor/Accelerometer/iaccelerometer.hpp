@@ -21,11 +21,10 @@ class IAccelerometer {
         virtual void calibrate() = 0;
 
         virtual void ComputeAcceleration() = 0;
-        virtual void ComputeMagnetometer() = 0;
 
 
         virtual float* GetAcceleration() = 0;
-        virtual float* GetMagnetometerData() = 0;
+
 };
 
 }

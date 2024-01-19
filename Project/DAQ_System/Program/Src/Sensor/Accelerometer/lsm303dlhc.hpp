@@ -43,6 +43,7 @@ class LSM303DLHC: public IAccelerometer {
 		/// @param hi2c an I2C peripheral from ST's HAL
         LSM303DLHC(I2C_HandleTypeDef &hi2c);
         virtual ~LSM303DLHC() = default;
+
         // Initialize the device
         void init() override;
 
@@ -50,17 +51,9 @@ class LSM303DLHC: public IAccelerometer {
         // @return -19.6 to 19.6 (  ±2g  )
         float* GetAcceleration() override;
 
-        // returns the value of the magnetometer at the given moment
-        // TODO
-        float* GetMagnetometerData() override;
-
 
         // calculates the acceleration in terms of m/s^2
         void ComputeAcceleration() override;
-
-        // calculates the magnetometer data
-        // TODO
-        void ComputeMagnetometer() override;
 
 
 //========================================Todo & Unused=======================================
@@ -82,12 +75,12 @@ class LSM303DLHC: public IAccelerometer {
 
         /** sets the scale factor for the x, y, and z axes
          *
-         * Calibratio details here:
+         * Calibration details here:
          *  http://mbed.org/users/shimniok/notebook/quick-and-dirty-3d-compass-calibration/
          *
          * Sensitivity of the three axes is never perfectly identical and this
          * function can help to correct differences in sensitivity.  You're
-         * supplying a multipler such that x, y and z will be normalized to the
+         * supplying a multiplier such that x, y and z will be normalized to the
          * same max/min values
          */
         void SetScale(float x, float y, float z);
@@ -104,11 +97,6 @@ class LSM303DLHC: public IAccelerometer {
         void ReadRawAcceleration();
 
 
-        // reads the raw values from the magnetometer
-        //TODO
-        void ReadRawMagnetometer();
-
-
         // The I2C peripherals from ST's HAL library
         I2C_HandleTypeDef i2c_;
 
@@ -123,9 +111,6 @@ class LSM303DLHC: public IAccelerometer {
         short raw_acceleration_data_[3] = {0, 0, 0};
         float real_acceleration_data_[3] = {0, 0, 0};
 
-        // TODO
-        short raw_magnetometer_data_[3] = {0, 0, 0};
-        float real_magnetometer_data_[3] = {0, 0, 0};
 };
 
 }
