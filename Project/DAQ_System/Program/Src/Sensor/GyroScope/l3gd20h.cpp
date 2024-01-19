@@ -38,7 +38,7 @@ bool L3GD20H::ReadRawData(short arr[3]) {
     return false;
 }
 
-bool L3GD20H::ComputeAngularVelocity() {
+bool L3GD20H::AngularVelocity() {
     short raw_data[3] = {0};
     if (ReadRawData(raw_data)) {
         angular_velocity_[0] =  raw_data[0] - offset_average_[0];
@@ -51,10 +51,10 @@ bool L3GD20H::ComputeAngularVelocity() {
     return false;
 }
 
-short* L3GD20H::GetDegreesPerSecond() {
+short* L3GD20H::DegreesPerSecond() {
     // Equation: degrees/second = RawData * SensitivityOfFullScaleRange
     // Using a default sensitivity for L3GD20H is 250dps
-	ComputeAngularVelocity();
+	AngularVelocity();
     degrees_per_second_[0] = angular_velocity_[0] * DPS_250_Sensitivity;
     degrees_per_second_[1] = angular_velocity_[1] * DPS_250_Sensitivity;
     degrees_per_second_[2] = angular_velocity_[2] * DPS_250_Sensitivity;
@@ -62,8 +62,8 @@ short* L3GD20H::GetDegreesPerSecond() {
     return degrees_per_second_;
 }
 
-float* L3GD20H::GetRadiansPerSecond() {
-	ComputeAngularVelocity();
+float* L3GD20H::RadiansPerSecond() {
+	AngularVelocity();
     radians_per_second_[0] = angular_velocity_[0] * DPS_250_Sensitivity * DegreesToRadians;
     radians_per_second_[1] = angular_velocity_[1] * DPS_250_Sensitivity * DegreesToRadians;
     radians_per_second_[2] = angular_velocity_[2] * DPS_250_Sensitivity * DegreesToRadians;

@@ -132,7 +132,7 @@ void cppMain() {
 		displacement_inches = lin_pot->DisplacementInches();
 		//HAL_Delay(250);
 		//printf("\n Percentage: %f", displacement_inches);
-		GyroData = gyroscope -> GetDegreesPerSecond();
+		GyroData = gyroscope -> DegreesPerSecond();
 		printf("x = %hd\t",GyroData[0]);
 		printf("y = %hd\t",GyroData[1]);
 		printf("z = %hd\t",GyroData[2]);

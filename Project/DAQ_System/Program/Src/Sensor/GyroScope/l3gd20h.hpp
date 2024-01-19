@@ -37,10 +37,10 @@ class L3GD20H: public IGyroscope{
 
         /// Converts the raw values from the gyroscope to Degrees/second
         /// @return ± 250 on each axis
-        virtual short* GetDegreesPerSecond() override;
+        virtual short* DegreesPerSecond() override;
         /// Converts the raw values from the gyroscope to Radians/second
         /// @return ± 4.363 on each axis
-        virtual float* GetRadiansPerSecond() override;
+        virtual float* RadiansPerSecond() override;
 
     private:
         /// takes in raw data from the gyroscope
@@ -50,7 +50,7 @@ class L3GD20H: public IGyroscope{
 
         /// takes in raw data from the gyroscope
         /// @return -32768 to 32767 on each axis
-        virtual bool ComputeAngularVelocity() override;
+        virtual bool AngularVelocity() override;
 
         /// writes to a specified value to a specified register
         /// @param addr_i2c 8-bit slave address( 7-bit slave address << 1 )
