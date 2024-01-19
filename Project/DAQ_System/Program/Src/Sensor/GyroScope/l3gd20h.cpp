@@ -16,7 +16,6 @@
 #include "l3gd20h.hpp"
 #include <stdint.h>
 
-#include "i2c.h"
 
 namespace sensor{
 
@@ -95,16 +94,6 @@ bool L3GD20H::WriteReg(uint8_t addr_i2c, uint8_t addr_reg, uint8_t register_data
     return HAL_I2C_Master_Transmit(&hi2c1,addr_i2c, data,2, HAL_MAX_DELAY);
 }
 
-
-bool L3GD20H::ReadReg(uint8_t addr_i2c,uint8_t *addr_reg, uint8_t read_data[]){
-	if(HAL_I2C_Master_Transmit(&hi2c1, addr_i2c, addr_reg, 1, HAL_MAX_DELAY) != HAL_OK){
-		return false;
-	}
-	if(HAL_I2C_Master_Receive(&hi2c1, addr_i2c, read_data, 1, HAL_MAX_DELAY) != HAL_OK){
-		return false;
-	}
-	return true;
-}
 
 
 bool L3GD20H::Receive(uint8_t data_buf[]){
