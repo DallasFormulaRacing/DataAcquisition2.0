@@ -23,9 +23,9 @@ public:
 
 	virtual ~ICan() = default;
 
-	virtual void EnableInterruptMode() = 0;
+	virtual void Receive(uint8_t rx_buffer[kMaxBytes]) = 0;
 
-	virtual void DisableInterruptMode() = 0;
+	virtual void Transmit(uint8_t tx_buffer) = 0;
 
 	virtual bool MessageArrivedFlag() = 0;
 
@@ -33,11 +33,9 @@ public:
 
 	virtual uint32_t LatestCanId() = 0;
 
-	virtual void ReceiveCallback() = 0;
+	virtual void EnableInterruptMode() = 0;
 
-	virtual void Receive(uint8_t rx_buffer[kMaxBytes]) = 0;
-
-	virtual void Transmit(uint8_t tx_buffer) = 0;
+	virtual void DisableInterruptMode() = 0;
 };
 
 }

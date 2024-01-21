@@ -37,11 +37,11 @@ CAN_FilterTypeDef CAN;
 #include "Platform/CAN/STM/F4/bxcan_stmf4.hpp"
 #include "Sensor/ECU/PE3/Frames/frame_pe2.hpp"
 
-// CallBack functions
-std::shared_ptr<platform::ICan> can_bus_callback_ptr(nullptr);
+// CAN Bus Interrupt Callback
+std::shared_ptr<platform::BxCanStmF4> bx_can_callback_ptr(nullptr);
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
-	can_bus_callback_ptr->ReceiveCallback();
+	bx_can_callback_ptr->ReceiveCallback();
 }
 
 
@@ -70,11 +70,23 @@ void cppMain() {
 										  0x0CFFFE48,
 										  0x0CFFD048  };
 
-	std::shared_ptr<platform::ICan> can_bus(nullptr);
-	can_bus = std::make_shared<platform::BxCanStmF4>(hcan1, CAN, can_id_list);
 
-	can_bus_callback_ptr = can_bus;
+
+
+
+	std::shared_ptr<platform::BxCanStmF4> bx_can_peripheral(nullptr);
+	bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1, CAN, can_id_list);
+
+	platform::BxCanStmF4::ReceiveInterruptMode rx_interrupt_mode = platform::BxCanStmF4::ReceiveInterruptMode::kFifo0MessagePending;
+	bx_can_peripheral->ConfigureReceiveCallback(rx_interrupt_mode);
+
+	bx_can_callback_ptr = bx_can_peripheral;
+
+	std::shared_ptr<platform::ICan> can_bus(nullptr);
+	can_bus = bx_can_peripheral;
+	// TODO: pass `can_bus` to ECU component via constructor
 	can_bus->EnableInterruptMode();
+
 
 	uint8_t rx_buffer[8];
 

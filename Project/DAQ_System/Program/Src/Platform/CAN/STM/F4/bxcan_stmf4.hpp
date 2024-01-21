@@ -28,9 +28,9 @@ public:
 
 	virtual ~BxCanStmF4();
 
-	virtual void EnableInterruptMode() override;
+	virtual void Receive(uint8_t rx_buffer[kMaxBytes]) override;
 
-	virtual void DisableInterruptMode() override;
+	virtual void Transmit(uint8_t tx_buffer) override;
 
 	virtual bool MessageArrivedFlag() override;
 
@@ -38,24 +38,34 @@ public:
 
 	virtual uint32_t LatestCanId() override;
 
-	virtual void ReceiveCallback() override;
+	virtual void EnableInterruptMode() override;
 
-	virtual void Receive(uint8_t rx_buffer[kMaxBytes]) override;
+	virtual void DisableInterruptMode() override;
 
-	virtual void Transmit(uint8_t tx_buffer) override;
+	enum class ReceiveInterruptMode : uint8_t {
+		kFifo0MessagePending,
+		kFifo0Full,
+		Fifo0Overrun,
+
+		kFifo1MessagePending,
+		kFifo1Full,
+		Fifo1Overrun,
+	};
+
+	void ConfigureReceiveCallback(ReceiveInterruptMode mode);
+
+	void ReceiveCallback();
 
 private:
 	void ConfigureFilter(CAN_FilterTypeDef &filter, uint8_t filter_bank_num, uint32_t can_id);
 
-	CAN_RxHeaderTypeDef rx_message_header_;
-
-	CAN_HandleTypeDef& bx_can_;
-
-
 	uint8_t rx_buffer_[kMaxBytes] = { 0 };
-
 	bool message_arrived_ = false;
 	uint32_t can_id_;
+
+	CAN_HandleTypeDef& bx_can_;
+	CAN_RxHeaderTypeDef rx_message_header_;
+	uint32_t rx_interrupt_mode_ = 0;
 };
 
 }
