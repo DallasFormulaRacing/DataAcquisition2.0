@@ -27,12 +27,18 @@ CAN_TxHeaderTypeDef TxHeader;
 CAN_RxHeaderTypeDef RxHeader;
 CAN_FilterTypeDef CAN;
 
+#include "i2c.h"
+extern I2C_HandleTypeDef hi2c1;
+
+
 
 // DFR Custom Dependencies
 #include "app.hpp"
 #include "../../Core/Inc/retarget.h"
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
+#include "Sensor/GyroScope/igyroscope.hpp"
+#include "Sensor/GyroScope/l3gd20h.hpp"
 
 // CAN variables
 uint8_t TxData[8] = {0};
@@ -53,6 +59,10 @@ constexpr uint32_t CanIDList[16] = {0x0CFFF048, 0x0CFFF148, 0x0CFFF248, 0x0CFFF3
 						  	  	  	0x0CFFF448, 0x0CFFF548, 0x0CFFF648, 0x0CFFF748,
 									0x0CFFF848, 0x0CFFF948, 0x0CFFFA48, 0x0CFFFB48,
 									0x0CFFFC48, 0x0CFFFD48, 0x0CFFFE48, 0x0CFFD048 };
+
+// Gyroscope variables
+short *GyroData; // first element is X-axis, the second element is the Y-axis, and the third element is the z-axis.
+
 
 // CallBack functions
 
@@ -78,6 +88,8 @@ void canDecodeDataFrame(float DecodeDataFrame[],int DataSet );
 
 void cppMain() {
 
+	short *GyroData; // first element is X-axis, the second element is the Y-axis, and the third element is the z-axis.
+	
 	// initializing all filters
 	canFilterSetup(1,CanIDList[0]);
 	canFilterSetup(2,CanIDList[1]);
@@ -106,6 +118,10 @@ void cppMain() {
 	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
 	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
 
+	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
+	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
+
+
 	float displacement_inches = 0.0f;
 
 	for(;;) {
@@ -114,6 +130,14 @@ void cppMain() {
 		// HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
 
 		displacement_inches = lin_pot->DisplacementInches();
+		//HAL_Delay(250);
+		//printf("\n Percentage: %f", displacement_inches);
+		GyroData = gyroscope -> DegreesPerSecond();
+		printf("x = %hd\t",GyroData[0]);
+		printf("y = %hd\t",GyroData[1]);
+		printf("z = %hd\t",GyroData[2]);
+		printf("\n");
+		printf("\r");
 
 
 		//printf("\n Percentage: %f", displacement_inches);
