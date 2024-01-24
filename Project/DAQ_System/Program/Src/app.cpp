@@ -49,25 +49,25 @@ void cppMain() {
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
 
-	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
-	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
+//	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
+//	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
 
 
 	std::vector<uint32_t> can_id_list = { 0x0CFFF048,
 										  0x0CFFF148,
-										  0x0CFFF248,
-										  0x0CFFF348,
-										  0x0CFFF448,
+										//   0x0CFFF248,
+										//   0x0CFFF348,
+										//   0x0CFFF448,
 										  0x0CFFF548,
-										  0x0CFFF648,
-										  0x0CFFF748,
-										  0x0CFFF848,
-										  0x0CFFF948,
-										  0x0CFFFA48,
-										  0x0CFFFB48,
-										  0x0CFFFC48,
-										  0x0CFFFD48,
-										  0x0CFFFE48,
+										//   0x0CFFF648,
+										//   0x0CFFF748,
+										//   0x0CFFF848,
+										//   0x0CFFF948,
+										//   0x0CFFFA48,
+										//   0x0CFFFB48,
+										//   0x0CFFFC48,
+										//   0x0CFFFD48,
+										//   0x0CFFFE48,
 										  0x0CFFD048  };
 
 
@@ -90,21 +90,21 @@ void cppMain() {
 
 	uint8_t rx_buffer[8];
 
-	float displacement_inches = 0.0f;
+//	float displacement_inches = 0.0f;
 
 	for(;;) {
 		// HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 		// HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 		// HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
 
-		displacement_inches = lin_pot->DisplacementInches();
+//		displacement_inches = lin_pot->DisplacementInches();
 
 
 		//printf("\n Percentage: %f", displacement_inches);
 		//HAL_Delay(150);
 		if(can_bus->MessageArrivedFlag()){
-			//__disable_irq();
-			can_bus->DisableInterruptMode();
+			__disable_irq();
+//			can_bus->DisableInterruptMode();
 			can_bus->Receive(rx_buffer);
 
 			if(can_bus->LatestCanId() == 0x0CFFF148) {
@@ -121,8 +121,8 @@ void cppMain() {
 			}
 
 			can_bus->ClearMessageArrivedFlag();
-			can_bus->EnableInterruptMode();
-			//__enable_irq();
+//			can_bus->EnableInterruptMode();
+			__enable_irq();
 		}
 	}
 }
