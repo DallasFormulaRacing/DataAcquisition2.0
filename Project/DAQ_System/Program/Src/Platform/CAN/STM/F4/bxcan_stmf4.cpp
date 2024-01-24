@@ -96,7 +96,7 @@ void BxCanStmF4::ConfigureReceiveCallback(ReceiveInterruptMode mode) {
 }
 
 void BxCanStmF4::ReceiveCallback() {
-	if (HAL_CAN_GetRxMessage(&bx_can_, rx_interrupt_mode_, &rx_message_header_, rx_buffer_) == HAL_OK) {
+	if (HAL_CAN_GetRxMessage(&bx_can_, CAN_RX_FIFO0, &rx_message_header_, rx_buffer_) == HAL_OK) {
 		message_arrived_ = true;
 		can_id_ = rx_message_header_.ExtId;
 	}
