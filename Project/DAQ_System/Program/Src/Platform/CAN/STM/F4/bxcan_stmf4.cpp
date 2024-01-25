@@ -74,6 +74,7 @@ void BxCanStmF4::ConfigureReceiveCallback(ReceiveInterruptMode mode) {
 	  // FIFO 0
 	  case ReceiveInterruptMode::kFifo0MessagePending:
 		rx_interrupt_mode_ = CAN_IT_RX_FIFO0_MSG_PENDING;
+		rx_fifo_ = CAN_RX_FIFO0;
 		break;
 	  case ReceiveInterruptMode::kFifo0Full:
 		rx_interrupt_mode_ = CAN_IT_RX_FIFO0_FULL;
@@ -85,6 +86,7 @@ void BxCanStmF4::ConfigureReceiveCallback(ReceiveInterruptMode mode) {
 	  // FIFO 1
 	  case ReceiveInterruptMode::kFifo1MessagePending:
 		rx_interrupt_mode_ = CAN_IT_RX_FIFO1_MSG_PENDING;
+		rx_fifo_ = CAN_RX_FIFO1;
 		break;
 	  case ReceiveInterruptMode::kFifo1Full:
 		rx_interrupt_mode_ = CAN_IT_RX_FIFO1_FULL;
@@ -96,7 +98,7 @@ void BxCanStmF4::ConfigureReceiveCallback(ReceiveInterruptMode mode) {
 }
 
 void BxCanStmF4::ReceiveCallback() {
-	if (HAL_CAN_GetRxMessage(&bx_can_, CAN_RX_FIFO0, &rx_message_header_, rx_buffer_) == HAL_OK) {
+	if (HAL_CAN_GetRxMessage(&bx_can_, rx_fifo_, &rx_message_header_, rx_buffer_) == HAL_OK) {
 		message_arrived_ = true;
 		can_id_ = rx_message_header_.ExtId;
 	}

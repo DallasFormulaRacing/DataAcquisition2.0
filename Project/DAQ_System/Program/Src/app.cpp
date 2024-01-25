@@ -44,6 +44,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 	bx_can_callback_ptr->ReceiveCallback();
 }
 
+namespace ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
+
 
 void cppMain() {
 	// Enable `printf()` using USART
@@ -77,7 +79,7 @@ void cppMain() {
 	std::shared_ptr<platform::BxCanStmF4> bx_can_peripheral(nullptr);
 	bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1, CAN, can_id_list);
 
-	platform::BxCanStmF4::ReceiveInterruptMode rx_interrupt_mode = platform::BxCanStmF4::ReceiveInterruptMode::kFifo0MessagePending;
+	ReceiveInterruptMode rx_interrupt_mode = ReceiveInterruptMode::kFifo0MessagePending;
 	bx_can_peripheral->ConfigureReceiveCallback(rx_interrupt_mode);
 
 	bx_can_callback_ptr = bx_can_peripheral;
