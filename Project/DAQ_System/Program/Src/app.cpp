@@ -44,7 +44,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 	bx_can_callback_ptr->ReceiveCallback();
 }
 
-namespace ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
+using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
 
 void cppMain() {
