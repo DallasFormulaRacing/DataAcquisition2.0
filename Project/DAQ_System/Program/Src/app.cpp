@@ -25,7 +25,6 @@ extern ADC_HandleTypeDef hadc1;
 
 #include "can.h"
 extern CAN_HandleTypeDef hcan1;
-CAN_FilterTypeDef CAN;
 
 #include "i2c.h"
 extern I2C_HandleTypeDef hi2c1;
@@ -88,7 +87,9 @@ void cppMain() {
 										  0x0CFFD048  };
 
 	std::shared_ptr<platform::BxCanStmF4> bx_can_peripheral(nullptr);
-	bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1, CAN, can_id_list);
+	bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
+	bx_can_peripheral->SubscribeCanId(can_id_list);
+	bx_can_peripheral->Start();
 
 	ReceiveInterruptMode rx_interrupt_mode = ReceiveInterruptMode::kFifo0MessagePending;
 	bx_can_peripheral->ConfigureReceiveCallback(rx_interrupt_mode);
@@ -140,9 +141,10 @@ void cppMain() {
 
 			if(can_bus->LatestCanId() == 0x0CFFF148) {
 				sensor::FramePE2 frame(rx_buffer);
-				float value = frame.ManifoldAbsolutePressure();
+				float manifold_absolute_pressure = frame.ManifoldAbsolutePressure();
 
 				printf("\t\t 0x0CFFF148 \n");
+				printf("Manifold Pressure: %f\n", manifold_absolute_pressure);
 				printf("\r");
 
 			} else if(can_bus->LatestCanId() == 0x0CFFF548){

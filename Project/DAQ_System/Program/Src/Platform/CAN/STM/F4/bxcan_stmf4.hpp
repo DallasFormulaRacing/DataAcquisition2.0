@@ -28,23 +28,27 @@ namespace platform {
 
 class BxCanStmF4 : public ICan {
 public:
-	BxCanStmF4(CAN_HandleTypeDef &hcan, CAN_FilterTypeDef &filter, const std::vector<uint32_t> &can_id_list);
+	BxCanStmF4(CAN_HandleTypeDef &hcan);
 
 	virtual ~BxCanStmF4();
 
+	virtual void SubscribeCanId(const std::vector<uint32_t> &can_id_list) override;
+
+	virtual void Start() override;
+
+	virtual void EnableInterruptMode() override;
+
+	virtual void DisableInterruptMode() override;
+
 	virtual void Receive(uint8_t rx_buffer[kMaxBytes]) override;
 
-	virtual void Transmit(uint8_t tx_buffer) override;
+	virtual void Transmit(uint8_t tx_buffer[kMaxBytes]) override;
 
 	virtual bool MessageArrivedFlag() override;
 
 	virtual void ClearMessageArrivedFlag() override;
 
 	virtual uint32_t LatestCanId() override;
-
-	virtual void EnableInterruptMode() override;
-
-	virtual void DisableInterruptMode() override;
 
 	enum class ReceiveInterruptMode : uint8_t {
 		kFifo0MessagePending,

@@ -14,6 +14,7 @@
 
 // Standard Libraries
 #include <cstdint>
+#include <vector>
 
 namespace platform {
 
@@ -25,13 +26,17 @@ public:
 
 	virtual void Receive(uint8_t rx_buffer[kMaxBytes]) = 0;
 
-	virtual void Transmit(uint8_t tx_buffer) = 0;
+	virtual void Transmit(uint8_t tx_buffer[kMaxBytes]) = 0;
 
 	virtual bool MessageArrivedFlag() = 0;
 
 	virtual void ClearMessageArrivedFlag() = 0;
 
+	virtual void SubscribeCanId(const std::vector<uint32_t> &can_id_list) = 0;
+
 	virtual uint32_t LatestCanId() = 0;
+
+	virtual void Start() = 0;
 
 	virtual void EnableInterruptMode() = 0;
 

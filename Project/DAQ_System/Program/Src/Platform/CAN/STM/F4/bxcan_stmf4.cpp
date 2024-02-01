@@ -15,14 +15,19 @@
 
 namespace platform {
 
-BxCanStmF4::BxCanStmF4(CAN_HandleTypeDef &hcan, CAN_FilterTypeDef &filter, const std::vector<uint32_t> &can_id_list)
-  : bx_can_(hcan) {
+BxCanStmF4::BxCanStmF4(CAN_HandleTypeDef &hcan)
+  : bx_can_(hcan) { }
+
+BxCanStmF4::~BxCanStmF4() {
+	HAL_CAN_Stop(&bx_can_);
+}
+
+void BxCanStmF4::SubscribeCanId(const std::vector<uint32_t> &can_id_list) {
+	CAN_FilterTypeDef filter;
 
 	for (uint8_t i = 0; i < can_id_list.size(); i++) {
 		ConfigureFilter(filter, i, can_id_list.at(i));
 	}
-
-	HAL_CAN_Start(&bx_can_);
 }
 
 void BxCanStmF4::ConfigureFilter(CAN_FilterTypeDef &filter, uint8_t filter_bank_num, uint32_t can_id) {
@@ -40,26 +45,9 @@ void BxCanStmF4::ConfigureFilter(CAN_FilterTypeDef &filter, uint8_t filter_bank_
 	HAL_CAN_ConfigFilter(&bx_can_, &filter);
 }
 
-
-BxCanStmF4::~BxCanStmF4() {
-	HAL_CAN_Stop(&bx_can_);
+void BxCanStmF4::Start() {
+	HAL_CAN_Start(&bx_can_);
 }
-
-void BxCanStmF4::Receive(uint8_t rx_buffer[kMaxBytes]) {
-	for (int i = 0; i < kMaxBytes; i++) {
-		rx_buffer[i] = rx_buffer_[i];
-	}
-}
-
-void BxCanStmF4::Transmit(uint8_t tx_buffer) {
-	// TODO
-}
-
-void BxCanStmF4::ClearMessageArrivedFlag() { message_arrived_ = false; }
-
-bool BxCanStmF4::MessageArrivedFlag() { return message_arrived_; }
-
-uint32_t BxCanStmF4::LatestCanId() { return can_id_; }
 
 void BxCanStmF4::EnableInterruptMode() {
 	HAL_CAN_ActivateNotification(&bx_can_, rx_interrupt_mode_);
@@ -68,6 +56,22 @@ void BxCanStmF4::EnableInterruptMode() {
 void BxCanStmF4::DisableInterruptMode() {
 	HAL_CAN_DeactivateNotification(&bx_can_, rx_interrupt_mode_);
 }
+
+void BxCanStmF4::Receive(uint8_t rx_buffer[kMaxBytes]) {
+	for (int i = 0; i < kMaxBytes; i++) {
+		rx_buffer[i] = rx_buffer_[i];
+	}
+}
+
+void BxCanStmF4::Transmit(uint8_t tx_buffer[kMaxBytes]) {
+	// TODO
+}
+
+void BxCanStmF4::ClearMessageArrivedFlag() { message_arrived_ = false; }
+
+bool BxCanStmF4::MessageArrivedFlag() { return message_arrived_; }
+
+uint32_t BxCanStmF4::LatestCanId() { return can_id_; }
 
 void BxCanStmF4::ConfigureReceiveCallback(ReceiveInterruptMode mode) {
 	switch(mode) {
