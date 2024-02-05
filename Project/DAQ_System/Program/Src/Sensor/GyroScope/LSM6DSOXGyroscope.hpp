@@ -64,8 +64,8 @@ class LSM6DSOX: public IGyroscope{
         bool ReadReg(uint8_t addr_i2c,uint8_t *addr_reg, uint8_t read_data[]);
 
 
-        /// sequential reading function for l3g20h. Reads all the registers that contain axis
-        /// data. [0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D]
+        /// sequential reading function for LSM6DSOX. Reads all the registers that contain axis
+        /// data. [0x22, 0x23, 0x24, 0x25, 0x26, 0x27]
         /// @param  data_buf array to contain all the raw axis data from l3gd20h
         /// @return status of function(true or false)
         bool Receive(uint8_t data_buf[]);
@@ -98,4 +98,4 @@ class LSM6DSOX: public IGyroscope{
 
 }
 
-#endif // GYROSCOPE_L3GD20H_H
+#endif // GYROSCOPE_LSM6DSOX_H

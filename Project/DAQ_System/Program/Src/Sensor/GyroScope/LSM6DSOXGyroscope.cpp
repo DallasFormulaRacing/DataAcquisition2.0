@@ -93,7 +93,7 @@ bool LSM6DSOX::WriteReg(uint8_t addr_i2c, uint8_t addr_reg, uint8_t register_dat
 
 
 bool LSM6DSOX::Receive(uint8_t data_buf[]){
-	uint8_t addr_reg = L3GD20_OUT_X_L | 0x80; // to set sequential reading you need to make the MSB of the register address to 1;
+	uint8_t addr_reg = LSM6DSOX_OUTX_L_G;
 	if(HAL_I2C_Master_Transmit(&hi2c1, GYR_ADDRESS, &addr_reg, 1, HAL_MAX_DELAY) != HAL_OK){
 		return false;
 	}
