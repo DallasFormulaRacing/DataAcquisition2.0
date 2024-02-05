@@ -27,9 +27,11 @@ class SLS1322 : public ILinearPotentiometer {
     public:
 		SLS1322();
 
+        virtual ~SLS1322();
+        
         /// @param hadc An ADC peripheral from ST's HAL.
 		SLS1322(ADC_HandleTypeDef &hadc);
-        virtual ~SLS1322();
+        
 
         /// Converts the ADC signal to the measured displacement of the potentiometer.
         /// @return 0.0 to 3.0 inches.
