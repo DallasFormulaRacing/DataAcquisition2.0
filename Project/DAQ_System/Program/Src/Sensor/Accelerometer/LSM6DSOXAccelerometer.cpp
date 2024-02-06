@@ -74,18 +74,6 @@ void LSM6DSOX::calibrate() {
     }
 }
 
-void LSM6DSOX::SetScale(float x, float y, float z) {
-    scale_[0] = x;
-    scale_[1] = y;
-    scale_[2] = z;
-}
-
-void LSM6DSOX::SetOffset(float x, float y, float z) {
-    offset_[0] = x;
-    offset_[1] = y;
-    offset_[2] = z;
-}
-
 float* LSM6DSOX::GetAcceleration() {
     return real_acceleration_data_;
 }
@@ -110,7 +98,7 @@ void LSM6DSOX::ReadRawAcceleration() {
 	static constexpr int I2CWriteSize = 1;
 	static constexpr int I2CReadSize = 6;
 
-    uint8_t command[1] = { CTRL1_XL };
+    uint8_t command[1] = { OUT_X_L_A };
     HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, command,I2CWriteSize, HAL_MAX_DELAY);
 
     uint8_t bytes_received[ByteArraySize];
