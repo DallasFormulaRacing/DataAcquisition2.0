@@ -8,11 +8,14 @@
 * Formula SAE International Collegiate Chapter
 * GPL-3.0 License
 */
-
-#include "LSM6DSOXAccelerometer.hpp"
+// Standard Libraris
 #include <stdint.h>
 #include <cmath>
 #include <limits>
+
+// DFR Custom dependencies
+#include "LSM6DSOXAccelerometer.hpp"
+
 
 
 namespace sensor{
@@ -98,7 +101,7 @@ void LSM6DSOX::ReadRawAcceleration() {
 	static constexpr int I2CWriteSize = 1;
 	static constexpr int I2CReadSize = 6;
 
-    uint8_t command[1] = { OUT_X_L_A };
+    uint8_t command[1] = { OUTX_L_A };
     HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, command,I2CWriteSize, HAL_MAX_DELAY);
 
     uint8_t bytes_received[ByteArraySize];

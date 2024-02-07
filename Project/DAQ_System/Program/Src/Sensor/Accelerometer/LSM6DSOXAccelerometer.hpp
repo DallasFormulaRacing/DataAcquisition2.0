@@ -23,9 +23,9 @@
 
 // Register Addresses
 
-#define CTRL1_XL          0x10  // CTRL_REG1_A
+#define CTRL1_XL          0x10
 
-#define OUT_X_L_A         0x28
+#define OUTX_L_A         0x28
 
 namespace sensor{
 
