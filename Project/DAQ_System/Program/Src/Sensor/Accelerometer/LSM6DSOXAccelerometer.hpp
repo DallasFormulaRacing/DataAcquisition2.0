@@ -27,6 +27,26 @@
 
 #define OUTX_L_A         0x28
 
+enum ODR{
+ODR12_5,
+ODR26,
+ODR52,
+ODR104,
+ODR208,
+ODR416,
+ODR833,
+ODR1_66K,
+ODR3_33K,
+ODR6_66K
+};
+
+enum FSR{
+	FSR2g = 10,
+	FSR4g,
+	FSR8g,
+	FSR16g
+};
+
 namespace sensor{
 
 class LSM6DSOX: public IAccelerometer {
@@ -45,6 +65,12 @@ class LSM6DSOX: public IAccelerometer {
 
         // calculates the acceleration in terms of m/s^2
         void ComputeAcceleration() override;
+
+
+        // Sets the ODR value
+        void SetODR(ODR ODRValue);
+
+        void SetFSR(FSR FSRValue);
 
     private:
 

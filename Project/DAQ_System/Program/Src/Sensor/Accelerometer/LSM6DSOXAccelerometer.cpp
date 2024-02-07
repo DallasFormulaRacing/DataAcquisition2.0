@@ -8,7 +8,7 @@
 * Formula SAE International Collegiate Chapter
 * GPL-3.0 License
 */
-// Standard Libraris
+// Standard Libraries
 #include <stdint.h>
 #include <cmath>
 #include <limits>
@@ -74,6 +74,66 @@ void LSM6DSOX::calibrate() {
     } else {
         // Testing found that ~1.028 is about 1G
         gravity_adjustment_conversion_factor_ = 1.028;
+    }
+}
+
+void SetODR(ODR ODRValue , I2C_HandleTypeDef i2c_){
+    static constexpr uint8_t kNumBytes = 2;
+    uint8_t commands[kNumBytes] = {0};
+    commands[0] = CTRL1_XL;
+
+    switch(ODRValue){
+    case ODR12_5:
+    	commands[1] = 0xB0;
+    	break;
+    case ODR26:
+    	commands[1] = 0x20;
+    	break;
+    case ODR52:
+    	commands[1] = 0x30;
+    	break;
+    case ODR104:
+    	commands[1] = 040;
+    	break;
+    case ODR208:
+    	commands[1] = 0x50;
+    	break;
+    case ODR416:
+    	commands[1] = 0x60;
+    	break;
+    case ODR833:
+    	commands[1] = 0x70;
+    	break;
+    case ODR1_66K:
+    	commands[1] = 0x80;
+    	break;
+    case ODR3_33K:
+    	commands[1] = 0x90;
+    	break;
+    case ODR6_66K:
+    	commands[1] = 0xA0;
+    	break;
+
+
+    }
+	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+}
+
+void SetFSR(FSR FSRValue){
+    static constexpr uint8_t kNumBytes = 2;
+    uint8_t commands[kNumBytes] = {0};
+    commands[0] = CTRL1_XL;
+
+    switch(FSRValue){
+    case FSR2g:
+
+    	break;
+    case FSR4g:
+		break;
+    case FSR8g:
+    	break;
+    case FSR16g:
+    	break;
     }
 }
 
