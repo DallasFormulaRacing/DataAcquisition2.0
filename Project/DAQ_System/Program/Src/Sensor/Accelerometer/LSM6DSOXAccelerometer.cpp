@@ -76,9 +76,6 @@ void LSM6DSOX::calibrate() {
         gravity_adjustment_conversion_factor_ = 1.028;
     }
 
-    static constexpr uint8_t kNumBytes = 2;
-    uint8_t commands[kNumBytes] = {0};
-    commands[0] = CTRL1_XL;
 }
 
 void LSM6DSOX::SetODR(ODR ODRValue){

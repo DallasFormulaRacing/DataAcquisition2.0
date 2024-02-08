@@ -12,12 +12,11 @@
 #ifndef ACCELEROMETER_LSM6DSOX_H
 #define ACCELEROMETER_LSM6DSOX_H
 
-
-// DFR Custom Dependancies
-#include "iaccelerometer.hpp"
-
 // ST HAL Dependencies
 #include "i2c.h"
+
+//  DFR Custom Dependencies
+#include "iaccelerometer.hpp"
 
 #define ACC_ADDRESS  0xd4
 
@@ -37,7 +36,7 @@ enum ODR{
 	ODR833,
 	ODR1_66K,
 	ODR3_33K,
-ODR6_66K
+	ODR6_66K
 };
 
 enum FSR{
