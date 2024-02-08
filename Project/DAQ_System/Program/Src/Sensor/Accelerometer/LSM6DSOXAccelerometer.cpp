@@ -75,66 +75,94 @@ void LSM6DSOX::calibrate() {
         // Testing found that ~1.028 is about 1G
         gravity_adjustment_conversion_factor_ = 1.028;
     }
-}
 
-void SetODR(ODR ODRValue , I2C_HandleTypeDef i2c_){
     static constexpr uint8_t kNumBytes = 2;
     uint8_t commands[kNumBytes] = {0};
     commands[0] = CTRL1_XL;
+}
+
+void LSM6DSOX::SetODR(ODR ODRValue){
+	static constexpr uint8_t kNumBytes = 2;
+    uint8_t commands[kNumBytes] = {0};
+    commands[0] = CTRL1_XL;
+    uint8_t* currentRegisterValue = 0;
+    uint8_t ODRRegisterValue = 0;
 
     switch(ODRValue){
-    case ODR12_5:
-    	commands[1] = 0xB0;
-    	break;
-    case ODR26:
-    	commands[1] = 0x20;
-    	break;
-    case ODR52:
-    	commands[1] = 0x30;
-    	break;
-    case ODR104:
-    	commands[1] = 040;
-    	break;
-    case ODR208:
-    	commands[1] = 0x50;
-    	break;
-    case ODR416:
-    	commands[1] = 0x60;
-    	break;
-    case ODR833:
-    	commands[1] = 0x70;
-    	break;
-    case ODR1_66K:
-    	commands[1] = 0x80;
-    	break;
-    case ODR3_33K:
-    	commands[1] = 0x90;
-    	break;
-    case ODR6_66K:
-    	commands[1] = 0xA0;
-    	break;
-
-
+		case ODR12_5:
+			ODRRegisterValue = 0xB0;
+			break;
+		case ODR26:
+			ODRRegisterValue = 0x20;
+			break;
+		case ODR52:
+			ODRRegisterValue = 0x30;
+			break;
+		case ODR104:
+			ODRRegisterValue = 0x40;
+			break;
+		case ODR208:
+			ODRRegisterValue = 0x50;
+			break;
+		case ODR416:
+			ODRRegisterValue = 0x60;
+			break;
+		case ODR833:
+			ODRRegisterValue = 0x70;
+			break;
+		case ODR1_66K:
+			ODRRegisterValue = 0x80;
+			break;
+		case ODR3_33K:
+			ODRRegisterValue = 0x90;
+			break;
+		case ODR6_66K:
+			ODRRegisterValue = 0xA0;
+			break;
     }
+    // read the current register values for the CTRL_X register
+	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
+
+	// set the ODR bits to the desired value without touching the other bits in the register
+	commands[1] = (currentRegisterValue[0] & 0x0f) | ODRRegisterValue ;
+
+	// write to register with the desired bit values
 	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
 }
 
-void SetFSR(FSR FSRValue){
-    static constexpr uint8_t kNumBytes = 2;
+void LSM6DSOX::SetFSR(FSR FSRValue){
+	static constexpr uint8_t kNumBytes = 2;
     uint8_t commands[kNumBytes] = {0};
     commands[0] = CTRL1_XL;
+    uint8_t* currentRegisterValue = 0;
+    uint8_t FSRRegisterValue = 0;
 
     switch(FSRValue){
-    case FSR2g:
-
-    	break;
-    case FSR4g:
-		break;
-    case FSR8g:
-    	break;
-    case FSR16g:
-    	break;
+		case FSR2g:
+			FSRRegisterValue = 0x00;
+			break;
+		case FSR4g:
+			FSRRegisterValue = 0x08;
+			break;
+		case FSR8g:
+			FSRRegisterValue = 0x0C;
+			break;
+		case FSR16g:
+			FSRRegisterValue = 0x04;
+			break;
     }
+
+    // read the current register values for the CTRL_X register
+	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
+
+	// set the FSR bits to the desired value without touching the other bits in the register
+	commands[1] = (currentRegisterValue[0] & 0x0f) | FSRRegisterValue ;
+
+	// write to register with the desired bit values
+	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+
 }
 
 float* LSM6DSOX::GetAcceleration() {

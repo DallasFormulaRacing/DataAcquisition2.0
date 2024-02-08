@@ -28,15 +28,15 @@
 #define OUTX_L_A         0x28
 
 enum ODR{
-ODR12_5,
-ODR26,
-ODR52,
-ODR104,
-ODR208,
-ODR416,
-ODR833,
-ODR1_66K,
-ODR3_33K,
+	ODR12_5,
+	ODR26,
+	ODR52,
+	ODR104,
+	ODR208,
+	ODR416,
+	ODR833,
+	ODR1_66K,
+	ODR3_33K,
 ODR6_66K
 };
 
@@ -69,7 +69,7 @@ class LSM6DSOX: public IAccelerometer {
 
         // Sets the ODR value
         void SetODR(ODR ODRValue);
-
+        // Sets the FSR value
         void SetFSR(FSR FSRValue);
 
     private:
@@ -84,7 +84,7 @@ class LSM6DSOX: public IAccelerometer {
 
 
         // The I2C peripherals from ST's HAL library
-        I2C_HandleTypeDef i2c_;
+        I2C_HandleTypeDef& i2c_;
 
 
         // value to hold offset values, scale, and gravity
