@@ -19,9 +19,29 @@
 #include "igyroscope.hpp"
 
 #include <stdint.h>
-#define LSM6DSOX_CTRL2_G        0x11 //L3GD20_CTRL_REG1
-#define LSM6DSOX_OUTX_L_G       0x22 // L3GD20_OUT_X_L
+#define LSM6DSOX_CTRL2_G        0x11
+#define LSM6DSOX_OUTX_L_G       0x22
 #define GYR_ADDRESS             0xD4
+
+enum ODR{
+	ODR12_5,
+	ODR26,
+	ODR52,
+	ODR104,
+	ODR208,
+	ODR416,
+	ODR833,
+	ODR1_66K,
+	ODR3_33K,
+	ODR6_66K,
+};
+
+enum FSR{
+	DPS250 = 10,
+	DPS500,
+	DPS1000,
+	DPS2000,
+};
 
 namespace sensor{
 
@@ -37,6 +57,14 @@ class LSM6DSOX: public IGyroscope{
         /// Converts the raw values from the gyroscope to Radians/second
         /// @return ± 4.363 on each axis
         virtual float* RadiansPerSecond() override;
+
+        /// sets the ODR of the gyroscope
+        /// @param value from ODR enumeration
+        void SetODR(ODR ODRValue);
+
+        /// sets the FSR of the gyroscope
+        /// @param value from FSR enumeration
+        void SetFSR(FSR FSRValue);
 
     private:
         /// takes in raw data from the gyroscope
