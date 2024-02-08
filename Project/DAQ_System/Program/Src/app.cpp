@@ -68,10 +68,11 @@ void cppMain() {
 //	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
 
 
-
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
 
-	auto ecu = std::make_unique<sensor::Pe3>(bx_can_peripheral);
+	std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
+
+	auto pe3_ecu = std::make_unique<sensor::Pe3>(can_bus);
 
 	bx_can_callback_ptr = bx_can_peripheral;
 	ReceiveInterruptMode rx_interrupt_mode = ReceiveInterruptMode::kFifo0MessagePending;
@@ -80,6 +81,7 @@ void cppMain() {
 
 
 	float manifold_absolute_pressure = 0.0f;
+	float battery_voltage = 0.0f;
 
 //	float displacement_inches = 0.0f;
 //	float* acc_data = 0.0f;
@@ -110,16 +112,15 @@ void cppMain() {
 //		printf("\r");
 
 
-
-		if (ecu->NewMessageArrived()) {
+		if (pe3_ecu->NewMessageArrived()) {
 			__disable_irq();
 
-			ecu->Update();
-			uint32_t can_id = ecu->LatestCanId();
+			pe3_ecu->Update();
+			uint32_t can_id = pe3_ecu->LatestCanId();
 
 			switch(can_id) {
 			case FramePe2Id:
-				manifold_absolute_pressure = ecu->map_;
+				manifold_absolute_pressure = pe3_ecu->Map();
 
 				printf("\t\t %" PRIu32 "\n", can_id);
 				printf("Manifold Pressure: %f\n", manifold_absolute_pressure);
@@ -128,12 +129,17 @@ void cppMain() {
 
 
 			case FramePe6Id:
+				battery_voltage = pe3_ecu->BatteryVoltage();
+
 				printf("\t\t %" PRIu32 "\n", can_id);
+				printf("Battery Voltage: %f\n", battery_voltage);
+				printf("\r");
 				break;
 			}
 
 			__enable_irq();
 		}
+
 
 		//HAL_Delay(150);
 

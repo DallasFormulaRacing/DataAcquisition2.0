@@ -28,7 +28,27 @@ public:
 
 	virtual void Update() = 0;
 
-	// TODO: getter methods for each variable
+	virtual int16_t Rpm() = 0;
+
+	virtual float Tps() = 0;
+
+	virtual float FuelOpenTime() = 0;
+
+	virtual float IgnitionAngle() = 0;
+
+	virtual float BarometerPressure() = 0;
+
+	virtual float Map() = 0;
+
+	virtual float Lambda() = 0;
+
+	virtual float BatteryVoltage() = 0;
+
+	virtual float AirTemperature() = 0;
+
+	virtual float CoolantTemperature() = 0;
+
+	virtual float AnalogInputVoltage(uint8_t index) = 0;
 
 };
 

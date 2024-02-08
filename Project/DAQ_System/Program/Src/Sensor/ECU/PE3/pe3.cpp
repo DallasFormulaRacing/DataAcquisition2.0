@@ -36,6 +36,87 @@ bool Pe3::NewMessageArrived() {
 	return can_bus_->MessageArrivedFlag();
 }
 
+
+int16_t Pe3::Rpm() { return rpm_; }
+
+float Pe3::Tps() { return tps_; }
+
+float Pe3::FuelOpenTime() { return fuel_open_time_; }
+
+float Pe3::IgnitionAngle() { return ignition_angle_; }
+
+float Pe3::BarometerPressure() { return barometer_pressure_; }
+
+float Pe3::Map() { return map_; }
+
+float Pe3::Lambda() { return lambda_; }
+
+float Pe3::AnalogInputVoltage(uint8_t index) { return analog_inputs_.at(index); }
+
+float Pe3::BatteryVoltage() { return battery_voltage_; }
+
+float Pe3::AirTemperature() { return air_temp_; }
+
+float Pe3::CoolantTemperature() { return coolant_temp_; }
+
+// TODO: get temperature and pressure types
+// TODO: access arrays using .at() for bounds checking
+
+float Pe3::FrequencyHertz(uint8_t index) { return frequencies_.at(index); }
+
+float Pe3::AnalogInputThermistorVoltage(uint8_t index) { return analog_inputs_thermistors_.at(index); }
+
+float Pe3::RpmRate() { return rpm_rate_; }
+
+float Pe3::TpsPercentageRate() { return tps_rate_; }
+
+float Pe3::MapRate() { return map_rate_; }
+
+float Pe3::MassAirFlowLoadRate() { return maf_load_rate_; }
+
+float Pe3::LambdaMeasured(uint8_t index) { return measured_lambdas_.at(index); }
+
+float Pe3::PwmDutyCycle(uint8_t index) { return duty_cycles_.at(index); }
+
+float Pe3::PercentSlip() { return percent_slip_; }
+
+float Pe3::DrivenWheelRateOfChange() { return driven_wheel_rate_; }
+
+float Pe3::DesiredValue() { return desired_value_; }
+
+float Pe3::DrivenAverageWheelSpeed() { return driven_avg_wheel_speed_; }
+
+float Pe3::NonDrivenAverageWheelSpeed() { return nondriven_avg_wheel_speed_; }
+
+float Pe3::IgnitionCompensation() { return ignition_compensation_; }
+
+float Pe3::IgnitionCutPercentage() { return ignition_cut_percentage_; }
+
+float Pe3::DrivenWheelSpeed(uint8_t index) { return driven_wheel_speeds_.at(index); }
+
+float Pe3::NonDrivenWheelSpeed(uint8_t index) { return nondriven_wheel_speeds_.at(index); }
+
+float Pe3::FuelCompensationAcceleration() { return fuel_comp_acceleration_; }
+
+float Pe3::FuelCompensationStarting() { return fuel_comp_starting_; }
+
+float Pe3::FuelCompensationAirTemperature() { return fuel_comp_air_temp_; }
+
+float Pe3::FuelCompensationCoolantTemperature() { return fuel_comp_coolant_temp_; }
+
+float Pe3::FuelCompensationBarometer() { return fuel_comp_barometer_; }
+
+float Pe3::FuelCompensationManifoldAbsolutePressure() { return fuel_comp_map_; }
+
+float Pe3::IgnitionCompensationAirTemperature() { return ignition_comp_air_temp_; }
+
+float Pe3::IgnitionCompensationCoolantTemperature() { return ignition_comp_coolant_temp_; }
+
+float Pe3::IgnitionCompensationBarometer() { return ignition_comp_barometer_; }
+
+float Pe3::IgnitionCompensationManifoldAbsolutePressure() { return ignition_comp_map_; }
+
+
 void Pe3::Update() {
 	can_bus_->Receive(raw_data_);
 
@@ -155,8 +236,8 @@ void Pe3::ProcessFramePe8() {
 
 void Pe3::ProcessFramePe9() {
 	FramePE9 frame(raw_data_);
-	measured_lambda_1_ = frame.LambdaMeasured(0);
-	measured_lambda_2_ = frame.LambdaMeasured(1);
+	measured_lambdas_.at(0) = frame.LambdaMeasured(0);
+	measured_lambdas_.at(1) = frame.LambdaMeasured(1);
 	target_lambda_ = frame.TargetLambda();
 }
 
@@ -184,10 +265,10 @@ void Pe3::ProcessFramePe12() {
 
 void Pe3::ProcessFramePe13() {
 	FramePE13 frame(raw_data_);
-	driven_wheel_speed_1_ = frame.DrivenWheelSpeed(0);
-	driven_wheel_speed_2_ = frame.DrivenWheelSpeed(1);
-	nondriven_wheel_speed_1_ = frame.NonDrivenWheelSpeed(0);
-	nondriven_wheel_speed_2_ = frame.NonDrivenWheelSpeed(1);
+	driven_wheel_speeds_.at(0) = frame.DrivenWheelSpeed(0);
+	driven_wheel_speeds_.at(1) = frame.DrivenWheelSpeed(1);
+	nondriven_wheel_speeds_.at(0) = frame.NonDrivenWheelSpeed(0);
+	nondriven_wheel_speeds_.at(1) = frame.NonDrivenWheelSpeed(1);
 }
 
 void Pe3::ProcessFramePe14() {
@@ -213,5 +294,6 @@ void Pe3::ProcessFramePe16() {
 }
 
 
-}
+
+} // namespace sensor
 
