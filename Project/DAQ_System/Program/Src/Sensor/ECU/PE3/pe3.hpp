@@ -98,9 +98,9 @@ public:
 
 	float CoolantTemperature() override;
 
-	//--------
+	PressureType PressureUnit();
 
-	// TODO: get temperature and pressure types
+	TemperatureType TemperatureUnit();
 
 	float FrequencyHertz(uint8_t index);
 
@@ -205,7 +205,7 @@ private:
 	float barometer_pressure_ = 0.0f;
 	float map_ = 0.0f;
 	float lambda_ = 0.0f;
-	PressureType pressure_unit = PressureType::kUnknown;
+	PressureType pressure_unit_ = PressureType::kUnknown;
 
 	// Frame PE3 and PE4 Fields
 	static constexpr uint8_t kNumAnalogPorts = 8;

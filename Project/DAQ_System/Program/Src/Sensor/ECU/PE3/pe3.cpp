@@ -59,8 +59,9 @@ float Pe3::AirTemperature() { return air_temp_; }
 
 float Pe3::CoolantTemperature() { return coolant_temp_; }
 
-// TODO: get temperature and pressure types
-// TODO: access arrays using .at() for bounds checking
+PressureType Pe3::PressureUnit() { return pressure_unit_; }
+
+TemperatureType Pe3::TemperatureUnit() { return temperature_unit_; }
 
 float Pe3::FrequencyHertz(uint8_t index) { return frequencies_.at(index); }
 
@@ -187,13 +188,13 @@ void Pe3::ProcessFramePe2() {
 	barometer_pressure_ = frame.BarometerPressure();
 	map_ = frame.ManifoldAbsolutePressure();
 	lambda_ = frame.Lambda();
-	pressure_unit = frame.PressureUnit();
+	pressure_unit_ = frame.PressureUnit();
 }
 
 void Pe3::ProcessFramePe3() {
 	FramePE3 frame(raw_data_);
 	for (int i = 0; i < frame.kNumOfFields; i++) {
-		analog_inputs_[i] = frame.AnalogInputVoltage(i);
+		analog_inputs_.at(i) = frame.AnalogInputVoltage(i);
 	}
 }
 
@@ -201,14 +202,14 @@ void Pe3::ProcessFramePe4() {
 	FramePE4 frame(raw_data_);
 	static constexpr uint8_t offset = 4;
 	for (int i = 0; i < frame.kNumOfFields; i++) {
-		analog_inputs_[i + offset] = frame.AnalogInputVoltage(i);
+		analog_inputs_.at(i + offset) = frame.AnalogInputVoltage(i);
 	}
 }
 
 void Pe3::ProcessFramePe5() {
 	FramePE5 frame(raw_data_);
 	for (int i = 0; i < frame.kNumOfFields; i++) {
-		frequencies_[i] = frame.FrequencyHertz(i);
+		frequencies_.at(i) = frame.FrequencyHertz(i);
 	}
 }
 
@@ -222,8 +223,8 @@ void Pe3::ProcessFramePe6() {
 
 void Pe3::ProcessFramePe7() {
 	FramePE7 frame(raw_data_);
-	analog_inputs_thermistors_[0] = frame.AnalogInputVoltage(0);
-	analog_inputs_thermistors_[1] = frame.AnalogInputVoltage(1);
+	analog_inputs_thermistors_.at(0) = frame.AnalogInputThermistorVoltage(0);
+	analog_inputs_thermistors_.at(1) = frame.AnalogInputThermistorVoltage(1);
 }
 
 void Pe3::ProcessFramePe8() {
@@ -244,7 +245,7 @@ void Pe3::ProcessFramePe9() {
 void Pe3::ProcessFramePe10() {
 	FramePE10 frame(raw_data_);
 	for (int i = 0; i < frame.kNumOfFields; i++) {
-		duty_cycles_[i] = frame.PwmDutyCycle(i);
+		duty_cycles_.at(i) = frame.PwmDutyCycle(i);
 	}
 }
 
@@ -293,7 +294,4 @@ void Pe3::ProcessFramePe16() {
 	ignition_comp_map_ = frame.IgnitionCompensationManifoldAbsolutePressure();
 }
 
-
-
 } // namespace sensor
-

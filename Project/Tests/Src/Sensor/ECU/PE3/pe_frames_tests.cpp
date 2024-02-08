@@ -251,8 +251,8 @@ TEST(Pe3EcuFrames, FramePe7) {
     FramePE7 frame(rx_buffer);
 
     static constexpr float kExpectedVoltage = 68.0f;
-    EXPECT_FLOAT_EQ(frame.AnalogInputVoltage(0), kExpectedVoltage);
-    EXPECT_FLOAT_EQ(frame.AnalogInputVoltage(1), kExpectedVoltage);
+    EXPECT_FLOAT_EQ(frame.AnalogInputThermistorVoltage(0), kExpectedVoltage);
+    EXPECT_FLOAT_EQ(frame.AnalogInputThermistorVoltage(1), kExpectedVoltage);
 }
 
 TEST(Pe3EcuFrames, FramePe7OutOfBounds) {
@@ -266,8 +266,8 @@ TEST(Pe3EcuFrames, FramePe7OutOfBounds) {
     static constexpr float kExpecteResult = 0.0f;
     static constexpr uint8_t kMaxIndex = frame.kNumOfFields;
 
-    EXPECT_FLOAT_EQ(frame.AnalogInputVoltage(kMaxIndex + 1), kExpecteResult);
-    EXPECT_FLOAT_EQ(frame.AnalogInputVoltage(kMaxIndex + 2), kExpecteResult);
+    EXPECT_FLOAT_EQ(frame.AnalogInputThermistorVoltage(kMaxIndex + 1), kExpecteResult);
+    EXPECT_FLOAT_EQ(frame.AnalogInputThermistorVoltage(kMaxIndex + 2), kExpecteResult);
 }
 
 TEST(Pe3EcuFrames, FramePe8) {

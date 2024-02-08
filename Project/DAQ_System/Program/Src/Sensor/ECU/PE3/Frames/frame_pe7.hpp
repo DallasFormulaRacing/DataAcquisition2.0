@@ -23,7 +23,7 @@ public:
 	FramePE7(uint8_t rx_buffer[kByteArrayMaxLength])
 	  : FrameFormat5(rx_buffer) {}
 
-	float AnalogInputVoltage(uint8_t index) {
+	float AnalogInputThermistorVoltage(uint8_t index) {
 		if (index >= kNumOfFields) {
 			return 0.0f;
 		}
