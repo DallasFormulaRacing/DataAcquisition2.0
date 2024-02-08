@@ -122,7 +122,7 @@ void LSM6DSOX::SetODR(ODR ODRValue){
 	HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
 
 	// set the ODR bits to the desired value without touching the other bits in the register
-	commands[1] = (currentRegisterValue[0] & 0x0f) | ODRRegisterValue ;
+	commands[1] = (currentRegisterValue[0] & 0x0F) | ODRRegisterValue ;
 
 	// write to register with the desired bit values
 	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
@@ -155,7 +155,7 @@ void LSM6DSOX::SetFSR(FSR FSRValue){
 	HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
 
 	// set the FSR bits to the desired value without touching the other bits in the register
-	commands[1] = (currentRegisterValue[0] & 0x0f) | FSRRegisterValue ;
+	commands[1] = (currentRegisterValue[0] & 0xF3) | FSRRegisterValue ;
 
 	// write to register with the desired bit values
 	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
