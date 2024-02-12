@@ -16,11 +16,7 @@
 namespace sensor {
 
 Pe3::Pe3(std::shared_ptr<platform::ICan> can_bus)
-  : can_bus_(can_bus) {
-
-	can_bus_->SubscribeCanId(can_id_list_);
-	can_bus_->Start();
-}
+  : can_bus_(can_bus) { }
 
 Pe3::~Pe3() { }
 

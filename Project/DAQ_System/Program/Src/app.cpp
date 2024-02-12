@@ -69,10 +69,17 @@ void cppMain() {
 
 
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
-
 	std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
 
 	auto pe3_ecu = std::make_unique<sensor::Pe3>(can_bus);
+	const std::vector<uint32_t>& can_id_list = pe3_ecu->CanIdList();
+
+	// Subscribe to messages with PE3's CAN IDs
+	for (const uint32_t& can_id : can_id_list) {
+		bx_can_peripheral->ConfigureFilter(can_id, (can_id >> 13), (can_id & 0x1FFF));
+	}
+
+	bx_can_peripheral->Start();
 
 	bx_can_callback_ptr = bx_can_peripheral;
 	ReceiveInterruptMode rx_interrupt_mode = ReceiveInterruptMode::kFifo0MessagePending;
