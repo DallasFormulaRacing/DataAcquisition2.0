@@ -251,8 +251,8 @@ TEST(Pe3EcuFrames, FramePe7) {
     FramePE7 frame(rx_buffer);
 
     static constexpr float kExpectedVoltage = 68.0f;
-    EXPECT_FLOAT_EQ(frame.AnalogInputVoltage(0), kExpectedVoltage);
-    EXPECT_FLOAT_EQ(frame.AnalogInputVoltage(1), kExpectedVoltage);
+    EXPECT_FLOAT_EQ(frame.AnalogInputThermistorVoltage(0), kExpectedVoltage);
+    EXPECT_FLOAT_EQ(frame.AnalogInputThermistorVoltage(1), kExpectedVoltage);
 }
 
 TEST(Pe3EcuFrames, FramePe7OutOfBounds) {
@@ -266,8 +266,8 @@ TEST(Pe3EcuFrames, FramePe7OutOfBounds) {
     static constexpr float kExpecteResult = 0.0f;
     static constexpr uint8_t kMaxIndex = frame.kNumOfFields;
 
-    EXPECT_FLOAT_EQ(frame.AnalogInputVoltage(kMaxIndex + 1), kExpecteResult);
-    EXPECT_FLOAT_EQ(frame.AnalogInputVoltage(kMaxIndex + 2), kExpecteResult);
+    EXPECT_FLOAT_EQ(frame.AnalogInputThermistorVoltage(kMaxIndex + 1), kExpecteResult);
+    EXPECT_FLOAT_EQ(frame.AnalogInputThermistorVoltage(kMaxIndex + 2), kExpecteResult);
 }
 
 TEST(Pe3EcuFrames, FramePe8) {
@@ -483,15 +483,15 @@ TEST(Pe3EcuFrames, FramePe16) {
                                                 0x00, 0x00  };
     FramePE16 frame(rx_buffer);
 
-    static constexpr float kExpectedFuelCompAirTemp = 0.0f;
-    static constexpr float kExpectedFuelCompCoolantTemp = 1.0f;
-    static constexpr float kExpectedFuelCompBarometer = 0.0f;
-    static constexpr float kExpectedFuelCompMap = 0.0f;
+    static constexpr float kExpectedIgnitionCompAirTemp = 0.0f;
+    static constexpr float kExpectedIgnitionCompCoolantTemp = 1.0f;
+    static constexpr float kExpectedIgnitionCompBarometer = 0.0f;
+    static constexpr float kExpectedIgnitionCompMap = 0.0f;
 
-    EXPECT_FLOAT_EQ(frame.IgnitionCompensationAirTemperature(), kExpectedFuelCompAirTemp);
-    EXPECT_FLOAT_EQ(frame.IgnitionCompensationCoolantTemperature(), kExpectedFuelCompCoolantTemp);
-    EXPECT_FLOAT_EQ(frame.IgnitionCompensationBarometer(), kExpectedFuelCompBarometer);
-    EXPECT_FLOAT_EQ(frame.IgnitionCompensationManifoldAbsolutePressure(), kExpectedFuelCompMap);
+    EXPECT_FLOAT_EQ(frame.IgnitionCompensationAirTemperature(), kExpectedIgnitionCompAirTemp);
+    EXPECT_FLOAT_EQ(frame.IgnitionCompensationCoolantTemperature(), kExpectedIgnitionCompCoolantTemp);
+    EXPECT_FLOAT_EQ(frame.IgnitionCompensationBarometer(), kExpectedIgnitionCompBarometer);
+    EXPECT_FLOAT_EQ(frame.IgnitionCompensationManifoldAbsolutePressure(), kExpectedIgnitionCompMap);
 }
 
 }
