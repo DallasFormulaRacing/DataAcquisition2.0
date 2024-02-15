@@ -12,35 +12,40 @@
 #ifndef GYROSCOPE_LSM6DSOX_H
 #define GYROSCOPE_LSM6DSOX_H
 
+// Standard Libraries
+#include <stdint.h>
+
 // ST HAL Dependencies
 #include "i2c.h"
 
 // DFR Custom Dependencies
 #include "igyroscope.hpp"
 
-#include <stdint.h>
 #define LSM6DSOX_CTRL2_G        0x11
 #define LSM6DSOX_OUTX_L_G       0x22
 #define GYR_ADDRESS             0xD4
 
-enum ODR{
-	ODR12_5,
-	ODR26,
-	ODR52,
-	ODR104,
-	ODR208,
-	ODR416,
-	ODR833,
-	ODR1_66K,
-	ODR3_33K,
-	ODR6_66K,
-};
+class SensorConfiguration{
+public:
+	enum ODR : uint8_t{
+		ODR12_5  = 0x01,
+		ODR26    = 0x02,
+		ODR52    = 0x03,
+		ODR104   = 0x04,
+		ODR208   = 0x05,
+		ODR416   = 0x06,
+		ODR833   = 0x07,
+		ODR1_66K = 0x09,
+		ODR3_33K = 0x08,
+		ODR6_66K = 0x0A
+	};
 
-enum FSR{
-	DPS250 = 10,
-	DPS500,
-	DPS1000,
-	DPS2000,
+	enum FSR : uint8_t{
+		DPS250  = 0x00,
+		DPS500  = 0x01,
+		DPS1000 = 0x02,
+		DPS2000 = 0x03
+	};
 };
 
 namespace sensor{
@@ -60,11 +65,11 @@ class LSM6DSOX: public IGyroscope{
 
         /// sets the ODR of the gyroscope
         /// @param value from ODR enumeration
-        void SetODR(ODR ODRValue);
+        void SetODR(SensorConfiguration::ODR ODRValue);
 
         /// sets the FSR of the gyroscope
         /// @param value from FSR enumeration
-        void SetFSR(FSR FSRValue);
+        void SetFSR(SensorConfiguration::FSR FSRValue);
 
     private:
         /// takes in raw data from the gyroscope
@@ -121,7 +126,7 @@ class LSM6DSOX: public IGyroscope{
         short offset_average_[3] = {0};
 
         /// The I2C peripheral from ST's HAL library.
-        I2C_HandleTypeDef& hi2c_;
+        I2C_HandleTypeDef& i2c_;
 };
 
 }

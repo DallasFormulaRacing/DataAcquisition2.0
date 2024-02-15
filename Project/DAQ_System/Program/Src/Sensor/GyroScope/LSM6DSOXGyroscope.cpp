@@ -9,13 +9,15 @@
 * GPL-3.0 License
 */
 
-#include "LSM6DSOXGyroscope.hpp"
+// Standard Libraries
 #include <stdint.h>
 
+//DFR Dependencies
+#include "LSM6DSOXGyroscope.hpp"
 
 namespace sensor{
 
-LSM6DSOX::LSM6DSOX(I2C_HandleTypeDef& hi2c):hi2c_(hi2c){
+LSM6DSOX::LSM6DSOX(I2C_HandleTypeDef& hi2c):i2c_(hi2c){
     WriteReg(GYR_ADDRESS, LSM6DSOX_CTRL2_G, CTRL2_G_init_value);
     ComputeInitialOffset();
 }
@@ -84,88 +86,50 @@ void LSM6DSOX::ComputeInitialOffset(){
     offset_average_[2] = sum[2] / average_sample_size;
 }
 
-void LSM6DSOX::SetODR(ODR ODRValue){
+void LSM6DSOX::SetODR(SensorConfiguration::ODR ODRValue){
 		static constexpr uint8_t kNumBytes = 2;
 	    uint8_t commands[kNumBytes] = {0};
 	    commands[0] = LSM6DSOX_CTRL2_G;
+
+	    // used to store the original register values
 	    uint8_t* currentRegisterValue = 0;
+	    // contains the value of ODR to be written to register
 	    uint8_t ODRRegisterValue = 0;
 
-	    switch(ODRValue){
-		case ODR12_5:
-			ODRRegisterValue = 0x10;
-			break;
-		case ODR26:
-			ODRRegisterValue = 0x20;
-			break;
-		case ODR52:
-			ODRRegisterValue = 0x30;
-			break;
-		case ODR104:
-			ODRRegisterValue = 0x40;
-			break;
-		case ODR208:
-			ODRRegisterValue = 0x50;
-			break;
-		case ODR416:
-			ODRRegisterValue = 0x60;
-			break;
-		case ODR833:
-			ODRRegisterValue = 0x70;
-			break;
-		case ODR1_66K:
-			ODRRegisterValue = 0x80;
-			break;
-		case ODR3_33K:
-			ODRRegisterValue = 0x90;
-			break;
-		case ODR6_66K:
-			ODRRegisterValue = 0xA0;
-			break;
-	    }
+	    ODRRegisterValue = ODRValue;
 
 	    // read the current register values for the CTRL_X register
-		HAL_I2C_Master_Transmit(&hi2c_,GYR_ADDRESS, commands,1, HAL_MAX_DELAY);
-		HAL_I2C_Master_Receive(&hi2c_,GYR_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
+		HAL_I2C_Master_Transmit(&i2c_,GYR_ADDRESS, commands,1, HAL_MAX_DELAY);
+		HAL_I2C_Master_Receive(&i2c_,GYR_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
 
 		// set the FSR bits to the desired value without touching the other bits in the register
 		commands[1] = (currentRegisterValue[0] & 0x0f) | ODRRegisterValue ;
 
 		// write to register with the desired bit values
-		HAL_I2C_Master_Transmit(&hi2c_,GYR_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+		HAL_I2C_Master_Transmit(&i2c_,GYR_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
 }
 
-void LSM6DSOX::SetFSR(FSR FSRValue){
+void LSM6DSOX::SetFSR(SensorConfiguration::FSR FSRValue){
 	static constexpr uint8_t kNumBytes = 2;
     uint8_t commands[kNumBytes] = {0};
     commands[0] = LSM6DSOX_CTRL2_G;
+
+    //  used to store the original register values
     uint8_t* currentRegisterValue = 0;
+    // contains the value of ODR to be written to register
     uint8_t FSRRegisterValue = 0;
 
-    switch(FSRValue){
-		case DPS250:
-			FSRRegisterValue = 0x00;
-			break;
-		case DPS500:
-			FSRRegisterValue = 0x04;
-			break;
-		case DPS1000:
-			FSRRegisterValue = 0x08;
-			break;
-		case DPS2000:
-			FSRRegisterValue =0x0C ;
-			break;
-    }
+    FSRRegisterValue = FSRValue;
 
     // read the current register values for the CTRL_X register
-	HAL_I2C_Master_Transmit(&hi2c_,GYR_ADDRESS, commands,1, HAL_MAX_DELAY);
-	HAL_I2C_Master_Receive(&hi2c_,GYR_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Transmit(&i2c_,GYR_ADDRESS, commands,1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Receive(&i2c_,GYR_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
 
 	// set the FSR bits to the desired value without touching the other bits in the register
 	commands[1] = (currentRegisterValue[0] & 0xF3) | FSRRegisterValue ;
 
 	// write to register with the desired bit values
-	HAL_I2C_Master_Transmit(&hi2c_,GYR_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+	HAL_I2C_Master_Transmit(&i2c_,GYR_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
 
 }
 
