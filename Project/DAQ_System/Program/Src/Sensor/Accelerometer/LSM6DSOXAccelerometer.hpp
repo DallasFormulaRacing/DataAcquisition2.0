@@ -26,29 +26,31 @@
 
 #define OUTX_L_A         0x28
 
-enum ODR{
-	ODR12_5,
-	ODR26,
-	ODR52,
-	ODR104,
-	ODR208,
-	ODR416,
-	ODR833,
-	ODR1_66K,
-	ODR3_33K,
-	ODR6_66K
-};
-
-enum FSR{
-	FSR2g = 10,
-	FSR4g,
-	FSR8g,
-	FSR16g
-};
-
 namespace sensor{
 
 class LSM6DSOX: public IAccelerometer {
+	class SensorConfiguration{
+	public:
+		enum ODR : uint8_t{
+			ODR12_5  = 0x01,
+			ODR26    = 0x02,
+			ODR52    = 0x03,
+			ODR104   = 0x04,
+			ODR208   = 0x05,
+			ODR416   = 0x06,
+			ODR833   = 0x07,
+			ODR1_66K = 0x08,
+			ODR3_33K = 0x09,
+			ODR6_66K = 0x0A
+		};
+
+		enum FSR : uint8_t{
+			FSR2g  = 0x00,
+			FSR4g  = 0x02,
+			FSR8g  = 0x03,
+			FSR16g = 0x1
+		};
+	};
     public:
 		/// @param hi2c an I2C peripheral from ST's HAL
 		LSM6DSOX(I2C_HandleTypeDef &hi2c);
@@ -67,9 +69,9 @@ class LSM6DSOX: public IAccelerometer {
 
 
         // Sets the ODR value
-        void SetODR(ODR ODRValue);
+        void SetODR(SensorConfiguration::ODR ODRValue);
         // Sets the FSR value
-        void SetFSR(FSR FSRValue);
+        void SetFSR(SensorConfiguration::FSR FSRValue);
 
     private:
 
