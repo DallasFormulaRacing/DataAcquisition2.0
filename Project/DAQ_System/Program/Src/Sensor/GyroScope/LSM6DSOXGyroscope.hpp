@@ -25,32 +25,32 @@
 #define LSM6DSOX_OUTX_L_G       0x22
 #define GYR_ADDRESS             0xD4
 
-class SensorConfiguration{
-public:
-	enum ODR : uint8_t{
-		ODR12_5  = 0x01,
-		ODR26    = 0x02,
-		ODR52    = 0x03,
-		ODR104   = 0x04,
-		ODR208   = 0x05,
-		ODR416   = 0x06,
-		ODR833   = 0x07,
-		ODR1_66K = 0x09,
-		ODR3_33K = 0x08,
-		ODR6_66K = 0x0A
-	};
-
-	enum FSR : uint8_t{
-		DPS250  = 0x00,
-		DPS500  = 0x01,
-		DPS1000 = 0x02,
-		DPS2000 = 0x03
-	};
-};
-
 namespace sensor{
 
 class LSM6DSOX: public IGyroscope{
+	class SensorConfiguration{
+	public:
+		enum ODR : uint8_t{
+			ODR12_5  = 0x01,
+			ODR26    = 0x02,
+			ODR52    = 0x03,
+			ODR104   = 0x04,
+			ODR208   = 0x05,
+			ODR416   = 0x06,
+			ODR833   = 0x07,
+			ODR1_66K = 0x09,
+			ODR3_33K = 0x08,
+			ODR6_66K = 0x0A
+		};
+
+		enum FSR : uint8_t{
+			DPS250  = 0x00,
+			DPS500  = 0x01,
+			DPS1000 = 0x02,
+			DPS2000 = 0x03
+		};
+	};
+
     public:
 		/// @param hi2c an I2C peripheral from ST's HAL.
         LSM6DSOX(I2C_HandleTypeDef &hi2c);
