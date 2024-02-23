@@ -1,78 +1,71 @@
+/*
+* Fat FS Library Wrapper
+* Author:   Cristian Cruz
+*
+* Email:    cris14.alex@gmail.com
+*
+* (c) 2024 Dallas Formula Racing - Embedded Firmware Team
+* Formula SAE International Collegiate Chapter
+* GPL-3.0 License
+*/
 
-#ifndef USB_DATA_LOGGER_H
-#define USB_DATA_LOGGER_H
+#ifndef FAT_FS_H
+#define FAT_FS_H
 
-#include "fatfs.h"
+// Standard Libraries
 #include "string.h"
 #include "stdio.h"
 
+// File System Framework
+#include "fatfs.h"
+
+// DFR Custom Dependencies
+#include "ifile_system.hpp"
+
 namespace application {
 
-class FatFs {
+class FatFs : public IFileSystem {
+private:
+	bool FileDoesNotExist(char* path);
+	bool EvaluateResult(ErrorFlags flag);
+
+	char* logical_drive_path_;
+	FATFS& file_system_;
+	FIL& file_;
+
+	FILINFO file_info_;
+	FRESULT fs_result_;
+
+	UINT num_bytes_read_ = 0;
+	UINT num_bytes_written_ = 0;
+
+	uint32_t total_space_ = 0;
+	uint32_t free_space_ = 0;
+
+	static constexpr uint8_t kMaxDrivePathLength = 4; // Drive letter, colon, backslash, terminating null character
+	static constexpr BYTE kForceMount = 1;
 
 public:
-
-	FatFs(char USBHPath[4], FATFS& USBHFatFS, FIL& USBHFile);
-
+	FatFs(char logical_drive_path[kMaxDrivePathLength], FATFS& file_system, FIL& file);
 	~FatFs();
 
-	/* mounts the USB*/
-	void Mount_USB (void);
+	bool Mount() override;
+	bool Unmount() override;
+	bool FileExists(char* path) override;
+	bool CreateFile(char *path) override;
+	bool OpenFile(char* path, const char* access_mode) override;
+	bool CloseFile() override;
+	bool WriteFile(char *data) override;
+	bool ReadFile(char* buffer) override;
+	bool CreateDirectory (char *name) override;
 
-	/* unmounts the USB*/
-	void Unmount_USB (void);
-
-	/* Start node to be scanned (***also used as work area***) */
-	FRESULT Scan_USB (char* pat);
-
-	/* Only supports removing files from home directory. Directory remover to be added soon */
-	FRESULT Format_USB (void);
-
-	/* write the data to the file
-	 * @ name : is the path to the file*/
-	FRESULT Write_File (char *name, char *data);
-
-	/* read data from the file
-	 * @ name : is the path to the file*/
-	FRESULT Read_File (char *name);
-
-	/* creates the file, if it does not exists
-	 * @ name : is the path to the file*/
-	FRESULT Create_File (char *name);
-
-	/* Removes the file from the USB
-	 * @ name : is the path to the file*/
-	FRESULT Remove_File (char *name);
-
-	/* creates a directory
-	 * @ name: is the path to the directory
-	 */
-	FRESULT Create_Dir (char *name);
-
-	/* checks the free space in the USB*/
-	void Check_USB_Details (void);
-
-	/* updates the file. write pointer is set to the end of the file
-	 * @ name : is the path to the file
-	 */
-	FRESULT Update_File (char *name, char *data);
-
-private:
-	char* USBHPath_;   /* USBH logical drive path */
-	FATFS& USBHFatFS_;    /* File system object for USBH logical drive */
-	FIL& USBHFile_;       /* File object for USBH */
-
-	FILINFO USBHfno_;
-	FRESULT fresult_;  // result
-	UINT br_, bw_;  // File read/write count
-
-	/**** capacity related *****/
-	FATFS *pUSBHFatFS_;
-	DWORD fre_clust_;
-	uint32_t total_, free_space_;
+	// Will temporarily keep this here, away from the interface, until it is
+	// decided whether this logic will be necessary. Perhaps for detecting whether
+	// the storage is full
+	void CheckStorageCapacity();
 };
 
 
 } // namespace application
 
-#endif // USB_DATA_LOGGER_H
+#endif // FAT_FS_H
