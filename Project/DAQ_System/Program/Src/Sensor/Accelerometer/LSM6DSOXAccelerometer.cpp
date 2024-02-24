@@ -82,34 +82,53 @@ void LSM6DSOX::SetODR(SensorConfiguration::ODR ODRValue){
 	static constexpr uint8_t kNumBytes = 2;
     uint8_t commands[kNumBytes] = {0};
     commands[0] = CTRL1_XL;
-    uint8_t* currentRegisterValue = 0;
+    uint8_t currentRegisterValue[1] = {0};
 
     // read the current register values for the CTRL_X register
 	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,1, HAL_MAX_DELAY);
 	HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
 
 	// set the ODR bits to the desired value without touching the other bits in the register
-	commands[1] = (currentRegisterValue[0] & 0x0F) | ODRValue ;
+	// ODRValue is shifter 4 bits to properly align the desired ODR bits to the proper bits in the register
+	commands[1] = (currentRegisterValue[0] & 0x0F) | ODRValue << 4;
 
 	// write to register with the desired bit values
 	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+
 }
 
 void LSM6DSOX::SetFSR(SensorConfiguration::FSR FSRValue){
 	static constexpr uint8_t kNumBytes = 2;
     uint8_t commands[kNumBytes] = {0};
     commands[0] = CTRL1_XL;
-    uint8_t* currentRegisterValue = 0;
+    uint8_t currentRegisterValue[1] = {0};
 
-    // read the current register values for the CTRL_X register
+    // read the current register values for the CTRL1_XL register
 	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,1, HAL_MAX_DELAY);
 	HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
 
 	// set the FSR bits to the desired value without touching the other bits in the register
-	commands[1] = (currentRegisterValue[0] & 0xF3) | FSRValue ;
+	// FSRValue is shifted to properly align the FSR bits in to the register.
+	commands[1] = (currentRegisterValue[0] & 0xF3) | FSRValue << 2  ;
 
 	// write to register with the desired bit values
 	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+
+	// each FSR has a different sensitivity factor to convert raw data to G
+	switch (FSRValue){
+	case SensorConfiguration::FSR2g:
+		sensitivity_factor = 0.0000610;
+		break;
+	case SensorConfiguration::FSR4g:
+		sensitivity_factor = 0.000122;
+		break;
+	case SensorConfiguration::FSR8g:
+		sensitivity_factor = 0.000244;
+		break;
+	case SensorConfiguration::FSR16g:
+		sensitivity_factor = 0.000488;
+		break;
+	}
 
 }
 
@@ -127,9 +146,9 @@ void LSM6DSOX::ComputeAcceleration() {
 */
 
     // linearization of the accelerometer. by default range of the accelerometer is ±2 g
-    real_acceleration_data_[0] = 0.0006 *raw_acceleration_data_[0] - 0.0002;
-    real_acceleration_data_[1] = 0.0006 *raw_acceleration_data_[1] - 0.0002;
-    real_acceleration_data_[2] = 0.0006 *raw_acceleration_data_[2] - 0.0002;
+    real_acceleration_data_[0] =  sensitivity_factor *raw_acceleration_data_[0] * 9.81;
+    real_acceleration_data_[1] =  sensitivity_factor *raw_acceleration_data_[1] * 9.81;
+    real_acceleration_data_[2] = (sensitivity_factor *raw_acceleration_data_[2] * 9.81) * (9.81/9.95); // used 9.81/9.9 to further calibrate the z-axis since it was a little bit off
 }
 
 void LSM6DSOX::ReadRawAcceleration() {
