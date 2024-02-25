@@ -13,6 +13,16 @@
 #include "../../Interfaces/ii2c.hpp"
 
 class i2cHalWrapperStmf4 : public II2C {
+public:
+	i2cHalWrapperStmf4(I2C_HandleTypeDef &hi2c);
+
+	virtual ~i2cHalWrapperStmf4();
+
+	virtual void Start() override;
+
+	virtual void Recieve() override;
+
+	virtual void Transmit() override;
 
 };
 
