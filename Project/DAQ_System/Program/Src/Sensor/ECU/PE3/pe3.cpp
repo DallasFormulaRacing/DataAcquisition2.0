@@ -16,7 +16,15 @@
 namespace sensor {
 
 Pe3::Pe3(std::shared_ptr<platform::ICan> can_bus)
-  : can_bus_(can_bus) { }
+  : can_bus_(can_bus) {
+
+	// Initialize frame fields to their respective sizes and default value
+	FrameFormat1::InitVector();
+	FrameFormat2::InitVector();
+	FrameFormat3::InitVector();
+	FrameFormat4::InitVector();
+	FrameFormat5::InitVector();
+}
 
 Pe3::~Pe3() { }
 

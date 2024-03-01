@@ -15,6 +15,13 @@
 
 namespace sensor {
 
+std::vector<int16_t> FrameFormat1::fields;
+std::vector<int16_t> FrameFormat2::fields;
+std::vector<int16_t> FrameFormat3::fields;
+std::vector<int16_t> FrameFormat4::fields;
+std::vector<int16_t> FrameFormat5::fields;
+
+
 // TODO: Document the meaning and significance of 32767, 65536
 // Source: https://www.quora.com/Why-is-32767-the-highest-value-number-that-can-be-made-into-binary-code-How-can-I-represent-any-higher-values-using-binary-code
 // The variable `field` is combining bytes into a form of Two's Complements
