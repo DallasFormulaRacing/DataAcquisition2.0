@@ -22,7 +22,7 @@ BxCanStmF4::~BxCanStmF4() {
 	HAL_CAN_Stop(&bx_can_);
 }
 
-void BxCanStmF4::ConfigureFilter(uint32_t can_id, uint32_t filder_id_high, uint32_t filter_id_low) {
+void BxCanStmF4::ConfigureFilter(uint32_t filder_id_high, uint32_t filter_id_low) {
 	filter_.FilterIdHigh = filder_id_high;
 	filter_.FilterIdLow = (filter_id_low <<3) | CAN_ID_EXT | CAN_RTR_DATA ;
 	filter_.FilterMaskIdHigh = 0xFFFF;
