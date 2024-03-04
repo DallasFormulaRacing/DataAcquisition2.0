@@ -23,35 +23,34 @@
 
 #define LSM6DSOX_CTRL2_G        0x11
 #define LSM6DSOX_OUTX_L_G       0x22
-#define GYR_ADDRESS             0xD4
+#define LSM6DSOX_GYR_ADDRESS    0xD4
 
 namespace sensor{
 
 class LSM6DSOX: public IGyroscope{
-	class SensorConfiguration{
-	public:
-		enum ODR : uint8_t{
-			ODR12_5  = 0x01,
-			ODR26    = 0x02,
-			ODR52    = 0x03,
-			ODR104   = 0x04,
-			ODR208   = 0x05,
-			ODR416   = 0x06,
-			ODR833   = 0x07,
-			ODR1_66K = 0x09,
-			ODR3_33K = 0x08,
-			ODR6_66K = 0x0A
-		};
-
-		enum FSR : uint8_t{
-			DPS250  = 0x00,
-			DPS500  = 0x01,
-			DPS1000 = 0x02,
-			DPS2000 = 0x03
-		};
-	};
-
     public:
+		class SensorConfiguration{
+		public:
+			enum ODR : uint8_t{
+				ODR12_5  = 0x01,
+				ODR26    = 0x02,
+				ODR52    = 0x03,
+				ODR104   = 0x04,
+				ODR208   = 0x05,
+				ODR416   = 0x06,
+				ODR833   = 0x07,
+				ODR1_66K = 0x09,
+				ODR3_33K = 0x08,
+				ODR6_66K = 0x0A
+			};
+
+			enum FSR : uint8_t{
+				DPS250  = 0x00,
+				DPS500  = 0x01,
+				DPS1000 = 0x02,
+				DPS2000 = 0x03
+			};
+		};
 		/// @param hi2c an I2C peripheral from ST's HAL.
         LSM6DSOX(I2C_HandleTypeDef &hi2c);
         virtual ~LSM6DSOX() = default;
@@ -111,11 +110,12 @@ class LSM6DSOX: public IGyroscope{
         uint8_t CTRL2_G_init_value = 0x50;
 
         // FSR value given by the data sheet. The values is used to normalize the raw data
-        // to ± 250 degrees
-        static constexpr float DPS_250_Sensitivity = .00875f;
+        // gyro defaults to FSR of 250DPS
+        float SensitivityFactor = .00875f;
+
 
         //Conversion factor of (2pi/360) to convert to radians
-        static constexpr float DegreesToRadians = 0.01745329251f; //Conversion facotr of (2pi/360)
+        static constexpr float DegreesToRadians = 0.01745329251f; //Conversion factor of (2pi/360)
 
         // First element is the x-axis
         // Second element is the y-axis

@@ -40,6 +40,7 @@ extern I2C_HandleTypeDef hi2c1;
 #include "Sensor/ECU/PE3/Frames/frame_pe2.hpp"
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
+#include "Sensor/GyroScope/LSM6DSOXGyroscope.hpp"
 
 
 // CAN Bus Interrupt Callback
@@ -63,10 +64,10 @@ void cppMain() {
 //	accelerometer = std::make_unique<sensor::LSM303DLHC>(hi2c1);
 //	accelerometer->init();
 //
-//	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
-//	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
-
-
+	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
+	gyroscope = std::make_unique<sensor::LSM6DSOX>(hi2c1);
+	static_cast<sensor::LSM6DSOX*>(gyroscope.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
+	static_cast<sensor::LSM6DSOX*>(gyroscope.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::DPS250);
 
 
 	std::vector<uint32_t> can_id_list = { 0x0CFFF048,
@@ -105,7 +106,7 @@ void cppMain() {
 
 //	float displacement_inches = 0.0f;
 //	float* acc_data = 0.0f;
-//	int16_t *gyro_data = 0;
+	int16_t *gyro_data = 0;
 
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
@@ -124,12 +125,12 @@ void cppMain() {
 //		printf("\r");
 //		printf("\n");
 //
-//		gyro_data = gyroscope->DegreesPerSecond();
-//		printf("x = %hd\t",gyro_data[0]);
-//		printf("y = %hd\t",gyro_data[1]);
-//		printf("z = %hd\t",gyro_data[2]);
-//		printf("\n");
-//		printf("\r");
+		gyro_data = gyroscope->DegreesPerSecond();
+		printf("x = %hd\t",gyro_data[0]);
+		printf("y = %hd\t",gyro_data[1]);
+		printf("z = %hd\t",gyro_data[2]);
+		printf("\n");
+		printf("\r");
 
 
 

@@ -18,7 +18,7 @@
 namespace sensor{
 
 LSM6DSOX::LSM6DSOX(I2C_HandleTypeDef& hi2c):i2c_(hi2c){
-    WriteReg(GYR_ADDRESS, LSM6DSOX_CTRL2_G, CTRL2_G_init_value);
+    WriteReg(LSM6DSOX_GYR_ADDRESS, LSM6DSOX_CTRL2_G, CTRL2_G_init_value);
     ComputeInitialOffset();
 }
 
@@ -53,18 +53,18 @@ short* LSM6DSOX::DegreesPerSecond() {
     // Equation: degrees/second = RawData * SensitivityOfFullScaleRange
     // Using a default sensitivity for L3GD20H is 250dps
 	AngularVelocity();
-    degrees_per_second_[0] = angular_velocity_[0] * DPS_250_Sensitivity;
-    degrees_per_second_[1] = angular_velocity_[1] * DPS_250_Sensitivity;
-    degrees_per_second_[2] = angular_velocity_[2] * DPS_250_Sensitivity;
+    degrees_per_second_[0] = angular_velocity_[0] * SensitivityFactor;
+    degrees_per_second_[1] = angular_velocity_[1] * SensitivityFactor;
+    degrees_per_second_[2] = angular_velocity_[2] * SensitivityFactor;
 
     return degrees_per_second_;
 }
 
 float* LSM6DSOX::RadiansPerSecond() {
 	AngularVelocity();
-    radians_per_second_[0] = angular_velocity_[0] * DPS_250_Sensitivity * DegreesToRadians;
-    radians_per_second_[1] = angular_velocity_[1] * DPS_250_Sensitivity * DegreesToRadians;
-    radians_per_second_[2] = angular_velocity_[2] * DPS_250_Sensitivity * DegreesToRadians;
+    radians_per_second_[0] = angular_velocity_[0] * SensitivityFactor * DegreesToRadians;
+    radians_per_second_[1] = angular_velocity_[1] * SensitivityFactor * DegreesToRadians;
+    radians_per_second_[2] = angular_velocity_[2] * SensitivityFactor * DegreesToRadians;
 
     return radians_per_second_;
 }
@@ -72,7 +72,7 @@ float* LSM6DSOX::RadiansPerSecond() {
 void LSM6DSOX::ComputeInitialOffset(){
     short temp_data[3] = {0};
     short sum[3] = {0};
-    uint8_t average_sample_size = 15;
+    uint8_t average_sample_size = 255;
 
     for (int i = 0; i <= average_sample_size; i++) {
         ReadRawData(temp_data);
@@ -99,14 +99,14 @@ void LSM6DSOX::SetODR(SensorConfiguration::ODR ODRValue){
 	    ODRRegisterValue = ODRValue;
 
 	    // read the current register values for the CTRL_X register
-		HAL_I2C_Master_Transmit(&i2c_,GYR_ADDRESS, commands,1, HAL_MAX_DELAY);
-		HAL_I2C_Master_Receive(&i2c_,GYR_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
+		HAL_I2C_Master_Transmit(&i2c_,LSM6DSOX_GYR_ADDRESS, commands,1, HAL_MAX_DELAY);
+		HAL_I2C_Master_Receive(&i2c_,LSM6DSOX_GYR_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
 
 		// set the FSR bits to the desired value without touching the other bits in the register
-		commands[1] = (currentRegisterValue[0] & 0x0f) | ODRRegisterValue ;
+		commands[1] = (currentRegisterValue[0] & 0x0f) | ODRRegisterValue << 4 ;
 
 		// write to register with the desired bit values
-		HAL_I2C_Master_Transmit(&i2c_,GYR_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+		HAL_I2C_Master_Transmit(&i2c_,LSM6DSOX_GYR_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
 }
 
 void LSM6DSOX::SetFSR(SensorConfiguration::FSR FSRValue){
@@ -115,38 +115,55 @@ void LSM6DSOX::SetFSR(SensorConfiguration::FSR FSRValue){
     commands[0] = LSM6DSOX_CTRL2_G;
 
     //  used to store the original register values
-    uint8_t* currentRegisterValue = 0;
+    uint8_t currentRegisterValue[1] = {0};
     // contains the value of ODR to be written to register
     uint8_t FSRRegisterValue = 0;
 
     FSRRegisterValue = FSRValue;
 
     // read the current register values for the CTRL_X register
-	HAL_I2C_Master_Transmit(&i2c_,GYR_ADDRESS, commands,1, HAL_MAX_DELAY);
-	HAL_I2C_Master_Receive(&i2c_,GYR_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
+
+	HAL_I2C_Master_Transmit(&i2c_,LSM6DSOX_GYR_ADDRESS, commands,1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Receive(&i2c_,LSM6DSOX_GYR_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
 
 	// set the FSR bits to the desired value without touching the other bits in the register
-	commands[1] = (currentRegisterValue[0] & 0xF3) | FSRRegisterValue ;
+	commands[1] = (currentRegisterValue[0] & 0xF3) | FSRRegisterValue << 2 ;
 
 	// write to register with the desired bit values
-	HAL_I2C_Master_Transmit(&i2c_,GYR_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+	HAL_I2C_Master_Transmit(&i2c_,LSM6DSOX_GYR_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+
+	switch(FSRValue){
+	case SensorConfiguration::DPS250:
+		SensitivityFactor = 0.00875;
+		break;
+	case SensorConfiguration::DPS500:
+		SensitivityFactor = 0.01750;
+		break;
+	case SensorConfiguration::DPS1000:
+		SensitivityFactor =  0.0350;
+		break;
+	case SensorConfiguration::DPS2000:
+		SensitivityFactor = 0.0700;
+		break;
+
+	}
 
 }
 
 
 bool LSM6DSOX::WriteReg(uint8_t addr_i2c, uint8_t addr_reg, uint8_t register_data){
     uint8_t data[2] = {addr_reg, register_data};
-    return HAL_I2C_Master_Transmit(&hi2c1,addr_i2c, data,2, HAL_MAX_DELAY);
+    return HAL_I2C_Master_Transmit(&i2c_,addr_i2c, data,2, HAL_MAX_DELAY);
 }
 
 
 
 bool LSM6DSOX::Receive(uint8_t data_buf[]){
 	uint8_t addr_reg = LSM6DSOX_OUTX_L_G;
-	if(HAL_I2C_Master_Transmit(&hi2c1, GYR_ADDRESS, &addr_reg, 1, HAL_MAX_DELAY) != HAL_OK){
+	if(HAL_I2C_Master_Transmit(&i2c_, LSM6DSOX_GYR_ADDRESS, &addr_reg, 1, HAL_MAX_DELAY) != HAL_OK){
 		return false;
 	}
-	if(HAL_I2C_Master_Receive(&hi2c1, GYR_ADDRESS, data_buf, 6, HAL_MAX_DELAY) != HAL_OK){
+	if(HAL_I2C_Master_Receive(&i2c_, LSM6DSOX_GYR_ADDRESS, data_buf, 6, HAL_MAX_DELAY) != HAL_OK){
 		return false;
 	}
 
