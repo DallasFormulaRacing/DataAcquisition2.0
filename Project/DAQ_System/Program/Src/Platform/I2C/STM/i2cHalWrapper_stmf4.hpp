@@ -20,9 +20,18 @@ public:
 
 	virtual void Start() override;
 
-	virtual void Recieve() override;
+	virtual void Master_Recieve() override;
 
-	virtual void Transmit() override;
+	virtual void Master_Transmit() override;
+
+	virtual void Slave_Recieve() override; //that is, the STM32 transmiting and reciving as a slave, probably unnecessary
+
+	virtual void Slave_Transmit() override;
+
+private:
+
+	I2c_HandleTypeDef bx_i2c_;
+	uint8_t slave_add_;
 
 };
 

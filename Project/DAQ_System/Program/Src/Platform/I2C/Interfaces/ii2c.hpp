@@ -17,15 +17,18 @@ class II2C{
 
 	static constexpr uint8_t kMaxBytes = 2;
 
-	static constexpr uint8_t MAG_ADD;
-
-	static constexpr unit8_t ACC_ADD;
-
 	virtual ~II2C() = default;
 
-	virtual void Recieve() = 0;
+	virtual void Start() = 0;
 
-	virtual void Transmit() = 0;
+	virtual void Master_Recieve() = 0;
+
+	virtual void Master_Transmit() = 0;
+
+	virtual void Slave_Recieve() = 0;
+
+	virtual void Slave_Transmit() = 0;
+
 };
 
 }
