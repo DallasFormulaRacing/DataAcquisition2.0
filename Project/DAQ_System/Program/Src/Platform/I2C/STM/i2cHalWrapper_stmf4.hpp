@@ -8,11 +8,12 @@
 #ifndef I2CHALWRAPPER_STMF4_HPP_
 #define STM_I2CHALWRAPPER_STMF4_HPP_
 
+#include "../Interfaces/ii2c.hpp"
 #include "i2c.h"
 
-#include "../../Interfaces/ii2c.hpp"
+namespace platform{
 
-class i2cHalWrapperStmf4 : public II2C {
+class i2cHalWrapperStmf4 : public II2C{
 public:
 	i2cHalWrapperStmf4(I2C_HandleTypeDef &hi2c);
 
@@ -30,9 +31,9 @@ public:
 
 private:
 
-	I2c_HandleTypeDef bx_i2c_;
+	I2C_HandleTypeDef bx_i2c_;
 	uint8_t slave_add_;
-
 };
 
+}
 #endif /* SRC_PLATFORM_I2C_STM_I2CHALWRAPPER_STMF4_HPP_ */

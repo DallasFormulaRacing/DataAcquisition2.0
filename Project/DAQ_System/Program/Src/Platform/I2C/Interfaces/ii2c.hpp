@@ -14,7 +14,7 @@
 namespace platform{
 
 class II2C{
-
+public:
 	static constexpr uint8_t kMaxBytes = 2;
 
 	virtual ~II2C() = default;
