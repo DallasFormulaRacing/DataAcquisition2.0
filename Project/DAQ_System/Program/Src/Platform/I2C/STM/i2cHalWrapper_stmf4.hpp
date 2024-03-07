@@ -21,9 +21,9 @@ public:
 
 	virtual void Start() override;
 
-	virtual void Master_Recieve() override;
+	virtual void Master_Recieve(uint8_t*) override;
 
-	virtual void Master_Transmit() override;
+	virtual void Master_Transmit(uint8_t*) override;
 
 	virtual void Slave_Recieve() override; //that is, the STM32 transmiting and reciving as a slave, probably unnecessary
 
