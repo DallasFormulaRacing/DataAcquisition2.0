@@ -25,10 +25,7 @@ public:
 
 	virtual void Master_Transmit(uint8_t*) = 0;
 
-	virtual void Slave_Recieve() = 0;
-
-	virtual void Slave_Transmit() = 0;
-
+	virtual void SetResponse(uint8_t) = 0;
 };
 
 }

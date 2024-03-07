@@ -16,9 +16,15 @@
 #ifndef ACCELEROMETER_LSM303DLHC_H
 #define ACCELEROMETER_LSM303DLHC_H
 
+// Standard Libraries
+#include <inttypes.h>
+#include <vector>
+#include <array>
+#include <memory>
 
 // DFR Custom Dependancies
 #include "iaccelerometer.hpp"
+#include "../../platform/I2C/STM/i2cHalWrapper_stmf4.hpp"
 
 // ST HAL Dependencies
 #include "i2c.h"
@@ -41,7 +47,8 @@ namespace sensor{
 class LSM303DLHC: public IAccelerometer {
     public:
 		/// @param hi2c an I2C peripheral from ST's HAL
-        LSM303DLHC(I2C_HandleTypeDef &hi2c);
+        LSM303DLHC(std::shared_ptr<platform::II2C> i2c_line);
+
         virtual ~LSM303DLHC() = default;
 
         // Initialize the device
@@ -97,8 +104,7 @@ class LSM303DLHC: public IAccelerometer {
         void ReadRawAcceleration();
 
 
-        // The I2C peripherals from ST's HAL library
-        I2C_HandleTypeDef i2c_;
+        std::shared_ptr<platform::II2C> I2C_line_;
 
 
         // value to hold offset values, scale, and gravity

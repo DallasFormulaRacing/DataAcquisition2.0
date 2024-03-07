@@ -1,4 +1,4 @@
-/*
+/*R
  * i2cHalWrapper_stmf4.hpp
  *
  *  Created on: Feb 23, 2024
@@ -19,20 +19,16 @@ public:
 
 	virtual ~i2cHalWrapperStmf4();
 
-	virtual void Start() override;
-
 	virtual void Master_Recieve(uint8_t*) override;
 
 	virtual void Master_Transmit(uint8_t*) override;
 
-	virtual void Slave_Recieve() override; //that is, the STM32 transmiting and reciving as a slave, probably unnecessary
-
-	virtual void Slave_Transmit() override;
+	virtual void SetResponse(uint8_t) override;
 
 private:
-
 	I2C_HandleTypeDef bx_i2c_;
 	uint8_t slave_add_;
+	uint8_t response_size_;
 };
 
 }
