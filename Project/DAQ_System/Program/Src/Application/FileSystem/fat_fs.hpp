@@ -149,6 +149,11 @@ public:
 
 	/// Updates the internal count for the block device's total and free space
 	/// in Kilobytes.
+	///
+	/// For more information, see
+	/// <a href="http://elm-chan.org/fsw/ff/doc/getfree.html"> f_mkdir() </a>.
+	///
+	/// @return Whether the operation completed succesfully or failed.
 	bool CheckStorageCapacity() override;
 
 	/// @return The total space in Kilobytes. 
