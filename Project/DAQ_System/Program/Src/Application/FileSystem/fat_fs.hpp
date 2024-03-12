@@ -48,8 +48,8 @@ private:
 	UINT num_bytes_read_ = 0;
 	UINT num_bytes_written_ = 0;
 
-	uint32_t total_space_ = 0;
-	uint32_t free_space_ = 0;
+	uint32_t total_kilobytes_ = 0;
+	uint32_t free_kilobytes_ = 0;
 
 	/// Accounts for the following characters:
 	/// - Drive letter
@@ -147,10 +147,15 @@ public:
 	/// @return Whether the operation completed succesfully or failed.
 	bool CreateDirectory (char *name) override;
 
-	// Will temporarily keep this here, away from the interface, until it is
-	// decided whether this logic will be necessary. Perhaps for detecting whether
-	// the storage is full
-	void CheckStorageCapacity();
+	/// Updates the internal count for the block device's total and free space
+	/// in Kilobytes.
+	bool CheckStorageCapacity() override;
+
+	/// @return The total space in Kilobytes. 
+	uint32_t TotalSpace() override;
+
+	/// @return The free space in Kilobytes.
+	uint32_t FreeSpace() override;
 };
 
 

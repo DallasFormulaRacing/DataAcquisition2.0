@@ -29,7 +29,10 @@ public:
 	virtual bool CloseFile() = 0;
 	virtual bool WriteFile(char* data) = 0;
 	virtual bool ReadFile(char* buffer) = 0;
-	virtual bool CreateDirectory (char *name) = 0;
+	virtual bool CreateDirectory(char *name) = 0;
+	virtual bool CheckStorageCapacity() = 0;
+	virtual uint32_t TotalSpace() = 0;
+	virtual uint32_t FreeSpace() = 0;
 
 protected:
 	// POSIX compliant mode flags
@@ -51,10 +54,11 @@ protected:
 		ReadFile		= 1 << 5,
 		WriteFile		= 1 << 6,
 		CloseFile		= 1 << 7,
-		CreateDirectory = 1 << 8
+		CreateDirectory = 1 << 8,
+		CheckCapacity	= 1 << 9
 	};
 
-	static constexpr uint8_t kNumErrorFlags = 9;
+	static constexpr uint8_t kNumErrorFlags = 10;
 	unsigned int errors_ : kNumErrorFlags;
 
 	void SetError(ErrorFlags flag) {

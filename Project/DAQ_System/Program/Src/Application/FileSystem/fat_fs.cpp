@@ -87,16 +87,22 @@ bool FatFs::CreateDirectory(char *name) {
 	return EvaluateResult(ErrorFlags::CreateDirectory);
 }
 
-void FatFs::CheckStorageCapacity () {
-	DWORD fre_clust;
-	FATFS *pUSBHFatFS;
-	f_getfree("", &fre_clust, &pUSBHFatFS);
+bool FatFs::CheckStorageCapacity () {
+	DWORD num_free_clusters;
+	FATFS *fs;
+	fs_result_ = f_getfree("", &num_free_clusters, &fs);
 
-	// TODO: Compute space, as the below variables may be counting
-	// sectors, not bytes
-	// http://elm-chan.org/fsw/ff/doc/getfree.html
-	total_space_ = (uint32_t)((pUSBHFatFS->n_fatent - 2) * pUSBHFatFS->csize * 0.5);
-	free_space_ = (uint32_t)(fre_clust * pUSBHFatFS->csize * 0.5);
+	total_kilobytes_ = (uint32_t)((fs->n_fatent - 2) * fs->csize * 0.5);
+	free_kilobytes_ = (uint32_t)(num_free_clusters * fs->csize * 0.5);
+	return EvaluateResult(ErrorFlags::CheckCapacity);
+}
+
+uint32_t FatFs::TotalSpace() {
+	return total_kilobytes_;
+}
+
+uint32_t FatFs::FreeSpace() {
+	return free_kilobytes_;
 }
 
 bool FatFs::FileDoesNotExist(char* path) {
