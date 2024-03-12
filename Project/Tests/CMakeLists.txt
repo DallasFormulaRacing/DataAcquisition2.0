@@ -46,7 +46,7 @@ add_executable(
   Src/Sensor/ECU/PE3/pe_frames_tests.cpp
 
   # Circular Queue Tests
-  ../DAQ_System/Program/Src/Application/CircularQueue/circular_queue.hpp
+  ../DAQ_System/Program/Src/Application/circular_queue.hpp
   Src/Application/circular_queue_tests.cpp
 )
 
