@@ -15,11 +15,11 @@ namespace platform{
 
 class i2cHalWrapperStmf4 : public II2C{
 public:
-	i2cHalWrapperStmf4(I2C_HandleTypeDef &hi2c);
+	i2cHalWrapperStmf4(I2C_HandleTypeDef &hi2c, uint8_t SAD);
 
 	virtual ~i2cHalWrapperStmf4();
 
-	virtual void Master_Recieve(uint8_t*) override;
+	virtual void Master_Receive(uint8_t*) override;
 
 	virtual void Master_Transmit(uint8_t*) override;
 

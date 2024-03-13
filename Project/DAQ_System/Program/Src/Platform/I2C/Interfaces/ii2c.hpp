@@ -19,9 +19,7 @@ public:
 
 	virtual ~II2C() = default;
 
-	virtual void Start() = 0;
-
-	virtual void Master_Recieve(uint8_t*) = 0;
+	virtual void Master_Receive(uint8_t*) = 0;
 
 	virtual void Master_Transmit(uint8_t*) = 0;
 
