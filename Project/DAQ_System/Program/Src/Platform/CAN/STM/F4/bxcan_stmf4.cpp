@@ -22,27 +22,20 @@ BxCanStmF4::~BxCanStmF4() {
 	HAL_CAN_Stop(&bx_can_);
 }
 
-void BxCanStmF4::SubscribeCanId(const std::vector<uint32_t> &can_id_list) {
-	CAN_FilterTypeDef filter;
+void BxCanStmF4::ConfigureFilter(uint32_t can_id, uint32_t filder_id_high, uint32_t filter_id_low) {
+	filter_.FilterIdHigh = filder_id_high;
+	filter_.FilterIdLow = (filter_id_low <<3) | CAN_ID_EXT | CAN_RTR_DATA ;
+	filter_.FilterMaskIdHigh = 0xFFFF;
+	filter_.FilterMaskIdLow = 0xFFFF;
+	filter_.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+	filter_.FilterBank = filter_bank_num_;
+	filter_.FilterMode = CAN_FILTERMODE_IDMASK;
+	filter_.FilterScale = CAN_FILTERSCALE_32BIT;
+	filter_.FilterActivation = CAN_FILTER_ENABLE;
+	filter_.SlaveStartFilterBank = 17;
 
-	for (uint8_t i = 0; i < can_id_list.size(); i++) {
-		ConfigureFilter(filter, i, can_id_list.at(i));
-	}
-}
-
-void BxCanStmF4::ConfigureFilter(CAN_FilterTypeDef &filter, uint8_t filter_bank_num, uint32_t can_id) {
-	filter.FilterIdHigh = can_id >> 13 ;
-	filter.FilterIdLow = ((can_id & 0x1FFF) <<3) | CAN_ID_EXT | CAN_RTR_DATA ;
-	filter.FilterMaskIdHigh = 0xFFFF;
-	filter.FilterMaskIdLow = 0xFFFF;
-	filter.FilterFIFOAssignment = CAN_FILTER_FIFO0;
-	filter.FilterBank = filter_bank_num;
-	filter.FilterMode = CAN_FILTERMODE_IDMASK;
-	filter.FilterScale = CAN_FILTERSCALE_32BIT;
-	filter.FilterActivation = CAN_FILTER_ENABLE;
-	filter.SlaveStartFilterBank = 17;
-
-	HAL_CAN_ConfigFilter(&bx_can_, &filter);
+	HAL_CAN_ConfigFilter(&bx_can_, &filter_);
+	filter_bank_num_++;
 }
 
 void BxCanStmF4::Start() {
