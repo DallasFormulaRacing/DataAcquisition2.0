@@ -35,9 +35,10 @@ extern I2C_HandleTypeDef hi2c1;
 #include "Platform/CAN/STM/F4/bxcan_stmf4.hpp"
 #include "Platform/CAN/Interfaces/ican.hpp"
 #include "Sensor/Accelerometer/lsm303dlhc.hpp"
+#include "Sensor/ECU/PE3/iecu.hpp"
+#include "Sensor/ECU/PE3/pe3.hpp"
 #include "Sensor/GyroScope/igyroscope.hpp"
 #include "Sensor/GyroScope/l3gd20h.hpp"
-#include "Sensor/ECU/PE3/Frames/frame_pe2.hpp"
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
 #include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
@@ -69,41 +70,27 @@ void cppMain() {
 //	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
 
 
+	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
+	std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
 
+	auto pe3_ecu = std::make_unique<sensor::Pe3>(can_bus);
+	const std::vector<uint32_t>& can_id_list = pe3_ecu->CanIdList();
 
-	std::vector<uint32_t> can_id_list = { 0x0CFFF048,
-										  0x0CFFF148,
-										//   0x0CFFF248,
-										//   0x0CFFF348,
-										//   0x0CFFF448,
-										  0x0CFFF548,
-										//   0x0CFFF648,
-										//   0x0CFFF748,
-										//   0x0CFFF848,
-										//   0x0CFFF948,
-										//   0x0CFFFA48,
-										//   0x0CFFFB48,
-										//   0x0CFFFC48,
-										//   0x0CFFFD48,
-										//   0x0CFFFE48,
-										  0x0CFFD048  };
+	// Subscribe to messages with PE3's CAN IDs
+	for (const uint32_t& can_id : can_id_list) {
+		bx_can_peripheral->ConfigureFilter(can_id, (can_id >> 13), (can_id & 0x1FFF));
+	}
 
-	std::shared_ptr<platform::BxCanStmF4> bx_can_peripheral(nullptr);
-	bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
-	bx_can_peripheral->SubscribeCanId(can_id_list);
 	bx_can_peripheral->Start();
 
+	bx_can_callback_ptr = bx_can_peripheral;
 	ReceiveInterruptMode rx_interrupt_mode = ReceiveInterruptMode::kFifo0MessagePending;
 	bx_can_peripheral->ConfigureReceiveCallback(rx_interrupt_mode);
+	bx_can_peripheral->EnableInterruptMode();
 
-	bx_can_callback_ptr = bx_can_peripheral;
 
-	std::shared_ptr<platform::ICan> can_bus(nullptr);
-	can_bus = bx_can_peripheral;
-	// TODO: pass `can_bus` to ECU component via constructor
-	can_bus->EnableInterruptMode();
-
-	uint8_t rx_buffer[8];
+	float manifold_absolute_pressure = 0.0f;
+	float battery_voltage = 0.0f;
 
 //	float displacement_inches = 0.0f;
 	float* acc_data;
@@ -134,31 +121,37 @@ void cppMain() {
 //		printf("\r");
 
 
-
-		//HAL_Delay(150);
-		if(can_bus->MessageArrivedFlag()){
+		if (pe3_ecu->NewMessageArrived()) {
 			__disable_irq();
-//			can_bus->DisableInterruptMode();
-			can_bus->Receive(rx_buffer);
 
-			if(can_bus->LatestCanId() == 0x0CFFF148) {
-				sensor::FramePE2 frame(rx_buffer);
-				float manifold_absolute_pressure = frame.ManifoldAbsolutePressure();
+			pe3_ecu->Update();
+			uint32_t can_id = pe3_ecu->LatestCanId();
 
-				printf("\t\t 0x0CFFF148 \n");
+			switch(can_id) {
+			case FramePe2Id:
+				manifold_absolute_pressure = pe3_ecu->Map();
+
+				printf("\t\t %" PRIu32 "\n", can_id);
 				printf("Manifold Pressure: %f\n", manifold_absolute_pressure);
 				printf("\r");
+				break;
 
-			} else if(can_bus->LatestCanId() == 0x0CFFF548){
-				printf("\t\t 0x0CFFF548 \n");
+
+			case FramePe6Id:
+				battery_voltage = pe3_ecu->BatteryVoltage();
+
+				printf("\t\t %" PRIu32 "\n", can_id);
+				printf("Battery Voltage: %f\n", battery_voltage);
 				printf("\r");
-				// Process raw data
+				break;
 			}
 
-			can_bus->ClearMessageArrivedFlag();
-//			can_bus->EnableInterruptMode();
 			__enable_irq();
 		}
+
+
+		//HAL_Delay(150);
+
 	}
 }
 

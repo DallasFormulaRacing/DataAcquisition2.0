@@ -32,8 +32,6 @@ public:
 
 	virtual ~BxCanStmF4();
 
-	virtual void SubscribeCanId(const std::vector<uint32_t> &can_id_list) override;
-
 	virtual void Start() override;
 
 	virtual void EnableInterruptMode() override;
@@ -60,12 +58,13 @@ public:
 		Fifo1Overrun,
 	};
 
+	void ConfigureFilter(uint32_t can_id, uint32_t filder_id_high, uint32_t filter_id_low);
+
 	void ConfigureReceiveCallback(ReceiveInterruptMode mode);
 
 	void ReceiveCallback();
 
 private:
-	void ConfigureFilter(CAN_FilterTypeDef &filter, uint8_t filter_bank_num, uint32_t can_id);
 
 	uint8_t rx_buffer_[kMaxBytes] = { 0 };
 	bool message_arrived_ = false;
@@ -74,6 +73,8 @@ private:
 	// ST's HAL library.
 	CAN_HandleTypeDef& bx_can_; 			// BxCAN (Basic Extended) peripheral
 	CAN_RxHeaderTypeDef rx_message_header_; // Receiving message info
+	CAN_FilterTypeDef filter_;				// Filter bank configuration
+	uint8_t filter_bank_num_;
 
 	// Configurable options
 	uint32_t rx_interrupt_mode_ = 0;

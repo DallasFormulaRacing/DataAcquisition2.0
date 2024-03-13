@@ -32,8 +32,6 @@ public:
 
 	virtual void ClearMessageArrivedFlag() = 0;
 
-	virtual void SubscribeCanId(const std::vector<uint32_t> &can_id_list) = 0;
-
 	virtual uint32_t LatestCanId() = 0;
 
 	virtual void Start() = 0;
