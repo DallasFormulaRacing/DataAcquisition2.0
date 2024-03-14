@@ -74,6 +74,9 @@ void cppMain() {
 	auto pe3_ecu = std::make_unique<sensor::Pe3>(can_bus);
 	const std::vector<uint32_t>& can_id_list = pe3_ecu->CanIdList();
 
+	auto bx_i2c_peripheral = std::make_shared<platform::i2cHalWrapperStmf4>(hi2c1, 0x28);
+	std::shared_ptr<platform::II2C> i2c_line = bx_i2c_peripheral;
+
 	// Subscribe to messages with PE3's CAN IDs
 	for (const uint32_t& can_id : can_id_list) {
 		bx_can_peripheral->ConfigureFilter(can_id, (can_id >> 13), (can_id & 0x1FFF));
