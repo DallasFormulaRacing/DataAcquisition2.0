@@ -24,7 +24,7 @@
 
 // DFR Custom Dependancies
 #include "iaccelerometer.hpp"
-#include "../../platform/I2C/STM/i2cHalWrapper_stmf4.hpp"
+#include "../../Platform/I2C/STM/i2cHalWrapper_stmf4.hpp"
 
 // ST HAL Dependencies
 #include "i2c.h"
