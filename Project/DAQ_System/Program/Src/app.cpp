@@ -41,6 +41,7 @@ extern I2C_HandleTypeDef hi2c1;
 #include "Sensor/GyroScope/l3gd20h.hpp"
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
+#include "Sensor/GyroScope/LSM6DSOXGyroscope.hpp"
 #include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
 
 // CAN Bus Interrupt Callback
@@ -66,10 +67,11 @@ void cppMain() {
 	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
 	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::FSR4g);
 //
-//	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
-//	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
-
-
+	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
+	gyroscope = std::make_unique<sensor::LSM6DSOX>(hi2c1);
+	static_cast<sensor::LSM6DSOX*>(gyroscope.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
+	static_cast<sensor::LSM6DSOX*>(gyroscope.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::DPS250);
+	
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
 	std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
 
@@ -93,8 +95,8 @@ void cppMain() {
 	float battery_voltage = 0.0f;
 
 //	float displacement_inches = 0.0f;
+	int16_t *gyro_data = 0;
 	float* acc_data;
-//	int16_t *gyro_data = 0;
 
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
@@ -113,12 +115,12 @@ void cppMain() {
 		printf("\r");
 		printf("\n");
 //
-//		gyro_data = gyroscope->DegreesPerSecond();
-//		printf("x = %hd\t",gyro_data[0]);
-//		printf("y = %hd\t",gyro_data[1]);
-//		printf("z = %hd\t",gyro_data[2]);
-//		printf("\n");
-//		printf("\r");
+		gyro_data = gyroscope->DegreesPerSecond();
+		printf("x = %hd\t",gyro_data[0]);
+		printf("y = %hd\t",gyro_data[1]);
+		printf("z = %hd\t",gyro_data[2]);
+		printf("\n");
+		printf("\r");
 
 
 		if (pe3_ecu->NewMessageArrived()) {
