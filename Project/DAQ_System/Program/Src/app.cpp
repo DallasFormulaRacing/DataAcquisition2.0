@@ -51,7 +51,7 @@ extern FIL USBHFile;       /* File object for USBH */
 #include "Sensor/GyroScope/l3gd20h.hpp"
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
-
+#include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
 
 
 
@@ -74,9 +74,11 @@ void cppMain() {
 //	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
 //	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
 //
-//	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
-//	accelerometer = std::make_unique<sensor::LSM303DLHC>(hi2c1);
-//	accelerometer->init();
+	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
+	accelerometer = std::make_unique<sensor::LSM6DSOX>(hi2c1);
+	accelerometer->init();
+	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
+	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::FSR4g);
 //
 //	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
 //	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
@@ -105,7 +107,7 @@ void cppMain() {
 	float battery_voltage = 0.0f;
 
 //	float displacement_inches = 0.0f;
-//	float* acc_data = 0.0f;
+	float* acc_data;
 //	int16_t *gyro_data = 0;
 
 	NVIC_SetPriorityGrouping( 0 ); //TODO
@@ -121,14 +123,14 @@ void cppMain() {
 //		displacement_inches = lin_pot->DisplacementInches();
 //		printf("\n Percentage: %f", displacement_inches);
 //
-//		accelerometer->ComputeAcceleration();
-//		acc_data = accelerometer->GetAcceleration();
+		accelerometer->ComputeAcceleration();
+		acc_data = accelerometer->GetAcceleration();
 //
-//		printf("the x-axis is %lf \t\t " , acc_data[0]);
-//		printf("the y-axis is %lf \t\t " , acc_data[1]);
-//		printf("the z-axis is %lf " , acc_data[2]);
-//		printf("\r");
-//		printf("\n");
+		printf("the x-axis is %lf \t\t " , acc_data[0]);
+		printf("the y-axis is %lf \t\t " , acc_data[1]);
+		printf("the z-axis is %lf " , acc_data[2]);
+		printf("\r");
+		printf("\n");
 //
 //		gyro_data = gyroscope->DegreesPerSecond();
 //		printf("x = %hd\t",gyro_data[0]);
