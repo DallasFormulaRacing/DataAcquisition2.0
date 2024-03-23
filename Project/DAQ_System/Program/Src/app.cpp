@@ -92,7 +92,7 @@ void cppMain() {
 
 	// Subscribe to messages with PE3's CAN IDs
 	for (const uint32_t& can_id : can_id_list) {
-		bx_can_peripheral->ConfigureFilter(can_id, (can_id >> 13), (can_id & 0x1FFF));
+		bx_can_peripheral->ConfigureFilter((can_id >> 13), (can_id & 0x1FFF));
 	}
 
 	bx_can_peripheral->Start();
