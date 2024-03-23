@@ -29,8 +29,18 @@ extern CAN_HandleTypeDef hcan1;
 #include "i2c.h"
 extern I2C_HandleTypeDef hi2c1;
 
+// 3rd Party Libraryes and Frameworks
+#include "cmsis_os.h"
+#include "fatfs.h"
+extern char USBHPath[4];   /* USBH logical drive path */
+extern FATFS USBHFatFS;    /* File system object for USBH logical drive */
+extern FIL USBHFile;       /* File object for USBH */
+#include "usb_host.h"
+
+
 // DFR Custom Dependencies
 #include "app.hpp"
+#include "Application/FileSystem/fat_fs.hpp"
 #include "../../Core/Inc/retarget.h"
 #include "Platform/CAN/STM/F4/bxcan_stmf4.hpp"
 #include "Platform/CAN/Interfaces/ican.hpp"
@@ -41,6 +51,8 @@ extern I2C_HandleTypeDef hi2c1;
 #include "Sensor/GyroScope/l3gd20h.hpp"
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
+#include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
+
 
 
 // CAN Bus Interrupt Callback
@@ -52,6 +64,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
+void RtosInit();
+void DataLoggingThread(void *argument);
 
 void cppMain() {
 	// Enable `printf()` using USART
@@ -60,9 +74,11 @@ void cppMain() {
 //	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
 //	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
 //
-//	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
-//	accelerometer = std::make_unique<sensor::LSM303DLHC>(hi2c1);
-//	accelerometer->init();
+	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
+	accelerometer = std::make_unique<sensor::LSM6DSOX>(hi2c1);
+	accelerometer->init();
+	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
+	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::FSR4g);
 //
 //	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
 //	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
@@ -91,8 +107,13 @@ void cppMain() {
 	float battery_voltage = 0.0f;
 
 //	float displacement_inches = 0.0f;
-//	float* acc_data = 0.0f;
+	float* acc_data;
 //	int16_t *gyro_data = 0;
+
+	NVIC_SetPriorityGrouping( 0 ); //TODO
+	osKernelInitialize();	// Initialize scheduler
+	RtosInit();				// Initialize thread
+	osKernelStart();		// Start scheduler
 
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
@@ -102,14 +123,14 @@ void cppMain() {
 //		displacement_inches = lin_pot->DisplacementInches();
 //		printf("\n Percentage: %f", displacement_inches);
 //
-//		accelerometer->ComputeAcceleration();
-//		acc_data = accelerometer->GetAcceleration();
+		accelerometer->ComputeAcceleration();
+		acc_data = accelerometer->GetAcceleration();
 //
-//		printf("the x-axis is %lf \t\t " , acc_data[0]);
-//		printf("the y-axis is %lf \t\t " , acc_data[1]);
-//		printf("the z-axis is %lf " , acc_data[2]);
-//		printf("\r");
-//		printf("\n");
+		printf("the x-axis is %lf \t\t " , acc_data[0]);
+		printf("the y-axis is %lf \t\t " , acc_data[1]);
+		printf("the z-axis is %lf " , acc_data[2]);
+		printf("\r");
+		printf("\n");
 //
 //		gyro_data = gyroscope->DegreesPerSecond();
 //		printf("x = %hd\t",gyro_data[0]);
@@ -153,5 +174,49 @@ void cppMain() {
 	}
 }
 
+osThreadId_t dataLoggingTaskHandle;
+const osThreadAttr_t dataLoggingTask_attributes = {
+  .name = "dataLoggingTask",
+  .stack_size = 128 * 17,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+
+void RtosInit() {
+	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
+}
+
+void DataLoggingThread(void *argument) {
+	MX_USB_HOST_Init();
+
+	std::unique_ptr<application::IFileSystem> file_system(nullptr);
+	file_system = std::make_unique<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
+
+	for (;;) {
+
+		if(to_log == 1) {
+			printf("logging");
+			file_system->Mount();
+			char root_file_path[] = "/ROOTFILE.csv";
+			file_system->CreateFile(root_file_path);
+
+			char root_file_header_row[] = "LinPot1,LinPot2,AccX,AccY,AccZ\n";
+			char root_file_contents[] = "2.3,2.45,2,9,200\n";
+			file_system->OpenFile(root_file_path, (char*)"a");
+			file_system->WriteFile(root_file_header_row);
+			file_system->WriteFile(root_file_contents);
+			file_system->WriteFile(root_file_contents);
+			file_system->CloseFile();
+
+			HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_SET);
+			to_log = 0;
+
+		} else if (to_unmount == 1) {
+			file_system->Unmount();
+			to_unmount = 0;
+		}
+
+		HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
+	}
+}
 
 
