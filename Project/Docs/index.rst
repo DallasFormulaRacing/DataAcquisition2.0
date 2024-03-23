@@ -11,6 +11,7 @@ Welcome to DFR's Data Acquisition API documentation!
    :hidden:
 
    data_logger/index
+   file_system/index
    
 
 .. toctree::
