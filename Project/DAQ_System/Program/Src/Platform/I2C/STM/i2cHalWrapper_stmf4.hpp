@@ -19,16 +19,12 @@ public:
 
 	virtual ~i2cHalWrapperStmf4();
 
-	virtual void Master_Receive(uint8_t*) override;
+	virtual void Receive(uint8_t*, uint8_t) override;
 
-	virtual void Master_Transmit(uint8_t*) override;
-
-	virtual void SetResponse(uint8_t) override;
+	virtual void Transmit(uint8_t*, uint8_t, uint8_t) override;
 
 private:
 	I2C_HandleTypeDef bx_i2c_;
-	uint8_t slave_add_;
-	uint8_t response_size_;
 };
 
 }
