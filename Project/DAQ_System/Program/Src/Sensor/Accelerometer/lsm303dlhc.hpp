@@ -94,6 +94,8 @@ class LSM303DLHC: public IAccelerometer {
 //==============================================================================================
 
     private:
+        //I2C Device Address
+        uint8_t _dev_add = 0x28;
 
         // averages the idle value of the accelerometer to calibrate
         void calibrate() override;

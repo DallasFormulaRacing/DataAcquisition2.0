@@ -26,32 +26,29 @@ LSM303DLHC::LSM303DLHC(std::shared_ptr<platform::II2C> i2c_line)
 
 void LSM303DLHC::init() {
     static constexpr uint8_t kNumBytes = 2;
-	static constexpr int I2CReadSize = 6;
-
     uint8_t commands[kNumBytes] = {0};
 
-    I2C_line_->SetResponse(I2CReadSize);
     // init mag
     // continuous conversion mode
     commands[0] = MR_REG_M;
     commands[1] = 0x00;
-    I2C_line_->Master_Transmit(commands);
+    I2C_line_->Transmit(commands,_dev_add);
 
     // data rate 75hz
     commands[0] = CRA_REG_M;
     commands[1] = 0x18; // 0b00011000
-    I2C_line_->Master_Transmit(commands);
+    I2C_line_->Transmit(commands,_dev_add);
 
     // init acc
     // data rate 100hz
     commands[0] = CTRL_REG1_A;
     commands[1] = 0x57; // 0b01010111
-    I2C_line_->Master_Transmit(commands);
+    I2C_line_->Transmit(commands,_dev_add);
 
     // High Resolution mode (HR) enable
     commands[0] = CTRL_REG4_A;
     commands[1] = 0x08; // 0b00001000
-    I2C_line_->Master_Transmit(commands);
+    I2C_line_->Transmit(commands,_dev_add);
 
     calibrate();
 }
@@ -134,10 +131,10 @@ void LSM303DLHC::ReadRawAcceleration() {
 	static constexpr int ByteArraySize = 6;
 
     uint8_t command[1] = { OUT_X_L_A | 0x80 };
-    I2C_line_->Master_Transmit(command);
 
     uint8_t bytes_received[ByteArraySize];
-    I2C_line_->Master_Receive(bytes_received);
+
+    I2C_line_->Receive(bytes_received,command[1], _dev_add);
 
     // 16-bit values
     raw_acceleration_data_[0] = (bytes_received[1] <<8 | bytes_received[0]);

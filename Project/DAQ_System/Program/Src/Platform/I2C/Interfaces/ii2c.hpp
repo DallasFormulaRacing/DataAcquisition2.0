@@ -15,15 +15,12 @@ namespace platform{
 
 class II2C{
 public:
-	static constexpr uint8_t kMaxBytes = 2;
-
 	virtual ~II2C() = default;
 
-	virtual void Master_Receive(uint8_t*) = 0;
+	virtual void Receive(uint8_t*, uint8_t, uint8_t) = 0;
 
-	virtual void Master_Transmit(uint8_t*) = 0;
+	virtual void Transmit(uint8_t*, uint8_t) = 0;
 
-	virtual void SetResponse(uint8_t) = 0;
 };
 
 }
