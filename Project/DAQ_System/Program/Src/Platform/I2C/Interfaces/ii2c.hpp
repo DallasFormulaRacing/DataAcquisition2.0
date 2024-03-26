@@ -11,9 +11,9 @@
 #include <cstdint>
 #include <vector>
 
-namespace platform{
+namespace platform {
 
-class II2C{
+class II2C {
 public:
 	virtual ~II2C() = default;
 
@@ -24,6 +24,5 @@ public:
 };
 
 }
-
 
 #endif /* SRC_PLATFORM_I2C_INTERFACES_II2C_HPP_ */

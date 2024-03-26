@@ -11,6 +11,8 @@
 #ifndef IACCELEROMETER
 #define IACCELEROMETER
 
+#include "Src/Platform/I2C/Interfaces/ii2c.hpp"
+
 namespace sensor{
 
 class IAccelerometer {
@@ -18,12 +20,16 @@ class IAccelerometer {
         virtual ~IAccelerometer() = default;
 
         virtual void init() = 0;
+
         virtual void calibrate() = 0;
 
         virtual void ComputeAcceleration() = 0;
 
 
         virtual float* GetAcceleration() = 0;
+
+    private:
+       std::shared_ptr<platform::II2C> i2c_line;
 
 };
 

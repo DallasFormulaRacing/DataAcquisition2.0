@@ -60,9 +60,6 @@ void cppMain() {
 //	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
 //	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
 //
-//	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
-//	accelerometer = std::make_unique<sensor::LSM303DLHC>(hi2c1);
-//	accelerometer->init();
 //
 //	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
 //	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
@@ -77,10 +74,15 @@ void cppMain() {
 	auto bx_i2c_peripheral = std::make_shared<platform::i2cHalWrapperStmf4>(hi2c1);
 	std::shared_ptr<platform::II2C> i2c_line = bx_i2c_peripheral;
 
+	auto accelerometer = std::make_unique<sensor::IAccelerometer>(i2c_line);
+
+	accelerometer->init();
+
 	// Subscribe to messages with PE3's CAN IDs
 	for (const uint32_t& can_id : can_id_list) {
 		bx_can_peripheral->ConfigureFilter(can_id, (can_id >> 13), (can_id & 0x1FFF));
 	}
+
 
 	bx_can_peripheral->Start();
 
@@ -98,28 +100,15 @@ void cppMain() {
 //	int16_t *gyro_data = 0;
 
 	for(;;) {
-//		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
-//		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
-//		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
-//
-//		displacement_inches = lin_pot->DisplacementInches();
-//		printf("\n Percentage: %f", displacement_inches);
-//
-//		accelerometer->ComputeAcceleration();
-//		acc_data = accelerometer->GetAcceleration();
-//
-//		printf("the x-axis is %lf \t\t " , acc_data[0]);
-//		printf("the y-axis is %lf \t\t " , acc_data[1]);
-//		printf("the z-axis is %lf " , acc_data[2]);
-//		printf("\r");
-//		printf("\n");
-//
-//		gyro_data = gyroscope->DegreesPerSecond();
-//		printf("x = %hd\t",gyro_data[0]);
-//		printf("y = %hd\t",gyro_data[1]);
-//		printf("z = %hd\t",gyro_data[2]);
-//		printf("\n");
-//		printf("\r");
+
+		accelerometer->ComputeAcceleration();
+		float* acc_data = accelerometer->GetAcceleration();
+
+		printf("the x-axis is %lf \t\t " , acc_data[0]);
+		printf("the y-axis is %lf \t\t " , acc_data[1]);
+		printf("the z-axis is %lf " , acc_data[2]);
+		printf("\r");
+		printf("\n");
 
 
 		if (pe3_ecu->NewMessageArrived()) {
