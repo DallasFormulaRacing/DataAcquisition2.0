@@ -47,7 +47,7 @@ namespace sensor{
 class LSM303DLHC: public IAccelerometer {
     public:
 		/// @param hi2c an I2C peripheral from ST's HAL
-        LSM303DLHC(std::shared_ptr<platform::II2C> i2c_line);
+        LSM303DLHC(std::shared_ptr<platform::II2C> I2C_line);
 
         virtual ~LSM303DLHC() = default;
 

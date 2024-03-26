@@ -74,9 +74,7 @@ void cppMain() {
 	auto bx_i2c_peripheral = std::make_shared<platform::i2cHalWrapperStmf4>(hi2c1);
 	std::shared_ptr<platform::II2C> i2c_line = bx_i2c_peripheral;
 
-	auto accelerometer = std::make_unique<sensor::IAccelerometer>(i2c_line);
-
-	accelerometer->init();
+	auto accelerometer = std::make_unique<sensor::LSM303DLHC>(i2c_line);
 
 	// Subscribe to messages with PE3's CAN IDs
 	for (const uint32_t& can_id : can_id_list) {
@@ -111,33 +109,33 @@ void cppMain() {
 		printf("\n");
 
 
-		if (pe3_ecu->NewMessageArrived()) {
-			__disable_irq();
-
-			pe3_ecu->Update();
-			uint32_t can_id = pe3_ecu->LatestCanId();
-
-			switch(can_id) {
-			case FramePe2Id:
-				manifold_absolute_pressure = pe3_ecu->Map();
-
-				printf("\t\t %" PRIu32 "\n", can_id);
-				printf("Manifold Pressure: %f\n", manifold_absolute_pressure);
-				printf("\r");
-				break;
-
-
-			case FramePe6Id:
-				battery_voltage = pe3_ecu->BatteryVoltage();
-
-				printf("\t\t %" PRIu32 "\n", can_id);
-				printf("Battery Voltage: %f\n", battery_voltage);
-				printf("\r");
-				break;
-			}
-
-			__enable_irq();
-		}
+//		if (pe3_ecu->NewMessageArrived()) {
+//			__disable_irq();
+//
+//			pe3_ecu->Update();
+//			uint32_t can_id = pe3_ecu->LatestCanId();
+//
+//			switch(can_id) {
+//			case FramePe2Id:
+//				manifold_absolute_pressure = pe3_ecu->Map();
+//
+//				printf("\t\t %" PRIu32 "\n", can_id);
+//				printf("Manifold Pressure: %f\n", manifold_absolute_pressure);
+//				printf("\r");
+//				break;
+//
+//
+//			case FramePe6Id:
+//				battery_voltage = pe3_ecu->BatteryVoltage();
+//
+//				printf("\t\t %" PRIu32 "\n", can_id);
+//				printf("Battery Voltage: %f\n", battery_voltage);
+//				printf("\r");
+//				break;
+//			}
+//
+//			__enable_irq();
+//		}
 
 
 		//HAL_Delay(150);

@@ -25,11 +25,7 @@ class IAccelerometer {
 
         virtual void ComputeAcceleration() = 0;
 
-
         virtual float* GetAcceleration() = 0;
-
-    private:
-       std::shared_ptr<platform::II2C> i2c_line;
 
 };
 
