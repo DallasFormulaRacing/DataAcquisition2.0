@@ -53,6 +53,8 @@ extern FIL USBHFile;       /* File object for USBH */
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
 #include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
 
+#include "Application/data_payload.hpp"
+#include "Application/DataLogger/DataLogger.hpp"
 
 
 // CAN Bus Interrupt Callback
@@ -188,30 +190,35 @@ void RtosInit() {
 void DataLoggingThread(void *argument) {
 	MX_USB_HOST_Init();
 
-	std::unique_ptr<application::IFileSystem> file_system(nullptr);
-	file_system = std::make_unique<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
+	std::shared_ptr<application::IFileSystem> file_system(nullptr);
+	file_system = std::make_shared<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
+
+	std::unique_ptr<application::DataLogger> data_logger(nullptr);
+	data_logger = std::make_unique<application::DataLogger>(file_system);
+
+	application::DataPayload dummy_data;
+	dummy_data.timestamp_ = 15;
+	dummy_data.linpot_displacement_inches_[0] = 2.5;
+	dummy_data.linpot_displacement_inches_[1] = 0.5;
+	dummy_data.linpot_displacement_inches_[2] = 1.3;
+	dummy_data.linpot_displacement_inches_[3] = 4.0;
+
 
 	for (;;) {
 
 		if(to_log == 1) {
 			printf("logging");
-			file_system->Mount();
-			char root_file_path[] = "/ROOTFILE.csv";
-			file_system->CreateFile(root_file_path);
+			data_logger->Enable();
+			data_logger->Start();
 
-			char root_file_header_row[] = "LinPot1,LinPot2,AccX,AccY,AccZ\n";
-			char root_file_contents[] = "2.3,2.45,2,9,200\n";
-			file_system->OpenFile(root_file_path, (char*)"a");
-			file_system->WriteFile(root_file_header_row);
-			file_system->WriteFile(root_file_contents);
-			file_system->WriteFile(root_file_contents);
-			file_system->CloseFile();
+			data_logger->RecordDataSample(dummy_data);
+			data_logger->Stop();
 
 			HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_SET);
 			to_log = 0;
 
 		} else if (to_unmount == 1) {
-			file_system->Unmount();
+			data_logger->Disable();
 			to_unmount = 0;
 		}
 
