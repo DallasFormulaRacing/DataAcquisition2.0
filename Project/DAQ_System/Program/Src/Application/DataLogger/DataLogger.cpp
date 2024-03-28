@@ -18,54 +18,46 @@ DataLogger::DataLogger(std::shared_ptr<IFileSystem> file_system)
 
 DataLogger::~DataLogger() { }
 
-bool DataLogger::Enable() {
-	return file_system_->Mount();
+bool DataLogger::Enable() { return file_system_->Mount(); }
+
+bool DataLogger::Disable() { return file_system_->Unmount(); }
+
+bool DataLogger::Start() {
+	FindUniqueFileName();
+	printf("Creating new file: %s\n", file_name_);
+
+	// Create CSV with header row
+	return file_system_->CreateFile(file_name_) &&
+			file_system_->OpenFile(file_name_, (char*)"a") &&
+			file_system_->WriteFile((char*)"Timestamp,Linpot1,Linpot2,Linpot3,Linpot4\n");
 }
 
-bool DataLogger::Disable() {
-	return file_system_->Unmount();
-}
-
-void DataLogger::Start() {
-	// Create unique file name
+void DataLogger::FindUniqueFileName() {
+	strcpy(file_name_, "\0");
 	bool file_found = false;
-	uint8_t i = 0;
+	uint32_t i = 0;
 
 	do {
-		snprintf(file_name_, sizeof(file_name_), "data%d.csv", i);
+		snprintf(file_name_, sizeof(file_name_), "data%ld.csv", i);
 		file_found = file_system_->FileExists(file_name_);
 		i++;
 	} while(file_found);
-
-	printf("Creating new file: %s\n", file_name_);
-
-	bool status = file_system_->CreateFile(file_name_);
-
-	if (status == false) {
-		printf("Failed to create new file\n");
-	}
-
-	// Create CSV Header row
-	file_system_->OpenFile(file_name_, (char*)"a");
-	file_system_->WriteFile((char*)"Timestamp,Linpot1,Linpot2,Linpot3,Linpot4");
-
 }
 
-void DataLogger::RecordDataSample(DataPayload& data) {
+bool DataLogger::RecordDataSample(DataPayload& data) {
 	char* csv_row = NULL;
-	int length = data.GetLength();
-//	csv_row = (char*)malloc(length + 1);
+	int length = data.GetCsvFormatLength();
 	csv_row = new char[length + 1]();
 
 	data.CsvFormat(csv_row, length + 1);
-	file_system_->WriteFile(csv_row);
+	bool status = file_system_->WriteFile(csv_row);
 
-//	free(csv_row);
 	delete csv_row;
+	return status;
 }
 
-void DataLogger::Stop() {
-	file_system_->CloseFile();
+bool DataLogger::Stop() {
+	return file_system_->CloseFile();
 }
 
 

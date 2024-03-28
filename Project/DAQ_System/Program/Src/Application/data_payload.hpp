@@ -43,7 +43,7 @@ struct DataPayload {
     float air_temp_ = 0.0f;
     float coolant_temp_ = 0.0f;
 
-    int GetLength() {
+    int GetCsvFormatLength() {
 		return snprintf(NULL, 0,
 				"%d,%f,%f,%f,%f",
 				timestamp_,
