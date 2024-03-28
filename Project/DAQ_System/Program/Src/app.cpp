@@ -76,11 +76,11 @@ void cppMain() {
 //	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
 //	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
 //
-	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
-	accelerometer = std::make_unique<sensor::LSM6DSOX>(hi2c1);
-	accelerometer->init();
-	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
-	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::FSR4g);
+//	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
+//	accelerometer = std::make_unique<sensor::LSM6DSOX>(hi2c1);
+//	accelerometer->init();
+//	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
+//	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::FSR4g);
 //
 //	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
 //	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
@@ -125,14 +125,14 @@ void cppMain() {
 //		displacement_inches = lin_pot->DisplacementInches();
 //		printf("\n Percentage: %f", displacement_inches);
 //
-		accelerometer->ComputeAcceleration();
-		acc_data = accelerometer->GetAcceleration();
-//
-		printf("the x-axis is %lf \t\t " , acc_data[0]);
-		printf("the y-axis is %lf \t\t " , acc_data[1]);
-		printf("the z-axis is %lf " , acc_data[2]);
-		printf("\r");
-		printf("\n");
+//		accelerometer->ComputeAcceleration();
+//		acc_data = accelerometer->GetAcceleration();
+////
+//		printf("the x-axis is %lf \t\t " , acc_data[0]);
+//		printf("the y-axis is %lf \t\t " , acc_data[1]);
+//		printf("the z-axis is %lf " , acc_data[2]);
+//		printf("\r");
+//		printf("\n");
 //
 //		gyro_data = gyroscope->DegreesPerSecond();
 //		printf("x = %hd\t",gyro_data[0]);
@@ -193,8 +193,10 @@ void DataLoggingThread(void *argument) {
 	std::shared_ptr<application::IFileSystem> file_system(nullptr);
 	file_system = std::make_shared<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
 
-	std::unique_ptr<application::DataLogger> data_logger(nullptr);
-	data_logger = std::make_unique<application::DataLogger>(file_system);
+//	std::unique_ptr<application::DataLogger> data_logger(nullptr);
+//	data_logger = std::make_unique<application::DataLogger>(file_system);
+
+	application::DataLogger data_logger(file_system);
 
 	application::DataPayload dummy_data;
 	dummy_data.timestamp_ = 15;
@@ -207,19 +209,20 @@ void DataLoggingThread(void *argument) {
 	for (;;) {
 
 		if(to_log == 1) {
-			printf("logging");
-			data_logger->Enable();
-			data_logger->Start();
+			printf("Logging\n");
+			data_logger.Enable();
+			data_logger.Start();
 
-			data_logger->RecordDataSample(dummy_data);
-			data_logger->Stop();
+			data_logger.RecordDataSample(dummy_data);
+			data_logger.Stop();
 
 			HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_SET);
 			to_log = 0;
 
 		} else if (to_unmount == 1) {
-			data_logger->Disable();
+			data_logger.Disable();
 			to_unmount = 0;
+			printf("Ejected\n");
 		}
 
 		HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);

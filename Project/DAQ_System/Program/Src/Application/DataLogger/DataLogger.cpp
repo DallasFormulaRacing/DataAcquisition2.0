@@ -34,7 +34,8 @@ void DataLogger::Start() {
 	do {
 		snprintf(file_name_, sizeof(file_name_), "data%d.csv", i);
 		file_found = file_system_->FileExists(file_name_);
-	} while(!file_found);
+		i++;
+	} while(file_found);
 
 	printf("Creating new file: %s\n", file_name_);
 
