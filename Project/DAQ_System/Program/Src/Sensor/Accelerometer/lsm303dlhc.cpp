@@ -134,7 +134,7 @@ void LSM303DLHC::ReadRawAcceleration() {
 
     uint8_t bytes_received[ByteArraySize];
 
-    I2C_line_->Receive(bytes_received,command, _dev_add);
+    I2C_line_->Receive(bytes_received, command, _dev_add);
 
     // 16-bit values
     raw_acceleration_data_[0] = (bytes_received[1] <<8 | bytes_received[0]);
