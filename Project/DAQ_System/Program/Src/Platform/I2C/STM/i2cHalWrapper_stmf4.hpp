@@ -24,7 +24,7 @@ public:
 	virtual void Transmit(uint8_t*, uint8_t, uint8_t) override;
 
 private:
-	I2C_HandleTypeDef bx_i2c_;
+	I2C_HandleTypeDef& bx_i2c_;
 };
 
 }
