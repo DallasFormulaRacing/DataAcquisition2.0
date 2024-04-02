@@ -32,23 +32,23 @@ void LSM303DLHC::init() {
     // continuous conversion mode
     commands[0] = MR_REG_M;
     commands[1] = 0x00;
-    I2C_line_->Transmit(commands,_dev_add);
+    I2C_line_->Transmit(commands,_dev_add, kNumBytes);
 
     // data rate 75hz
     commands[0] = CRA_REG_M;
     commands[1] = 0x18; // 0b00011000
-    I2C_line_->Transmit(commands,_dev_add);
+    I2C_line_->Transmit(commands,_dev_add, kNumBytes);
 
     // init acc
     // data rate 100hz
     commands[0] = CTRL_REG1_A;
     commands[1] = 0x57; // 0b01010111
-    I2C_line_->Transmit(commands,_dev_add);
+    I2C_line_->Transmit(commands,_dev_add, kNumBytes);
 
     // High Resolution mode (HR) enable
     commands[0] = CTRL_REG4_A;
     commands[1] = 0x08; // 0b00001000
-    I2C_line_->Transmit(commands,_dev_add);
+    I2C_line_->Transmit(commands,_dev_add, kNumBytes);
 
     calibrate();
 }
@@ -132,11 +132,11 @@ void LSM303DLHC::ReadRawAcceleration() {
 
     uint8_t command[1] = { OUT_X_L_A | 0x80 };
 
-    I2C_line_->Transmit(command, _dev_add);
+    I2C_line_->Transmit(command, _dev_add, 2);
 
     uint8_t bytes_received[ByteArraySize];
 
-    I2C_line_->Receive(bytes_received, _dev_add);
+    I2C_line_->Receive(bytes_received, _dev_add, byteArraySize);
 
     // 16-bit values
     raw_acceleration_data_[0] = (bytes_received[1] <<8 | bytes_received[0]);

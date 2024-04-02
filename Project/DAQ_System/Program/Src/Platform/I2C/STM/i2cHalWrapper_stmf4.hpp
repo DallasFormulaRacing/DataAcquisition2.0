@@ -19,9 +19,9 @@ public:
 
 	virtual ~i2cHalWrapperStmf4();
 
-	virtual void Receive(uint8_t*, uint8_t) override;
+	virtual void Receive(uint8_t*, uint8_t, uint8_t) override;
 
-	virtual void Transmit(uint8_t*, uint8_t) override;
+	virtual void Transmit(uint8_t*, uint8_t, uint8_t) override;
 
 private:
 	I2C_HandleTypeDef bx_i2c_;
