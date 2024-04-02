@@ -75,7 +75,7 @@ void cppMain() {
 	std::shared_ptr<platform::II2C> i2c_line = bx_i2c_peripheral;
 
 	auto accelerometer = std::make_unique<sensor::LSM303DLHC>(i2c_line);
-
+	accelerometer->init();
 	// Subscribe to messages with PE3's CAN IDs
 	for (const uint32_t& can_id : can_id_list) {
 		bx_can_peripheral->ConfigureFilter(can_id, (can_id >> 13), (can_id & 0x1FFF));

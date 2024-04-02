@@ -17,7 +17,7 @@ class II2C {
 public:
 	virtual ~II2C() = default;
 
-	virtual void Receive(uint8_t*, uint8_t*, uint8_t) = 0;
+	virtual void Receive(uint8_t*, uint8_t) = 0;
 
 	virtual void Transmit(uint8_t*, uint8_t) = 0;
 
