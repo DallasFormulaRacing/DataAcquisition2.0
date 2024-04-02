@@ -111,10 +111,12 @@ void cppMain() {
 	float* acc_data;
 //	int16_t *gyro_data = 0;
 
-	NVIC_SetPriorityGrouping( 0 ); //TODO
-	osKernelInitialize();	// Initialize scheduler
-	RtosInit();				// Initialize thread
-	osKernelStart();		// Start scheduler
+//	NVIC_SetPriorityGrouping( 0 ); //TODO
+//	osKernelInitialize();	// Initialize scheduler
+//	RtosInit();				// Initialize thread
+//	osKernelStart();		// Start scheduler
+
+
 
 	for(;;) {
 
