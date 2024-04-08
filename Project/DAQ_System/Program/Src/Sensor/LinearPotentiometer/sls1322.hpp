@@ -37,7 +37,7 @@ class SLS1322 : public ILinearPotentiometer {
         /// @return 0.0 to 3.0 inches.
         float DisplacementInches() override;
 
-        // Converts the ADC signal to the measured displacement of the potentiometer.
+        /// Converts the ADC signal to the measured displacement of the potentiometer.
         /// @return 0.0 to 76.2 millimeters.
         float DisplacementMillimeters() override;
 
@@ -47,7 +47,7 @@ class SLS1322 : public ILinearPotentiometer {
         /// @return ADC reading in a range of 0 to 2^(n bits)-1.
 		uint32_t ReadQuantizedInput();
         
-        /// Represents the quantized input as a ratio.
+        /// @brief Represents the quantized input as a ratio.
         /// @return ADC reading in a range of 0.0 to 1.0.
         float DisplacementRatio();
 

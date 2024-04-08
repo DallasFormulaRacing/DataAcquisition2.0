@@ -39,7 +39,26 @@
 
 namespace sensor {
 
-TEST(Pe3EcuFrames, FramePe1) {
+class Pe3EcuFrameFixture : public testing::Test {
+protected:
+    void SetUp() override {
+        FrameFormat1::InitVector();
+        FrameFormat2::InitVector();
+        FrameFormat3::InitVector();
+        FrameFormat4::InitVector();
+        FrameFormat5::InitVector();
+    }
+
+    void TearDown() override {
+        FrameFormat1::fields.clear();
+        FrameFormat2::fields.clear();
+        FrameFormat3::fields.clear();
+        FrameFormat4::fields.clear();
+        FrameFormat5::fields.clear();
+    }
+};
+
+TEST_F(Pe3EcuFrameFixture, FramePe1) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x1E, 0x05,
                                                 0xA5, 0x03,
@@ -58,7 +77,7 @@ TEST(Pe3EcuFrames, FramePe1) {
     EXPECT_FLOAT_EQ(frame.IgnitionAngle(), kExpectedIgnitionAngle);
 }
 
-TEST(Pe3EcuFrames, FramePe2PressureKiloPascal) {
+TEST_F(Pe3EcuFrameFixture, FramePe2PressureKiloPascal) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xBE, 0x05,
                                                 0xBB, 0x05,
@@ -77,7 +96,7 @@ TEST(Pe3EcuFrames, FramePe2PressureKiloPascal) {
     EXPECT_EQ(frame.PressureUnit(), kExpectedPressureUnit);
 }
 
-TEST(Pe3EcuFrames, FramePe2PressurePoundsPerSquareInch) {
+TEST_F(Pe3EcuFrameFixture, FramePe2PressurePoundsPerSquareInch) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xBE, 0x05,
                                                 0xBB, 0x05,
@@ -89,7 +108,7 @@ TEST(Pe3EcuFrames, FramePe2PressurePoundsPerSquareInch) {
     EXPECT_EQ(frame.PressureUnit(), kExpectedPressureUnit);
 }
 
-TEST(Pe3EcuFrames, FramePe2PressureUnkown) {
+TEST_F(Pe3EcuFrameFixture, FramePe2PressureUnkown) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xBE, 0x05,
                                                 0xBB, 0x05,
@@ -101,7 +120,7 @@ TEST(Pe3EcuFrames, FramePe2PressureUnkown) {
     EXPECT_EQ(frame.PressureUnit(), kExpectedPressureUnit);
 }
 
-TEST(Pe3EcuFrames, FramePe3) {
+TEST_F(Pe3EcuFrameFixture, FramePe3) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x33, 0x04,
                                                 0x01, 0x08,
@@ -118,7 +137,7 @@ TEST(Pe3EcuFrames, FramePe3) {
     }
 }
 
-TEST(Pe3EcuFrames, FramePe3OutOfBounds) {
+TEST_F(Pe3EcuFrameFixture, FramePe3OutOfBounds) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x33, 0x04,
                                                 0x01, 0x08,
@@ -133,7 +152,7 @@ TEST(Pe3EcuFrames, FramePe3OutOfBounds) {
     EXPECT_FLOAT_EQ(frame.AnalogInputVoltage(kMaxIndex + 2), kExpecteResult);
 }
 
-TEST(Pe3EcuFrames, FramePe4) {
+TEST_F(Pe3EcuFrameFixture, FramePe4) {
     // Sample data.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x04, 0x00,
                                                 0x09, 0x02,
@@ -150,7 +169,7 @@ TEST(Pe3EcuFrames, FramePe4) {
     }
 }
 
-TEST(Pe3EcuFrames, FramePe4OutOfBounds) {
+TEST_F(Pe3EcuFrameFixture, FramePe4OutOfBounds) {
     // Sample data.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x04, 0x00,
                                                 0x09, 0x02,
@@ -165,7 +184,7 @@ TEST(Pe3EcuFrames, FramePe4OutOfBounds) {
     EXPECT_FLOAT_EQ(frame.AnalogInputVoltage(kMaxIndex + 2), kExpecteResult);
 }
 
-TEST(Pe3EcuFrames, FramePe5) {
+TEST_F(Pe3EcuFrameFixture, FramePe5) {
     // Dummy data. TODO: Gather and analyze sample data when the Digital Inputs
     // are configured to measure frequency (page 60 of the PE3 Series manual).
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x01, 0x00,
@@ -183,7 +202,7 @@ TEST(Pe3EcuFrames, FramePe5) {
     }
 }
 
-TEST(Pe3EcuFrames, FramePe5OutOfBounds) {
+TEST_F(Pe3EcuFrameFixture, FramePe5OutOfBounds) {
     // Dummy data. TODO: Gather and analyze sample data when the Digital Inputs
     // are configured to measure frequency (page 60 of the PE3 Series manual).
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x01, 0x00,
@@ -199,7 +218,7 @@ TEST(Pe3EcuFrames, FramePe5OutOfBounds) {
     EXPECT_FLOAT_EQ(frame.FrequencyHertz(kMaxIndex + 2), kExpecteResult);
 }
 
-TEST(Pe3EcuFrames, FramePe6TempCelsius) {
+TEST_F(Pe3EcuFrameFixture, FramePe6TempCelsius) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x14, 0x05,
                                                 0xAA, 0x02,
@@ -218,7 +237,7 @@ TEST(Pe3EcuFrames, FramePe6TempCelsius) {
     EXPECT_EQ(frame.TemperatureUnit(), kExpectedTemperatureUnit);
 }
 
-TEST(Pe3EcuFrames, FramePe6TempFaranheit) {
+TEST_F(Pe3EcuFrameFixture, FramePe6TempFaranheit) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x14, 0x05,
                                                 0xAA, 0x02,
@@ -230,7 +249,7 @@ TEST(Pe3EcuFrames, FramePe6TempFaranheit) {
     EXPECT_EQ(frame.TemperatureUnit(), kExpectedTemperatureUnit);
 }
 
-TEST(Pe3EcuFrames, FramePe6TempUnknown) {
+TEST_F(Pe3EcuFrameFixture, FramePe6TempUnknown) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x14, 0x05,
                                                 0xAA, 0x02,
@@ -242,7 +261,7 @@ TEST(Pe3EcuFrames, FramePe6TempUnknown) {
     EXPECT_EQ(frame.TemperatureUnit(), kExpectedTemperatureUnit);
 }
 
-TEST(Pe3EcuFrames, FramePe7) {
+TEST_F(Pe3EcuFrameFixture, FramePe7) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xA8, 0x02,
                                                 0xA8, 0x02,
@@ -255,7 +274,7 @@ TEST(Pe3EcuFrames, FramePe7) {
     EXPECT_FLOAT_EQ(frame.AnalogInputThermistorVoltage(1), kExpectedVoltage);
 }
 
-TEST(Pe3EcuFrames, FramePe7OutOfBounds) {
+TEST_F(Pe3EcuFrameFixture, FramePe7OutOfBounds) {
     // Sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xA8, 0x02,
                                                 0xA8, 0x02,
@@ -270,7 +289,7 @@ TEST(Pe3EcuFrames, FramePe7OutOfBounds) {
     EXPECT_FLOAT_EQ(frame.AnalogInputThermistorVoltage(kMaxIndex + 2), kExpecteResult);
 }
 
-TEST(Pe3EcuFrames, FramePe8) {
+TEST_F(Pe3EcuFrameFixture, FramePe8) {
     // Dummy data. TODO: Gather and analyze sample data while vehicle is in motion.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x01, 0x00,
                                                 0x02, 0x00,
@@ -289,7 +308,7 @@ TEST(Pe3EcuFrames, FramePe8) {
     EXPECT_FLOAT_EQ(frame.MassAirFlowLoadRate(), kExpectedMafLoadRate);
 }
 
-TEST(Pe3EcuFrames, FramePe9) {
+TEST_F(Pe3EcuFrameFixture, FramePe9) {
     // Sample data.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xBE, 0x03,
                                                 0x00, 0x00,
@@ -306,7 +325,7 @@ TEST(Pe3EcuFrames, FramePe9) {
     EXPECT_FLOAT_EQ(frame.TargetLambda(), kExpectedTargetLambda);
 }
 
-TEST(Pe3EcuFrames, FramePe9OutOfBounds) {
+TEST_F(Pe3EcuFrameFixture, FramePe9OutOfBounds) {
     // Sample data.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xBE, 0x03,
                                                 0x00, 0x00,
@@ -321,7 +340,7 @@ TEST(Pe3EcuFrames, FramePe9OutOfBounds) {
     EXPECT_FLOAT_EQ(frame.LambdaMeasured(kMaxIndex + 2), kExpectedResult);
 }
 
-TEST(Pe3EcuFrames, FramePe10) {
+TEST_F(Pe3EcuFrameFixture, FramePe10) {
     // Dummy data. TODO: Gather and analyze sample data with vehicle
     // in motion while PWM outuput duty cycle is enabled.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x01, 0x00,
@@ -339,7 +358,7 @@ TEST(Pe3EcuFrames, FramePe10) {
     }
 }
 
-TEST(Pe3EcuFrames, FramePe10OutputIsOff) {
+TEST_F(Pe3EcuFrameFixture, FramePe10OutputIsOff) {
     // Sample data.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x00, 0x00,
                                                 0x00, 0x00,
@@ -353,7 +372,7 @@ TEST(Pe3EcuFrames, FramePe10OutputIsOff) {
     }
 }
 
-TEST(Pe3EcuFrames, FramePe10OutOfBounds) {
+TEST_F(Pe3EcuFrameFixture, FramePe10OutOfBounds) {
     // Dummy data. TODO: Gather and analyze sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x01, 0x00,
                                                 0x02, 0x00,
@@ -368,7 +387,7 @@ TEST(Pe3EcuFrames, FramePe10OutOfBounds) {
     EXPECT_FLOAT_EQ(frame.PwmDutyCycle(kMaxIndex + 2), kExpectedResult);
 }
 
-TEST(Pe3EcuFrames, FramePe11) {
+TEST_F(Pe3EcuFrameFixture, FramePe11) {
     // Sample data.
     // TODO: Gather sample data while the vehicle is in motion for 
     //       the Percent Slip and Driven Wheel Rate of Change fields.
@@ -387,7 +406,7 @@ TEST(Pe3EcuFrames, FramePe11) {
     EXPECT_FLOAT_EQ(frame.DesiredValue(), kExpectedDesiredValue);
 }
 
-TEST(Pe3EcuFrames, FramePe12) {
+TEST_F(Pe3EcuFrameFixture, FramePe12) {
     // Dummy data. TODO: Gather and analyze sample data while the vehicle is in motion.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x01, 0x00,
                                                 0x02, 0x00,
@@ -406,7 +425,7 @@ TEST(Pe3EcuFrames, FramePe12) {
     EXPECT_FLOAT_EQ(frame.IgnitionCutPercentage(), kExpectedIgnitionCutPercentage);
 }
 
-TEST(Pe3EcuFrames, FramePe13) {
+TEST_F(Pe3EcuFrameFixture, FramePe13) {
     // Dummy data. TODO: Gather and analyze sample data while the vehicle is in motion.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x01, 0x00,
                                                 0x02, 0x00,
@@ -425,7 +444,7 @@ TEST(Pe3EcuFrames, FramePe13) {
     EXPECT_FLOAT_EQ(frame.NonDrivenWheelSpeed(1), kExpectedNonDrivenWheelSpeed2);
 }
 
-TEST(Pe3EcuFrames, FramePe13OutOfBounds) {
+TEST_F(Pe3EcuFrameFixture, FramePe13OutOfBounds) {
     // Dummy data. TODO: Gather and analyze sample data
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x01, 0x00,
                                                 0x02, 0x00,
@@ -440,7 +459,7 @@ TEST(Pe3EcuFrames, FramePe13OutOfBounds) {
     EXPECT_FLOAT_EQ(frame.NonDrivenWheelSpeed(3), kExpectedResult);
 }
 
-TEST(Pe3EcuFrames, FramePe14) {
+TEST_F(Pe3EcuFrameFixture, FramePe14) {
     // Sample data.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xE8, 0x03,
                                                 0xD9, 0x04,
@@ -459,7 +478,7 @@ TEST(Pe3EcuFrames, FramePe14) {
     EXPECT_FLOAT_EQ(frame.FuelCompensationCoolantTemperature(), kExpectedFuelCompCoolantTemp);
 }
 
-TEST(Pe3EcuFrames, FramePe15) {
+TEST_F(Pe3EcuFrameFixture, FramePe15) {
     // Sample data.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0xE8, 0x03,
                                                 0xE8, 0x03,
@@ -474,7 +493,7 @@ TEST(Pe3EcuFrames, FramePe15) {
     EXPECT_FLOAT_EQ(frame.FuelCompensationManifoldAbsolutePressure(), kExpectedFuelCompMap);
 }
 
-TEST(Pe3EcuFrames, FramePe16) {
+TEST_F(Pe3EcuFrameFixture, FramePe16) {
     // Sample data.
     // TODO: Gather more sample data while vehicle is in motion.
     uint8_t rx_buffer[kByteArrayMaxLength] = {  0x00, 0x00,

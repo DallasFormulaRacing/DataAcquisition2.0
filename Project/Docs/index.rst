@@ -11,6 +11,7 @@ Welcome to DFR's Data Acquisition API documentation!
    :hidden:
 
    data_logger/index
+   file_system/index
    
 
 .. toctree::
@@ -18,6 +19,7 @@ Welcome to DFR's Data Acquisition API documentation!
    :caption: Sensor Layer
    :hidden:
 
+   engine_control_unit/index
    linear_potentiometer/index
 
 .. toctree::
@@ -25,7 +27,8 @@ Welcome to DFR's Data Acquisition API documentation!
    :caption: Platform Layer
    :hidden:
 
-   peripherals/index
+   peripheral_interfaces/index
+   stmicroelectronics/index
 
 These pages are auto-generated from our source code. Each firmware component is organized as the following. For high-level design and development documentation, go to our repository's `wiki <https://github.com/DallasFormulaRacing/DataAcquisition2.0/wiki/>`_.
 

@@ -64,96 +64,172 @@ namespace sensor {
 
 class Pe3 : public IEcu {
 public:
+	/// @param can_bus An implementation of a CAN peripheral following the
+	/// @ref platform.ICan abstract interface. This ECU requires it for
+	/// the following functionalities:
+	/// - a flag indicating for checking when a new CAN message has arrived.
+	/// - a method to clear the flag after processing.
+	/// - the CAN ID of the latest message received.
+	/// - the message's data payload in the form of an array of 8 bytes.
 	Pe3(std::shared_ptr<platform::ICan> can_bus);
 
 	virtual ~Pe3();
 
+	/// Provides CAN IDs currently enabled to read from.
+	/// @return A reference to a read-only list of the enabled CAN IDs.
 	const std::vector<uint32_t>& CanIdList() override;
 
+	/// @return The CAN ID of the latest message received.
 	uint32_t LatestCanId() override;
 
+	/// @return A flag indicating whether a new message has arrived. 
 	bool NewMessageArrived() override;
 
+	/// Processes the current message and then clears the `NewMessageArrived()` flag.
 	void Update() override;
 
+	/// @return The number of Revolutions per Minute.
 	int16_t Rpm() override;
 
+	/// @return The Throttle Position expressed as a percentage.
 	float Tps() override;
 
+	/// @return The time duration of how long the fuel injector remains
+	/// open in milliseconds.
 	float FuelOpenTime() override;
 
+	/// @return The ignition angle in degrees.
 	float IgnitionAngle() override;
 
+	/// @return Pressure in PSI or Kilo-Pascal.
+	/// To determine the unit of measurement being used, see `PressureUnit()`.
 	float BarometerPressure() override;
 
+	/// @return Manifold Air Pressure in PSI or Kilo-Pascal.
+	/// To determine the unit of measurement being used, see `PressureUnit()`.
 	float Map() override;
 
+	/// @return The level of oxygen in the exhaust.
 	float Lambda() override;
 
+	/// Provides access to the analog input measurements.
+	/// @param index The selected channel to read from. 8 channels are provided
+	/// and they are zero-indexed.
+	/// @return The voltage measurement at an analog input channel.
 	float AnalogInputVoltage(uint8_t index) override;
 
+	/// @return The battery voltage in Volts.
 	float BatteryVoltage() override;
 
+	/// @return The air temperature in Celsius or Fahrenheit .
+	/// To determine the unit of measurement being used, see `TemperatureUnit()`.
 	float AirTemperature() override;
 
+	/// @return The air temperature in Celsius or Fahrenheit .
+	/// To determine the unit of measurement being used, see `TemperatureUnit()`.
 	float CoolantTemperature() override;
 
+	/// @return Indicates whether the pressure unit is PSI or Kilo-Pascal.
 	PressureType PressureUnit();
 
+	/// @return Indicates whether the temperature unit is Celsius or Fahrenheit.
 	TemperatureType TemperatureUnit();
 
+	/// Provides access to the frequency channels.
+	/// @param index The selected channel to read from. 2 channels are provided
+	/// and they are zero-indexed.
+	/// @return A channel's frequency in hertz.
 	float FrequencyHertz(uint8_t index);
 
+	/// Provides access to the analog input measurements dedicated to thermistors.
+	/// @param index The selected channel to read from. 4 channels are provided
+	/// and they are zero-indexed.
+	/// @return The voltage measurement at an analog input channel.
 	float AnalogInputThermistorVoltage(uint8_t index);
 
+	/// @return RPM per second.
 	float RpmRate();
 
+	/// @return Throttle position percentage per second.
 	float TpsPercentageRate();
 
+	/// @return Pressure rate in PSI per second or Kilo-Pascal per second.
 	float MapRate();
 
+	/// @return Load rate in Gs per revolution per second.
 	float MassAirFlowLoadRate();
 
+	/// Provides access to the <em> Lambda Measured </em> channels.
+	/// @param index The selected channel to read from. 2 channels are provided
+	/// and they are zero-indexed.
+	/// @return The lambda measured at a channel.
 	float LambdaMeasured(uint8_t index);
 
+	/// Provides access to the PWM channels.
+	/// @param index The selected channel to read from. 8 channels are provided
+	/// and they are zero-indexed.
+	/// @return The duty cycle percentage.  
 	float PwmDutyCycle(uint8_t index);
 
+	/// @return Slip in percentage.
 	float PercentSlip();
 
+	/// @return The driven wheel rate of change in feet per second per second.
 	float DrivenWheelRateOfChange();
 
 	float DesiredValue();
 
+	/// @return Speed in feet per second.
 	float DrivenAverageWheelSpeed();
 
+	/// @return Speed in feet per second.
 	float NonDrivenAverageWheelSpeed();
 
+	/// @return Ignition compensation in degrees.
 	float IgnitionCompensation();
 
 	float IgnitionCutPercentage();
 
+	/// Provides access to the <em>Driven Wheel Speed</em> channels.
+	/// @param index The selected channel to read from. 2 channels are provided
+	/// and they are zero-indexed.
+	/// @return Speed in feet per second.
 	float DrivenWheelSpeed(uint8_t index);
 
+	// Provides access to the <em>Non Driven Wheel Speed</em> channels.
+	/// @param index The selected channel to read from. 2 channels are provided
+	/// and they are zero-indexed.
+	/// @return Speed in feet per second.
 	float NonDrivenWheelSpeed(uint8_t index);
 
+	/// @return Fuel compensation in percentage.
 	float FuelCompensationAcceleration();
 
+	/// @return Fuel compensation in percentage.
 	float FuelCompensationStarting();
 
+	/// @return Fuel compensation in percentage.
 	float FuelCompensationAirTemperature();
 
+	/// @return Fuel compensation in percentage.
 	float FuelCompensationCoolantTemperature();
 
+	/// @return Fuel compensation in percentage.
 	float FuelCompensationBarometer();
 
+	/// @return Fuel compensation in percentage.
 	float FuelCompensationManifoldAbsolutePressure();
 
+	/// @return Fuel compensation in percentage.
 	float IgnitionCompensationAirTemperature();
 
+	/// @return Ignition compensation in degrees.
 	float IgnitionCompensationCoolantTemperature();
 
+	/// @return Ignition compensation in degrees.
 	float IgnitionCompensationBarometer();
 
+	/// @return Ignition compensation in degrees.
 	float IgnitionCompensationManifoldAbsolutePressure();
 
 
