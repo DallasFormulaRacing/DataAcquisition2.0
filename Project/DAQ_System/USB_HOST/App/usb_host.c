@@ -25,8 +25,8 @@
 #include "usbh_msc.h"
 
 /* USER CODE BEGIN Includes */
-uint8_t to_log = 0;
-uint8_t to_unmount = 0;
+uint8_t block_device_connected = 0;
+uint8_t block_device_ejected = 0;
 
 /* USER CODE END Includes */
 
@@ -104,12 +104,12 @@ static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
 
   case HOST_USER_DISCONNECTION:
   Appli_state = APPLICATION_DISCONNECT;
-  to_unmount = 1;
+  block_device_ejected = 1;
   break;
 
   case HOST_USER_CLASS_ACTIVE:
   Appli_state = APPLICATION_READY;
-  to_log = 1;
+  block_device_connected = 1;
   break;
 
   case HOST_USER_CONNECTION:

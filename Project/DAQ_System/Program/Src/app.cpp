@@ -53,6 +53,15 @@ extern FIL USBHFile;       /* File object for USBH */
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
 #include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
 
+bool logging_mode_changed = false;
+bool to_log = false;
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	if(GPIO_Pin == GPIO_PIN_15) {
+		logging_mode_changed = true;
+	}
+}
+
 
 
 // CAN Bus Interrupt Callback
@@ -70,18 +79,6 @@ void DataLoggingThread(void *argument);
 void cppMain() {
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
-
-//	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
-//	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
-//
-	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
-	accelerometer = std::make_unique<sensor::LSM6DSOX>(hi2c1);
-	accelerometer->init();
-	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
-	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::FSR4g);
-//
-//	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
-//	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
 
 
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
@@ -102,13 +99,10 @@ void cppMain() {
 	bx_can_peripheral->ConfigureReceiveCallback(rx_interrupt_mode);
 	bx_can_peripheral->EnableInterruptMode();
 
-
 	float manifold_absolute_pressure = 0.0f;
 	float battery_voltage = 0.0f;
 
-//	float displacement_inches = 0.0f;
-	float* acc_data;
-//	int16_t *gyro_data = 0;
+
 
 	NVIC_SetPriorityGrouping( 0 ); //TODO
 	osKernelInitialize();	// Initialize scheduler
@@ -119,26 +113,6 @@ void cppMain() {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
-//
-//		displacement_inches = lin_pot->DisplacementInches();
-//		printf("\n Percentage: %f", displacement_inches);
-//
-		accelerometer->ComputeAcceleration();
-		acc_data = accelerometer->GetAcceleration();
-//
-		printf("the x-axis is %lf \t\t " , acc_data[0]);
-		printf("the y-axis is %lf \t\t " , acc_data[1]);
-		printf("the z-axis is %lf " , acc_data[2]);
-		printf("\r");
-		printf("\n");
-//
-//		gyro_data = gyroscope->DegreesPerSecond();
-//		printf("x = %hd\t",gyro_data[0]);
-//		printf("y = %hd\t",gyro_data[1]);
-//		printf("z = %hd\t",gyro_data[2]);
-//		printf("\n");
-//		printf("\r");
-
 
 		if (pe3_ecu->NewMessageArrived()) {
 			__disable_irq();
@@ -167,10 +141,6 @@ void cppMain() {
 
 			__enable_irq();
 		}
-
-
-		//HAL_Delay(150);
-
 	}
 }
 
@@ -191,28 +161,73 @@ void DataLoggingThread(void *argument) {
 	std::unique_ptr<application::IFileSystem> file_system(nullptr);
 	file_system = std::make_unique<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
 
+	bool ready_to_log = false;
+
 	for (;;) {
 
-		if(to_log == 1) {
-			printf("logging");
+		if(block_device_connected == 1) {
+			// Ready state
+			// TODO for transition: check GPIO, despite no interrupt.
+
 			file_system->Mount();
-			char root_file_path[] = "/ROOTFILE.csv";
-			file_system->CreateFile(root_file_path);
-
-			char root_file_header_row[] = "LinPot1,LinPot2,AccX,AccY,AccZ\n";
-			char root_file_contents[] = "2.3,2.45,2,9,200\n";
-			file_system->OpenFile(root_file_path, (char*)"a");
-			file_system->WriteFile(root_file_header_row);
-			file_system->WriteFile(root_file_contents);
-			file_system->WriteFile(root_file_contents);
-			file_system->CloseFile();
-
+			ready_to_log = true;
 			HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_SET);
-			to_log = 0;
 
-		} else if (to_unmount == 1) {
+			block_device_connected = 0;
+
+		} else if (block_device_ejected == 1) {
+			// Standby state
+
+			// Edge case: if the usb flash drive is ejected while the switch is logical HIGH,
+			//			  then the logging file is left open.
+			if (to_log) {
+				file_system->CloseFile();
+				to_log = false;
+			}
+
 			file_system->Unmount();
-			to_unmount = 0;
+			ready_to_log = false;
+
+			block_device_ejected = 0;
+		}
+
+
+		if (ready_to_log) {
+
+			if (logging_mode_changed) {
+				if (HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_15) == GPIO_PIN_SET) {
+					// Logging state
+
+					to_log = true;
+					// TODO: Create a new logging file here
+				} else {
+					to_log = false;
+				}
+
+				logging_mode_changed = false;
+			}
+
+
+			if (to_log) {
+				printf("logging...\n");
+
+//				char root_file_path[] = "/ROOTFILE.csv";
+//				file_system->CreateFile(root_file_path);
+//
+//				char root_file_header_row[] = "LinPot1,LinPot2,AccX,AccY,AccZ\n";
+//				char root_file_contents[] = "2.3,2.45,2,9,200\n";
+//				file_system->OpenFile(root_file_path, (char*)"a");
+//				file_system->WriteFile(root_file_header_row);
+//				file_system->WriteFile(root_file_contents);
+//				file_system->WriteFile(root_file_contents);
+
+
+			} else {
+				printf("stop\n");
+
+//				file_system->CloseFile();
+			}
+
 		}
 
 		HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
