@@ -85,7 +85,7 @@ void cppMain() {
 	auto pe3_ecu = std::make_unique<sensor::Pe3>(can_bus);
 	const std::vector<uint32_t>& can_id_list = pe3_ecu->CanIdList();
 
-	auto bx_i2c_peripheral = std::make_shared<platform::i2cHalWrapperStmf4>(hi2c1);
+	auto bx_i2c_peripheral = std::make_shared<platform::i2c_stmf4>(hi2c1);
 	std::shared_ptr<platform::II2C> i2c_line = bx_i2c_peripheral;
 
 	auto accelerometer = std::make_unique<sensor::LSM303DLHC>(i2c_line);

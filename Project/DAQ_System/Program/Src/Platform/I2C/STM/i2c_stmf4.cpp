@@ -1,0 +1,24 @@
+/*
+ * i2cHalWrapper_stmf4.cpp
+ *
+ *  Created on: Mar 4, 2024
+ *      Author: Nico
+ */
+#include <Src/Platform/I2C/STM/i2c_stmf4.hpp>
+
+namespace platform {
+
+	i2c_stmf4::i2c_stmf4(I2C_HandleTypeDef &hi2c)
+			: _i2c_(hi2c) {
+	}
+
+	i2c_stmf4::~i2c_stmf4(){}
+
+	void i2c_stmf4::Transmit(uint8_t *commands, uint8_t dev_add_, uint8_t maxBytes){
+		HAL_I2C_Master_Transmit(&_i2c_,dev_add_, commands, maxBytes, HAL_MAX_DELAY);
+	}
+	void i2c_stmf4::Receive(uint8_t *response, uint8_t dev_add_, uint8_t response_size_){
+		HAL_I2C_Master_Receive(&_i2c_, dev_add_, response, response_size_, HAL_MAX_DELAY);
+	}
+}
+

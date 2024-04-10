@@ -13,18 +13,18 @@
 
 namespace platform{
 
-class i2cHalWrapperStmf4 : public II2C{
+class i2c_stmf4 : public II2C{
 public:
-	i2cHalWrapperStmf4(I2C_HandleTypeDef &hi2c);
+	i2c_stmf4(I2C_HandleTypeDef &hi2c);
 
-	virtual ~i2cHalWrapperStmf4();
+	virtual ~i2c_stmf4();
 
 	virtual void Receive(uint8_t*, uint8_t, uint8_t) override;
 
 	virtual void Transmit(uint8_t*, uint8_t, uint8_t) override;
 
 private:
-	I2C_HandleTypeDef& bx_i2c_;
+	I2C_HandleTypeDef& _i2c_;
 };
 
 }

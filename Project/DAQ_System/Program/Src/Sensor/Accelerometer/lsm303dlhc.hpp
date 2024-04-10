@@ -18,15 +18,13 @@
 
 // Standard Libraries
 #include <inttypes.h>
+#include <Src/Platform/I2C/STM/i2c_stmf4.hpp>
 #include <vector>
 #include <array>
 #include <memory>
 
 // DFR Custom Dependancies
 #include "iaccelerometer.hpp"
-#include "../../Platform/I2C/STM/i2cHalWrapper_stmf4.hpp"
-
-// ST HAL Dependencies
 #include "i2c.h"
 
 #define MAG_ADDRESS  0x3C
@@ -95,7 +93,7 @@ class LSM303DLHC: public IAccelerometer {
 
     private:
         //I2C Device Address
-        uint8_t _dev_add = 0x28;
+        static constexpr uint8_t _dev_add = 0x28;
 
         // averages the idle value of the accelerometer to calibrate
         void calibrate() override;
