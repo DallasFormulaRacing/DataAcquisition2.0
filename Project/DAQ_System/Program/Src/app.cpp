@@ -62,6 +62,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	}
 }
 
+#include "Application/data_payload.hpp"
+#include "Application/DataLogger/DataLogger.hpp"
 
 
 // CAN Bus Interrupt Callback
@@ -158,8 +160,21 @@ void RtosInit() {
 void DataLoggingThread(void *argument) {
 	MX_USB_HOST_Init();
 
-	std::unique_ptr<application::IFileSystem> file_system(nullptr);
-	file_system = std::make_unique<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
+	std::shared_ptr<application::IFileSystem> file_system(nullptr);
+	file_system = std::make_shared<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
+
+//	std::unique_ptr<application::DataLogger> data_logger(nullptr);
+//	data_logger = std::make_unique<application::DataLogger>(file_system);
+
+	application::DataLogger data_logger(file_system);
+
+	application::DataPayload dummy_data;
+	dummy_data.timestamp_ = 15;
+	dummy_data.linpot_displacement_inches_[0] = 2.5;
+	dummy_data.linpot_displacement_inches_[1] = 0.5;
+	dummy_data.linpot_displacement_inches_[2] = 1.3;
+	dummy_data.linpot_displacement_inches_[3] = 4.0;
+
 
 	bool ready_to_log = false;
 
