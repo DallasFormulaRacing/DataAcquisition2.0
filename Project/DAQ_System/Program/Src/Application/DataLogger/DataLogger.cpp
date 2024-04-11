@@ -14,9 +14,11 @@
 namespace application {
 
 DataLogger::DataLogger(std::shared_ptr<IFileSystem> file_system,
-					   std::shared_ptr<platform::IGpio> gpio,
-					   uint8_t* storage_connected)
-  : file_system_(file_system), gpio_(gpio), storage_connected_(storage_connected) {
+					   std::shared_ptr<platform::IGpio> user_input,
+					   uint8_t* storage_connected_observer)
+  : file_system_(file_system),
+	user_input_(user_input),
+	storage_connected_observer_(storage_connected_observer) {
 
 	dummy_data_.timestamp_ = 15;
 	dummy_data_.linpot_displacement_inches_[0] = 2.5;
@@ -73,15 +75,17 @@ void DataLogger::Run() {
 	current_state_->Compute(*this);
 }
 
-//==========================================
 
+//*************************************************
+//					Idle State
+//*************************************************
 void DataLogger::Idle::Enter(DataLogger& context) {
 	context.file_system_->Unmount();
 	printf("[DataLogger] Entering Idle state.\n");
 }
 
 void DataLogger::Idle::Compute(DataLogger& context) {
-	if (*context.storage_connected_) {
+	if (*context.storage_connected_observer_) {
 		context.SetState(&context.standby_state_);
 	}
 }
@@ -91,19 +95,21 @@ void DataLogger::Idle::Exit(DataLogger& context) {
 	printf("[DataLogger] Leaving Idle state.\n");
 }
 
-//=====================================================
 
+//*************************************************
+//					Standby State
+//*************************************************
 void DataLogger::Standby::Enter(DataLogger& context) {
 	printf("[DataLogger] Entering Standby state.\n");
 }
 
 void DataLogger::Standby::Compute(DataLogger& context) {
-	if (!*context.storage_connected_) {
+	if (!*context.storage_connected_observer_) {
 		context.SetState(&context.idle_state_);
 	}
 
-	if (context.gpio_->ToggleDetected()) {
-		context.logging_enabled_ = context.gpio_->Read();
+	if (context.user_input_->ToggleDetected()) {
+		context.logging_enabled_ = context.user_input_->Read();
 
 		if (context.logging_enabled_) {
 			context.SetState(&context.logging_state_);
@@ -115,20 +121,22 @@ void DataLogger::Standby::Exit(DataLogger& context) {
 	printf("[DataLogger] Leaving Standby state.\n");
 }
 
-//=====================================================
 
+//*************************************************
+//					Logging State
+//*************************************************
 void DataLogger::Logging::Enter(DataLogger& context) {
 	printf("[DataLogger] Entering Logging state.\n");
 	context.CreateCsvFile();
 }
 
 void DataLogger::Logging::Compute(DataLogger& context) {
-	if (!*context.storage_connected_) {
+	if (!*context.storage_connected_observer_) {
 		context.SetState(&context.idle_state_);
 	}
 
-	if (context.gpio_->ToggleDetected()) {
-		context.logging_enabled_ = context.gpio_->Read();
+	if (context.user_input_->ToggleDetected()) {
+		context.logging_enabled_ = context.user_input_->Read();
 
 		if (!context.logging_enabled_) {
 			context.SetState(&context.standby_state_);
@@ -145,9 +153,5 @@ void DataLogger::Logging::Exit(DataLogger& context) {
 	context.file_system_->CloseFile();
 	printf("[DataLogger] Leaving Logging state.\n");
 }
-
-
-
-
 
 } // namespace application

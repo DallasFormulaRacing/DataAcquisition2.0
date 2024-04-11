@@ -1,3 +1,14 @@
+/*
+* STM32 F4 GPIO Peripheral
+* Author:   Cristian Cruz
+*
+* Email:    cris14.alex@gmail.com
+*
+* (c) 2024 Dallas Formula Racing - Embedded Firmware Team
+* Formula SAE International Collegiate Chapter
+* GPL-3.0 License
+*/
+
 #include "gpio_stmf4.hpp"
 
 namespace platform {
@@ -34,6 +45,5 @@ void GpioStmF4::InterruptCallback(uint16_t pin_detected) {
 		interrupt_flag_ = true;
 	}
 }
-
 
 } // namespace platform

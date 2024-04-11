@@ -31,7 +31,7 @@
 #include "stm32f4xx_hal.h"
 
 /* USER CODE BEGIN INCLUDE */
- extern uint8_t usb_connected;
+ extern uint8_t usb_connected_observer;
 
 /* USER CODE END INCLUDE */
 

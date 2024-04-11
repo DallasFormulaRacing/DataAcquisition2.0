@@ -22,24 +22,43 @@
 #include "../FileSystem/ifile_system.hpp"
 #include "../../Platform/GPIO/igpio.hpp"
 
+/// @param file_system An implementation of a file system following the
+/// @ref application.IFileSystem abstract interface. The current
+/// implementation of the `DataLogger` requires the following functionalities:
+/// - Mounting/unmounting.
+/// - File searching.
+/// - File opening/closing.
+/// - File writing.
 
 namespace application {
 
 class DataLogger {
 public:
-	/// @param file_system An implementation of a file system following the
-	/// @ref application.IFileSystem abstract interface. The current
+	/// Initializes a DataLogger object.
+	/// @param file_system An implementation of a file system following
+	/// the @ref application.IFileSystem abstract interface. The current
 	/// implementation of the `DataLogger` requires the following functionalities:
 	/// - Mounting/unmounting.
 	/// - File searching.
 	/// - File opening/closing.
 	/// - File writing.
+	/// @param user_input An implementation of a GPIO following
+	/// the @ref platform.IGpio abstract interface. The following functionalities
+	/// are required:
+	/// - Reading the logical `HIGH` and `LOW` states.
+	/// - Setting a flag for detecting whether the GPIO state has cleared, and
+	///	  clearing this flag after it has been read.
+	/// @param storage_connected_observer A pointer to a flag that monitors whether the
+	/// storage block device is connected or ejected. To be used as a boolean
+	/// variable with only binary values.
 	DataLogger(std::shared_ptr<IFileSystem> file_system,
-			   std::shared_ptr<platform::IGpio> gpio,
-			   uint8_t* storage_connected);
+			   std::shared_ptr<platform::IGpio> user_input,
+			   uint8_t* storage_connected_observer);
 
 	~DataLogger();
 
+	/// Informs the `DataLogger` to evaluate its current state and perform
+	/// the according tasks.
 	void Run();
 
 protected:
@@ -82,35 +101,24 @@ protected:
 		virtual void Exit(DataLogger& context) override;
 	};
 
-
-
-
-
-
 private:
 	bool CreateCsvFile();
 	void FindUniqueFileName();
 	bool RecordDataSample(DataPayload& data);
 	void SetState(State* new_state);
 
-
 	std::shared_ptr<IFileSystem> file_system_;
-	std::shared_ptr<platform::IGpio> gpio_;
+	std::shared_ptr<platform::IGpio> user_input_;
 	char file_name_[16] = "\0";
+	bool logging_enabled_ = false;
 
 	Idle idle_state_;
 	Standby standby_state_;
 	Logging logging_state_;
 	State* current_state_{&idle_state_};
 
-
-
-
-	//======
-	// Observer flags
-	uint8_t* storage_connected_;
-
-	bool logging_enabled_ = false;
+	// Flag observer
+	uint8_t* storage_connected_observer_;
 
 	DataPayload dummy_data_;
 };
