@@ -31,19 +31,25 @@ extern I2C_HandleTypeDef hi2c1;
 
 // 3rd Party Libraryes and Frameworks
 #include "cmsis_os.h"
+
 #include "fatfs.h"
-extern char USBHPath[4];   /* USBH logical drive path */
-extern FATFS USBHFatFS;    /* File system object for USBH logical drive */
-extern FIL USBHFile;       /* File object for USBH */
+extern char USBHPath[4];   // USBH logical drive path
+extern FATFS USBHFatFS;    // File system object for USBH logical drive
+extern FIL USBHFile;       // File object for USBH
+
 #include "usb_host.h"
+extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 
 
 // DFR Custom Dependencies
 #include "app.hpp"
+#include "Application/data_payload.hpp"
+#include "Application/DataLogger/DataLogger.hpp"
 #include "Application/FileSystem/fat_fs.hpp"
-#include "../../Core/Inc/retarget.h"
 #include "Platform/CAN/STM/F4/bxcan_stmf4.hpp"
 #include "Platform/CAN/Interfaces/ican.hpp"
+#include "Platform/GPIO/igpio.hpp"
+#include "Platform/GPIO/gpio_stmf4.hpp"
 #include "Sensor/Accelerometer/lsm303dlhc.hpp"
 #include "Sensor/ECU/PE3/iecu.hpp"
 #include "Sensor/ECU/PE3/pe3.hpp"
@@ -52,26 +58,16 @@ extern FIL USBHFile;       /* File object for USBH */
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
 #include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
-
-#include "Platform/GPIO/igpio.hpp"
-#include "Platform/GPIO/gpio_stmf4.hpp"
+#include "../../Core/Inc/retarget.h"
 
 
 
+// Toggle Switch Interrupt Callback
 std::shared_ptr<platform::GpioStmF4> gpio_callback_ptr(nullptr);
-bool logging_mode_changed = false;
-bool to_log = false;
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	gpio_callback_ptr->InterruptCallback(GPIO_Pin);
 }
-
-
-
-#include "Application/data_payload.hpp"
-#include "Application/DataLogger/DataLogger.hpp"
-
-
 
 
 
@@ -84,9 +80,14 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
+
+
+
 void StartFreeRtos();
 void RtosInit();
 void DataLoggingThread(void *argument);
+
+
 
 void cppMain() {
 	// Enable `printf()` using USART
