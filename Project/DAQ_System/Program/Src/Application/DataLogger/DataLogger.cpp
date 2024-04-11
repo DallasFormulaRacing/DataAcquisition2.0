@@ -13,8 +13,10 @@
 
 namespace application {
 
-DataLogger::DataLogger(std::shared_ptr<IFileSystem> file_system)
-  : file_system_(file_system) {
+DataLogger::DataLogger(std::shared_ptr<IFileSystem> file_system,
+					   std::shared_ptr<platform::IGpio> gpio,
+					   uint8_t* storage_connected)
+  : file_system_(file_system), gpio_(gpio), storage_connected_(storage_connected) {
 
 	dummy_data_.timestamp_ = 15;
 	dummy_data_.linpot_displacement_inches_[0] = 2.5;
@@ -67,6 +69,9 @@ void DataLogger::SetState(State* new_state) {
 	}
 }
 
+void DataLogger::Run() {
+	current_state_->Compute(*this);
+}
 
 //==========================================
 
@@ -76,7 +81,7 @@ void DataLogger::Idle::Enter(DataLogger& context) {
 }
 
 void DataLogger::Idle::Compute(DataLogger& context) {
-	if (*context.block_device_connected_) {
+	if (*context.storage_connected_) {
 		context.SetState(&context.standby_state_);
 	}
 }
@@ -93,12 +98,12 @@ void DataLogger::Standby::Enter(DataLogger& context) {
 }
 
 void DataLogger::Standby::Compute(DataLogger& context) {
-	if (!*context.block_device_connected_) {
+	if (!*context.storage_connected_) {
 		context.SetState(&context.idle_state_);
 	}
 
-	if (*context.logging_mode_changed_) { //TODO: Read from GPIO and clear internally
-		context.logging_enabled_ = true; // TODO: Read from GPIO
+	if (context.gpio_->ToggleDetected()) {
+		context.logging_enabled_ = context.gpio_->Read();
 
 		if (context.logging_enabled_) {
 			context.SetState(&context.logging_state_);
@@ -118,12 +123,12 @@ void DataLogger::Logging::Enter(DataLogger& context) {
 }
 
 void DataLogger::Logging::Compute(DataLogger& context) {
-	if (!*context.block_device_connected_) {
+	if (!*context.storage_connected_) {
 		context.SetState(&context.idle_state_);
 	}
 
-	if (*context.logging_mode_changed_) { //TODO: Read from GPIO and clear internally
-		context.logging_enabled_ = false; // TODO: Read from GPIO
+	if (context.gpio_->ToggleDetected()) {
+		context.logging_enabled_ = context.gpio_->Read();
 
 		if (!context.logging_enabled_) {
 			context.SetState(&context.standby_state_);
@@ -133,9 +138,7 @@ void DataLogger::Logging::Compute(DataLogger& context) {
 
 
 	// TODO: check the queue and log
-	 context.RecordDataSample(context.dummy_data_);
-
-
+	context.RecordDataSample(context.dummy_data_);
 }
 
 void DataLogger::Logging::Exit(DataLogger& context) {
@@ -144,7 +147,6 @@ void DataLogger::Logging::Exit(DataLogger& context) {
 }
 
 
-//======================================================
 
 
 

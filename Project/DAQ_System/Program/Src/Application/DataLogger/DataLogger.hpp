@@ -20,6 +20,7 @@
 // DFR Custom Dependencies
 #include "../data_payload.hpp"
 #include "../FileSystem/ifile_system.hpp"
+#include "../../Platform/GPIO/igpio.hpp"
 
 
 namespace application {
@@ -33,9 +34,13 @@ public:
 	/// - File searching.
 	/// - File opening/closing.
 	/// - File writing.
-	DataLogger(std::shared_ptr<IFileSystem> file_system);
+	DataLogger(std::shared_ptr<IFileSystem> file_system,
+			   std::shared_ptr<platform::IGpio> gpio,
+			   uint8_t* storage_connected);
 
 	~DataLogger();
+
+	void Run();
 
 protected:
 	class State {
@@ -88,7 +93,9 @@ private:
 	bool RecordDataSample(DataPayload& data);
 	void SetState(State* new_state);
 
+
 	std::shared_ptr<IFileSystem> file_system_;
+	std::shared_ptr<platform::IGpio> gpio_;
 	char file_name_[16] = "\0";
 
 	Idle idle_state_;
@@ -101,14 +108,9 @@ private:
 
 	//======
 	// Observer flags
-	bool* block_device_connected_;
-	bool* block_device_ejected_;
-	bool* logging_mode_changed_;
-	bool* is_logging_;
+	uint8_t* storage_connected_;
 
-
-	bool ready_to_log_;
-	bool logging_enabled_;
+	bool logging_enabled_ = false;
 
 	DataPayload dummy_data_;
 };

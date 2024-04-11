@@ -84,6 +84,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
+void StartFreeRtos();
 void RtosInit();
 void DataLoggingThread(void *argument);
 
@@ -113,16 +114,7 @@ void cppMain() {
 	float manifold_absolute_pressure = 0.0f;
 	float battery_voltage = 0.0f;
 
-
-
-//	NVIC_SetPriorityGrouping( 0 ); //TODO
-//	osKernelInitialize();	// Initialize scheduler
-//	RtosInit();				// Initialize thread
-//	osKernelStart();		// Start scheduler
-
-	auto switch_gpio_peripheral = std::make_shared<platform::GpioStmF4>(GPIOF, GPIO_PIN_15);
-	std::shared_ptr<platform::IGpio> gpio = switch_gpio_peripheral;
-	gpio_callback_ptr = switch_gpio_peripheral;
+	StartFreeRtos();
 
 
 	for(;;) {
@@ -160,22 +152,23 @@ void cppMain() {
 
 
 
-		if (gpio->ToggleDetected()) {
-			if (gpio->Read() == true) {
-				printf("high\n");
-			} else {
-				printf("low\n");
-			}
-		}
 
 
 	}
 }
 
+
+void StartFreeRtos() {
+	NVIC_SetPriorityGrouping( 0 ); // For allowing hardware (not RTOS/software) interrupts while the Kernel is running
+	osKernelInitialize();	// Initialize scheduler
+	RtosInit();				// Initialize thread
+	osKernelStart();		// Start scheduler
+}
+
 osThreadId_t dataLoggingTaskHandle;
 const osThreadAttr_t dataLoggingTask_attributes = {
   .name = "dataLoggingTask",
-  .stack_size = 128 * 17,
+  .stack_size = 128 * 20,
   .priority = (osPriority_t) osPriorityNormal,
 };
 
@@ -189,87 +182,15 @@ void DataLoggingThread(void *argument) {
 	std::shared_ptr<application::IFileSystem> file_system(nullptr);
 	file_system = std::make_shared<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
 
-	application::DataLogger data_logger(file_system);
+	auto switch_gpio_peripheral = std::make_shared<platform::GpioStmF4>(GPIOF, GPIO_PIN_15);
+	std::shared_ptr<platform::IGpio> toggle_switch = switch_gpio_peripheral;
+	gpio_callback_ptr = switch_gpio_peripheral;
 
-	// Dummy data
-	application::DataPayload dummy_data;
-	dummy_data.timestamp_ = 15;
-	dummy_data.linpot_displacement_inches_[0] = 2.5;
-	dummy_data.linpot_displacement_inches_[1] = 0.5;
-	dummy_data.linpot_displacement_inches_[2] = 1.3;
-	dummy_data.linpot_displacement_inches_[3] = 4.0;
+	application::DataLogger data_logger(file_system, toggle_switch, &usb_connected);
 
-
-	bool ready_to_log = false;
 
 	for (;;) {
-
-		if(block_device_connected == 1) {
-			// Standby state
-			// TODO for transition: check GPIO, despite no interrupt.
-
-			file_system->Mount();
-			ready_to_log = true;
-			HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_SET);
-
-			block_device_connected = 0;
-
-		} else if (block_device_ejected == 1) {
-			// Idle state
-
-			// Edge case: if the usb flash drive is ejected while the switch is logical HIGH,
-			//			  then the logging file is left open.
-			if (to_log) {
-				file_system->CloseFile();
-				to_log = false;
-			}
-
-			file_system->Unmount();
-			ready_to_log = false;
-
-			block_device_ejected = 0;
-		}
-
-
-		if (ready_to_log) {
-
-			if (logging_mode_changed) {
-				if (HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_15) == GPIO_PIN_SET) {
-					// Logging state
-
-					to_log = true;
-					// TODO: Create a new logging file here
-				} else {
-					to_log = false;
-				}
-
-				logging_mode_changed = false;
-			}
-
-
-			if (to_log) {
-				printf("logging...\n");
-
-//				char root_file_path[] = "/ROOTFILE.csv";
-//				file_system->CreateFile(root_file_path);
-//
-//				char root_file_header_row[] = "LinPot1,LinPot2,AccX,AccY,AccZ\n";
-//				char root_file_contents[] = "2.3,2.45,2,9,200\n";
-//				file_system->OpenFile(root_file_path, (char*)"a");
-//				file_system->WriteFile(root_file_header_row);
-//				file_system->WriteFile(root_file_contents);
-//				file_system->WriteFile(root_file_contents);
-
-
-			} else {
-				printf("stop\n");
-
-//				file_system->CloseFile();
-			}
-
-		}
-
-		HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
+		data_logger.Run();
 	}
 }
 
