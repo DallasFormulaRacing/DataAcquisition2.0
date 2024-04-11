@@ -133,7 +133,7 @@ void DataLogger::Logging::Compute(DataLogger& context) {
 
 
 	// TODO: check the queue and log
-	 context.RecordDataSample(dummy_data);
+	 context.RecordDataSample(context.dummy_data_);
 
 
 }

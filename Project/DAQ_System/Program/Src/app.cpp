@@ -53,17 +53,26 @@ extern FIL USBHFile;       /* File object for USBH */
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
 #include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
 
+#include "Platform/GPIO/igpio.hpp"
+#include "Platform/GPIO/gpio_stmf4.hpp"
+
+
+
+std::shared_ptr<platform::GpioStmF4> gpio_callback_ptr(nullptr);
 bool logging_mode_changed = false;
 bool to_log = false;
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	if(GPIO_Pin == GPIO_PIN_15) {
-		logging_mode_changed = true;
-	}
+	gpio_callback_ptr->InterruptCallback(GPIO_Pin);
 }
+
+
 
 #include "Application/data_payload.hpp"
 #include "Application/DataLogger/DataLogger.hpp"
+
+
+
 
 
 // CAN Bus Interrupt Callback
@@ -106,10 +115,15 @@ void cppMain() {
 
 
 
-	NVIC_SetPriorityGrouping( 0 ); //TODO
-	osKernelInitialize();	// Initialize scheduler
-	RtosInit();				// Initialize thread
-	osKernelStart();		// Start scheduler
+//	NVIC_SetPriorityGrouping( 0 ); //TODO
+//	osKernelInitialize();	// Initialize scheduler
+//	RtosInit();				// Initialize thread
+//	osKernelStart();		// Start scheduler
+
+	auto switch_gpio_peripheral = std::make_shared<platform::GpioStmF4>(GPIOF, GPIO_PIN_15);
+	std::shared_ptr<platform::IGpio> gpio = switch_gpio_peripheral;
+	gpio_callback_ptr = switch_gpio_peripheral;
+
 
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
@@ -143,6 +157,18 @@ void cppMain() {
 
 			__enable_irq();
 		}
+
+
+
+		if (gpio->ToggleDetected()) {
+			if (gpio->Read() == true) {
+				printf("high\n");
+			} else {
+				printf("low\n");
+			}
+		}
+
+
 	}
 }
 
