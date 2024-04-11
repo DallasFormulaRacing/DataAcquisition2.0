@@ -163,11 +163,9 @@ void DataLoggingThread(void *argument) {
 	std::shared_ptr<application::IFileSystem> file_system(nullptr);
 	file_system = std::make_shared<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
 
-//	std::unique_ptr<application::DataLogger> data_logger(nullptr);
-//	data_logger = std::make_unique<application::DataLogger>(file_system);
-
 	application::DataLogger data_logger(file_system);
 
+	// Dummy data
 	application::DataPayload dummy_data;
 	dummy_data.timestamp_ = 15;
 	dummy_data.linpot_displacement_inches_[0] = 2.5;
@@ -181,7 +179,7 @@ void DataLoggingThread(void *argument) {
 	for (;;) {
 
 		if(block_device_connected == 1) {
-			// Ready state
+			// Standby state
 			// TODO for transition: check GPIO, despite no interrupt.
 
 			file_system->Mount();
@@ -191,7 +189,7 @@ void DataLoggingThread(void *argument) {
 			block_device_connected = 0;
 
 		} else if (block_device_ejected == 1) {
-			// Standby state
+			// Idle state
 
 			// Edge case: if the usb flash drive is ejected while the switch is logical HIGH,
 			//			  then the logging file is left open.

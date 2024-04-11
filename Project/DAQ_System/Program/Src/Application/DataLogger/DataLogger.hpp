@@ -37,31 +37,80 @@ public:
 
 	~DataLogger();
 
-	/// Mounts the file system. This must be done before starting the `DataLogger`.
-	/// @return Whether the operation completed successfully or failed.
-	bool Enable();
+protected:
+	class State {
+	public:
+		virtual ~State() = default;
 
-	/// Unmounts the file system. This must be done before the file system's
-	/// block device is ejected.
-	/// @return Whether the operation completed successfully or failed.
-	bool Disable();
+		virtual void Enter(DataLogger& context) = 0;
+		virtual void Compute(DataLogger& context) = 0;
+		virtual void Exit(DataLogger& context) = 0;
 
-	/// Prepares a new CSV to be ready for writing data to it.
-	bool Start();
+	protected:
+		State() = default;
+	};
 
-	/// Logs the provided @ref application.DataPayload to the CSV file.
-	/// @param data A batch of sampled data, associated with a timestamp. 
-	bool RecordDataSample(DataPayload& data);
+	class Idle : public State {
+	public:
+		Idle() = default;
 
-	/// Closes the current CSV file.
-	bool Stop();
+		virtual void Enter(DataLogger& context) override;
+		virtual void Compute(DataLogger& context) override;
+		virtual void Exit(DataLogger& context) override;
+	};
+
+	class Standby : public State {
+	public:
+		Standby() = default;
+
+		virtual void Enter(DataLogger& context) override;
+		virtual void Compute(DataLogger& context) override;
+		virtual void Exit(DataLogger& context) override;
+	};
+
+	class Logging : public State {
+	public:
+		Logging() = default;
+
+		virtual void Enter(DataLogger& context) override;
+		virtual void Compute(DataLogger& context) override;
+		virtual void Exit(DataLogger& context) override;
+	};
+
+
+
+
+
 
 private:
+	bool CreateCsvFile();
 	void FindUniqueFileName();
+	bool RecordDataSample(DataPayload& data);
+	void SetState(State* new_state);
 
 	std::shared_ptr<IFileSystem> file_system_;
-
 	char file_name_[16] = "\0";
+
+	Idle idle_state_;
+	Standby standby_state_;
+	Logging logging_state_;
+	State* current_state_{&idle_state_};
+
+
+
+
+	//======
+	// Observer flags
+	bool* block_device_connected_;
+	bool* block_device_ejected_;
+	bool* logging_mode_changed_;
+	bool* is_logging_;
+
+
+	bool ready_to_log_;
+	bool logging_enabled_;
+
+	DataPayload dummy_data_;
 };
 
 } // namespace application
