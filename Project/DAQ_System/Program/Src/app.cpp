@@ -29,7 +29,7 @@ extern CAN_HandleTypeDef hcan1;
 #include "i2c.h"
 extern I2C_HandleTypeDef hi2c1;
 
-// 3rd Party Libraryes and Frameworks
+// 3rd Party Libraries and Frameworks
 #include "cmsis_os.h"
 #include "fatfs.h"
 extern char USBHPath[4];   /* USBH logical drive path */
@@ -56,6 +56,8 @@ extern FIL USBHFile;       /* File object for USBH */
 #include "Application/data_payload.hpp"
 #include "Application/DataLogger/DataLogger.hpp"
 
+#include "Application/circular_queue.hpp"
+#include "Application/Mutex/mutex_cmsisv2.hpp"
 
 // CAN Bus Interrupt Callback
 std::shared_ptr<platform::BxCanStmF4> bx_can_callback_ptr(nullptr);
@@ -112,10 +114,7 @@ void cppMain() {
 	float* acc_data;
 //	int16_t *gyro_data = 0;
 
-	NVIC_SetPriorityGrouping( 0 ); //TODO
-	osKernelInitialize();	// Initialize scheduler
-	RtosInit();				// Initialize thread
-	osKernelStart();		// Start scheduler
+	RtosInit();
 
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
@@ -183,9 +182,91 @@ const osThreadAttr_t dataLoggingTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 
+
+
+
+
+void QueueProducingThread(void *argument);
+void QueueConsumingThread(void *argument);
+
+osThreadId_t producerTaskHandle;
+const osThreadAttr_t producerTask_attributes = {
+  .name = "dataLoggingTask",
+  .stack_size = 128 * 17,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+
+osThreadId_t consumerTaskHandle;
+const osThreadAttr_t consumerTask_attributes = {
+  .name = "dataLoggingTask",
+  .stack_size = 128 * 17,
+  .priority = (osPriority_t) osPriorityHigh,
+};
+
+
+
+const osMutexAttr_t queue_thread_attributes = {
+  "myThreadMutex",                          // human readable mutex name
+  osMutexRecursive | osMutexPrioInherit,    // attr_bits
+  NULL,                                     // memory for control block
+  0U                                        // size for control block
+};
+
+auto wrapper_mutex = std::make_shared<application::MutexCmsisV2>(queue_thread_attributes);
+uint8_t size = 10;
+application::CircularQueue<uint32_t> q(size, wrapper_mutex);
+
 void RtosInit() {
-	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
+	NVIC_SetPriorityGrouping( 0 ); //TODO
+	osKernelInitialize(); // Initialize scheduler
+
+//	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
+	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
+	consumerTaskHandle = osThreadNew(QueueConsumingThread, NULL, &consumerTask_attributes);
+
+	wrapper_mutex->Create();
+
+	osKernelStart(); // Start scheduler
 }
+
+
+
+
+
+
+
+void QueueProducingThread(void *argument) {
+	uint32_t num = 1;
+
+	for(;;) {
+		q.Lock();
+
+		q.Enqueue(num);
+		num *= 2;
+
+		q.Unlock();
+		osDelay(1000);
+	}
+}
+
+void QueueConsumingThread(void *argument) {
+	uint32_t receiving_num = 0;
+	for(;;) {
+		q.Lock();
+
+		if(!q.IsEmpty()) {
+			receiving_num = q.Dequeue();
+			printf("\nReceived: %d", receiving_num);
+		}
+
+		q.Unlock();
+		osDelay(300);
+	}
+}
+
+
+
+
 
 void DataLoggingThread(void *argument) {
 	MX_USB_HOST_Init();
