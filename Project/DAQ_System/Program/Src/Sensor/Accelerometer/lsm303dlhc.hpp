@@ -18,7 +18,7 @@
 
 // Standard Libraries
 #include <inttypes.h>
-#include <Src/Platform/I2C/STM/i2c_stmf4.hpp>
+#include <Src/Platform/I2C/STM/I2CStmF4.hpp>
 #include <vector>
 #include <array>
 #include <memory>
@@ -92,9 +92,6 @@ class LSM303DLHC: public IAccelerometer {
 //==============================================================================================
 
     private:
-        //I2C Device Address
-        static constexpr uint8_t _dev_add = 0x28;
-
         // averages the idle value of the accelerometer to calibrate
         void calibrate() override;
 

@@ -13,18 +13,18 @@
 
 namespace platform{
 
-class i2c_stmf4 : public II2C{
+class I2CStmF4 : public II2C{
 public:
-	i2c_stmf4(I2C_HandleTypeDef &hi2c);
+	I2CStmF4(I2C_HandleTypeDef &hi2c);
 
-	virtual ~i2c_stmf4();
+	virtual ~I2CStmF4();
 
-	virtual void Receive(uint8_t*, uint8_t, uint8_t) override;
+	virtual void Receive(uint8_t* commands, uint8_t dev_add_, uint8_t maxBytes) override;
 
-	virtual void Transmit(uint8_t*, uint8_t, uint8_t) override;
+	virtual void Transmit(uint8_t* response, uint8_t dev_add_, uint8_t response_size) override;
 
 private:
-	I2C_HandleTypeDef& _i2c_;
+	I2C_HandleTypeDef& i2c_;
 };
 
 }
