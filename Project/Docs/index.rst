@@ -10,7 +10,7 @@ Welcome to DFR's Data Acquisition API documentation!
    :caption: Application Layer
    :hidden:
 
-   data_logger/index
+   data_logging/index
    file_system/index
    
 
