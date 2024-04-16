@@ -16,11 +16,15 @@
 #ifndef ACCELEROMETER_LSM303DLHC_H
 #define ACCELEROMETER_LSM303DLHC_H
 
+// Standard Libraries
+#include <inttypes.h>
+#include <Src/Platform/I2C/STM/I2CStmF4.hpp>
+#include <vector>
+#include <array>
+#include <memory>
 
 // DFR Custom Dependancies
 #include "iaccelerometer.hpp"
-
-// ST HAL Dependencies
 #include "i2c.h"
 
 #define MAG_ADDRESS  0x3C
@@ -41,7 +45,8 @@ namespace sensor{
 class LSM303DLHC: public IAccelerometer {
     public:
 		/// @param hi2c an I2C peripheral from ST's HAL
-        LSM303DLHC(I2C_HandleTypeDef &hi2c);
+        LSM303DLHC(std::shared_ptr<platform::II2C> I2C_line);
+
         virtual ~LSM303DLHC() = default;
 
         // Initialize the device
@@ -87,7 +92,6 @@ class LSM303DLHC: public IAccelerometer {
 //==============================================================================================
 
     private:
-
         // averages the idle value of the accelerometer to calibrate
         void calibrate() override;
 
@@ -97,8 +101,7 @@ class LSM303DLHC: public IAccelerometer {
         void ReadRawAcceleration();
 
 
-        // The I2C peripherals from ST's HAL library
-        I2C_HandleTypeDef i2c_;
+        std::shared_ptr<platform::II2C> I2C_line_;
 
 
         // value to hold offset values, scale, and gravity
