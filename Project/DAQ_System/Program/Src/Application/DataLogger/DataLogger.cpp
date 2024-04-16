@@ -15,10 +15,12 @@ namespace application {
 
 DataLogger::DataLogger(std::shared_ptr<IFileSystem> file_system,
 					   std::shared_ptr<platform::IGpio> user_input,
-					   uint8_t* storage_connected_observer)
+					   uint8_t* storage_connected_observer,
+					   std::shared_ptr<CircularQueue<DataPayload>> queue)
   : file_system_(file_system),
 	user_input_(user_input),
-	storage_connected_observer_(storage_connected_observer) {
+	storage_connected_observer_(storage_connected_observer),
+	queue_(queue) {
 
 	dummy_data_.timestamp_ = 15;
 	dummy_data_.linpot_displacement_inches_[0] = 2.5;
@@ -145,8 +147,20 @@ void DataLogger::Logging::Compute(DataLogger& context) {
 
 
 
-	// TODO: check the queue and log
-	context.RecordDataSample(context.dummy_data_);
+	context.queue_->Lock();
+
+	DataPayload received_data;
+
+	if(!context.queue_->IsEmpty()) {
+		received_data = context.queue_->Dequeue();
+		context.RecordDataSample(received_data);
+	}
+
+	if(context.queue_->IsFull()) {
+		printf("Queue is full! Data samples are being dropped...\n");
+	}
+
+	context.queue_->Unlock();
 }
 
 void DataLogger::Logging::Exit(DataLogger& context) {

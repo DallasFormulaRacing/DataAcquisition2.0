@@ -105,13 +105,10 @@ void cppMain() {
 	auto bx_i2c_peripheral = std::make_shared<platform::I2CStmF4>(hi2c1);
 	std::shared_ptr<platform::II2C> i2c_line = bx_i2c_peripheral;
 
-	auto accelerometer = std::make_unique<sensor::LSM303DLHC>(i2c_line);
-	accelerometer->init();
 	// Subscribe to messages with PE3's CAN IDs
 	for (const uint32_t& can_id : can_id_list) {
 		bx_can_peripheral->ConfigureFilter((can_id >> 13), (can_id & 0x1FFF));
 	}
-
 
 	bx_can_peripheral->Start();
 
@@ -169,7 +166,7 @@ osThreadId_t dataLoggingTaskHandle;
 const osThreadAttr_t dataLoggingTask_attributes = {
   .name = "dataLoggingTask",
   .stack_size = 128 * 20,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 
 
@@ -201,16 +198,16 @@ const osMutexAttr_t queue_thread_attributes = {
 };
 
 auto wrapper_mutex = std::make_shared<application::MutexCmsisV2>(queue_thread_attributes);
-uint8_t size = 10;
-application::CircularQueue<uint32_t> q(size, wrapper_mutex);
+uint8_t size = 20;
+auto q = std::make_shared<application::CircularQueue<application::DataPayload>>(size, wrapper_mutex);
 
 void RtosInit() {
 	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
 	osKernelInitialize(); 			// Initialize scheduler
 
-//	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
+	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
 	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
-	consumerTaskHandle = osThreadNew(QueueConsumingThread, NULL, &consumerTask_attributes);
+//	consumerTaskHandle = osThreadNew(QueueConsumingThread, NULL, &consumerTask_attributes);
 
 	wrapper_mutex->Create();
 
@@ -224,30 +221,41 @@ void RtosInit() {
 
 
 void QueueProducingThread(void *argument) {
-	uint32_t num = 1;
+	application::DataPayload data;
+
+	data.timestamp_ = 1;
+	data.linpot_displacement_inches_[0] = 2.5;
+	data.linpot_displacement_inches_[1] = 0.5;
+	data.linpot_displacement_inches_[2] = 1.3;
+	data.linpot_displacement_inches_[3] = 4.0;
 
 	for(;;) {
-		q.Lock();
+		q->Lock();
+		q->Enqueue(data);
+		q->Unlock();
 
-		q.Enqueue(num);
-		num *= 2;
+		data.timestamp_*= 2;
+		data.linpot_displacement_inches_[0] *= 2;
+		data.linpot_displacement_inches_[1] *= 2;
+		data.linpot_displacement_inches_[2] *= 2;
+		data.linpot_displacement_inches_[3] *= 2;
 
-		q.Unlock();
 		osDelay(1000);
 	}
 }
 
 void QueueConsumingThread(void *argument) {
-	uint32_t receiving_num = 0;
-	for(;;) {
-		q.Lock();
+	application::DataPayload received_data;
 
-		if(!q.IsEmpty()) {
-			receiving_num = q.Dequeue();
-			printf("\nReceived: %d", receiving_num);
+	for(;;) {
+		q->Lock();
+
+		if(!q->IsEmpty()) {
+			received_data = q->Dequeue();
+			printf("\nReceived: %d", received_data.timestamp_);
 		}
 
-		q.Unlock();
+		q->Unlock();
 		osDelay(300);
 	}
 }
@@ -266,10 +274,11 @@ void DataLoggingThread(void *argument) {
 	std::shared_ptr<platform::IGpio> toggle_switch = switch_gpio_peripheral;
 	gpio_callback_ptr = switch_gpio_peripheral;
 
-	application::DataLogger data_logger(file_system, toggle_switch, &usb_connected_observer);
+	application::DataLogger data_logger(file_system, toggle_switch, &usb_connected_observer, q);
 
 	for (;;) {
 		data_logger.Run();
+		osDelay(2300);
 	}
 }
 

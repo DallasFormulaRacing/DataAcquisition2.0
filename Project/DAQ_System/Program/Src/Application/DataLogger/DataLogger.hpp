@@ -18,17 +18,10 @@
 #include <memory>
 
 // DFR Custom Dependencies
+#include "../circular_queue.hpp"
 #include "../data_payload.hpp"
 #include "../FileSystem/ifile_system.hpp"
 #include "../../Platform/GPIO/igpio.hpp"
-
-/// @param file_system An implementation of a file system following the
-/// @ref application.IFileSystem abstract interface. The current
-/// implementation of the `DataLogger` requires the following functionalities:
-/// - Mounting/unmounting.
-/// - File searching.
-/// - File opening/closing.
-/// - File writing.
 
 namespace application {
 
@@ -53,7 +46,8 @@ public:
 	/// variable with only binary values.
 	DataLogger(std::shared_ptr<IFileSystem> file_system,
 			   std::shared_ptr<platform::IGpio> user_input,
-			   uint8_t* storage_connected_observer);
+			   uint8_t* storage_connected_observer,
+			   std::shared_ptr<CircularQueue<DataPayload>> queue);
 
 	~DataLogger();
 
@@ -120,7 +114,7 @@ private:
 	// Flag observer
 	uint8_t* storage_connected_observer_;
 
-	DataPayload dummy_data_;
+	std::shared_ptr<CircularQueue<DataPayload>> queue_;
 };
 
 } // namespace application
