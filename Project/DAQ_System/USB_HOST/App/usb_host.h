@@ -31,8 +31,6 @@
 #include "stm32f4xx_hal.h"
 
 /* USER CODE BEGIN INCLUDE */
- extern uint8_t to_log;
- extern uint8_t to_unmount;
 
 /* USER CODE END INCLUDE */
 
