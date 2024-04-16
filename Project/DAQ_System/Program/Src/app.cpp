@@ -274,7 +274,7 @@ void DataLoggingThread(void *argument) {
 	std::shared_ptr<platform::IGpio> toggle_switch = switch_gpio_peripheral;
 	gpio_callback_ptr = switch_gpio_peripheral;
 
-	application::DataLogger data_logger(file_system, toggle_switch, &usb_connected_observer, q);
+	application::DataLogger data_logger(file_system, toggle_switch, q, &usb_connected_observer);
 
 	for (;;) {
 		data_logger.Run();

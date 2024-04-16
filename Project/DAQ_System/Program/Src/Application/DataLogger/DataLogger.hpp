@@ -41,13 +41,15 @@ public:
 	/// - Reading the logical `HIGH` and `LOW` states.
 	/// - Setting a flag for detecting whether the GPIO state has cleared, and
 	///	  clearing this flag after it has been read.
+	/// @param queue A FIFO data structure to be shared with sensors for sharing
+	/// data samples.
 	/// @param storage_connected_observer A pointer to a flag that monitors whether the
 	/// storage block device is connected or ejected. To be used as a boolean
 	/// variable with only binary values.
 	DataLogger(std::shared_ptr<IFileSystem> file_system,
 			   std::shared_ptr<platform::IGpio> user_input,
-			   uint8_t* storage_connected_observer,
-			   std::shared_ptr<CircularQueue<DataPayload>> queue);
+			   std::shared_ptr<CircularQueue<DataPayload>> queue,
+			   uint8_t* storage_connected_observer);
 
 	~DataLogger();
 
@@ -103,6 +105,9 @@ private:
 
 	std::shared_ptr<IFileSystem> file_system_;
 	std::shared_ptr<platform::IGpio> user_input_;
+	std::shared_ptr<CircularQueue<DataPayload>> queue_;
+	uint8_t* storage_connected_observer_;
+
 	char file_name_[16] = "\0";
 	bool logging_enabled_ = false;
 
@@ -110,11 +115,6 @@ private:
 	Standby standby_state_;
 	Logging logging_state_;
 	State* current_state_{&idle_state_};
-
-	// Flag observer
-	uint8_t* storage_connected_observer_;
-
-	std::shared_ptr<CircularQueue<DataPayload>> queue_;
 };
 
 } // namespace application
