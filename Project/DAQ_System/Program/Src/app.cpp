@@ -31,19 +31,25 @@ extern I2C_HandleTypeDef hi2c1;
 
 // 3rd Party Libraries and Frameworks
 #include "cmsis_os.h"
+
 #include "fatfs.h"
-extern char USBHPath[4];   /* USBH logical drive path */
-extern FATFS USBHFatFS;    /* File system object for USBH logical drive */
-extern FIL USBHFile;       /* File object for USBH */
+extern char USBHPath[4];   // USBH logical drive path
+extern FATFS USBHFatFS;    // File system object for USBH logical drive
+extern FIL USBHFile;       // File object for USBH
+
 #include "usb_host.h"
+extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 
 
 // DFR Custom Dependencies
 #include "app.hpp"
+#include "Application/data_payload.hpp"
+#include "Application/DataLogger/DataLogger.hpp"
 #include "Application/FileSystem/fat_fs.hpp"
-#include "../../Core/Inc/retarget.h"
 #include "Platform/CAN/STM/F4/bxcan_stmf4.hpp"
 #include "Platform/CAN/Interfaces/ican.hpp"
+#include "Platform/GPIO/igpio.hpp"
+#include "Platform/GPIO/gpio_stmf4.hpp"
 #include "Sensor/Accelerometer/lsm303dlhc.hpp"
 #include "Sensor/ECU/PE3/iecu.hpp"
 #include "Sensor/ECU/PE3/pe3.hpp"
@@ -52,9 +58,17 @@ extern FIL USBHFile;       /* File object for USBH */
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
 #include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
+#include "../../Core/Inc/retarget.h"
 
-#include "Application/data_payload.hpp"
-#include "Application/DataLogger/DataLogger.hpp"
+
+
+// Toggle Switch Interrupt Callback
+std::shared_ptr<platform::GpioStmF4> gpio_callback_ptr(nullptr);
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	gpio_callback_ptr->InterruptCallback(GPIO_Pin);
+}
+
 
 #include "Application/circular_queue.hpp"
 #include "Application/Mutex/mutex_cmsisv2.hpp"
@@ -68,24 +82,18 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
+
+
+
+void StartFreeRtos();
 void RtosInit();
 void DataLoggingThread(void *argument);
+
+
 
 void cppMain() {
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
-
-//	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
-//	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
-//
-//	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
-//	accelerometer = std::make_unique<sensor::LSM6DSOX>(hi2c1);
-//	accelerometer->init();
-//	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
-//	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::FSR4g);
-//
-//	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
-//	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
 
 
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
@@ -112,59 +120,47 @@ void cppMain() {
 	bx_can_peripheral->ConfigureReceiveCallback(rx_interrupt_mode);
 	bx_can_peripheral->EnableInterruptMode();
 
-
 	float manifold_absolute_pressure = 0.0f;
 	float battery_voltage = 0.0f;
-
-//	float displacement_inches = 0.0f;
-	float* acc_data;
-//	int16_t *gyro_data = 0;
 
 	RtosInit();
 
 	for(;;) {
+//		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
+//		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
+//		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
 
-		accelerometer->ComputeAcceleration();
-		float* acc_data = accelerometer->GetAcceleration();
+		if (pe3_ecu->NewMessageArrived()) {
+			__disable_irq();
 
-		printf("the x-axis is %lf \t\t " , acc_data[0]);
-		printf("the y-axis is %lf \t\t " , acc_data[1]);
-		printf("the z-axis is %lf " , acc_data[2]);
-		printf("\r");
-		printf("\n");
+			pe3_ecu->Update();
+			uint32_t can_id = pe3_ecu->LatestCanId();
 
+			switch(can_id) {
+			case FramePe2Id:
+				manifold_absolute_pressure = pe3_ecu->Map();
 
-//		if (pe3_ecu->NewMessageArrived()) {
-//			__disable_irq();
-//
-//			pe3_ecu->Update();
-//			uint32_t can_id = pe3_ecu->LatestCanId();
-//
-//			switch(can_id) {
-//			case FramePe2Id:
-//				manifold_absolute_pressure = pe3_ecu->Map();
-//
-//				printf("\t\t %" PRIu32 "\n", can_id);
-//				printf("Manifold Pressure: %f\n", manifold_absolute_pressure);
-//				printf("\r");
-//				break;
-
-//
-//
-//			case FramePe6Id:
-//				battery_voltage = pe3_ecu->BatteryVoltage();
-//
-//				printf("\t\t %" PRIu32 "\n", can_id);
-//				printf("Battery Voltage: %f\n", battery_voltage);
-//				printf("\r");
-//				break;
-//			}
-//
-//			__enable_irq();
-//		}
+				printf("\t\t %" PRIu32 "\n", can_id);
+				printf("Manifold Pressure: %f\n", manifold_absolute_pressure);
+				printf("\r");
+				break;
 
 
-		//HAL_Delay(150);
+			case FramePe6Id:
+				battery_voltage = pe3_ecu->BatteryVoltage();
+
+				printf("\t\t %" PRIu32 "\n", can_id);
+				printf("Battery Voltage: %f\n", battery_voltage);
+				printf("\r");
+				break;
+			}
+
+			__enable_irq();
+		}
+
+
+
+
 
 	}
 }
@@ -172,11 +168,9 @@ void cppMain() {
 osThreadId_t dataLoggingTaskHandle;
 const osThreadAttr_t dataLoggingTask_attributes = {
   .name = "dataLoggingTask",
-  .stack_size = 128 * 17,
+  .stack_size = 128 * 20,
   .priority = (osPriority_t) osPriorityNormal,
 };
-
-
 
 
 
@@ -211,8 +205,8 @@ uint8_t size = 10;
 application::CircularQueue<uint32_t> q(size, wrapper_mutex);
 
 void RtosInit() {
-	NVIC_SetPriorityGrouping( 0 ); //TODO
-	osKernelInitialize(); // Initialize scheduler
+	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
+	osKernelInitialize(); 			// Initialize scheduler
 
 //	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
 	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
@@ -220,7 +214,7 @@ void RtosInit() {
 
 	wrapper_mutex->Create();
 
-	osKernelStart(); // Start scheduler
+	osKernelStart(); 				// Start scheduler
 }
 
 
@@ -268,39 +262,14 @@ void DataLoggingThread(void *argument) {
 	std::shared_ptr<application::IFileSystem> file_system(nullptr);
 	file_system = std::make_shared<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
 
-//	std::unique_ptr<application::DataLogger> data_logger(nullptr);
-//	data_logger = std::make_unique<application::DataLogger>(file_system);
+	auto switch_gpio_peripheral = std::make_shared<platform::GpioStmF4>(GPIOF, GPIO_PIN_15);
+	std::shared_ptr<platform::IGpio> toggle_switch = switch_gpio_peripheral;
+	gpio_callback_ptr = switch_gpio_peripheral;
 
-	application::DataLogger data_logger(file_system);
-
-	application::DataPayload dummy_data;
-	dummy_data.timestamp_ = 15;
-	dummy_data.linpot_displacement_inches_[0] = 2.5;
-	dummy_data.linpot_displacement_inches_[1] = 0.5;
-	dummy_data.linpot_displacement_inches_[2] = 1.3;
-	dummy_data.linpot_displacement_inches_[3] = 4.0;
-
+	application::DataLogger data_logger(file_system, toggle_switch, &usb_connected_observer);
 
 	for (;;) {
-
-		if(to_log == 1) {
-			printf("Logging\n");
-			data_logger.Enable();
-			data_logger.Start();
-
-			data_logger.RecordDataSample(dummy_data);
-			data_logger.Stop();
-
-			HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_SET);
-			to_log = 0;
-
-		} else if (to_unmount == 1) {
-			data_logger.Disable();
-			to_unmount = 0;
-			printf("Ejected\n");
-		}
-
-		HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
+		data_logger.Run();
 	}
 }
 

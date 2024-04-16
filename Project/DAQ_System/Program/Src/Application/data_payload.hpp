@@ -45,7 +45,7 @@ struct DataPayload {
 
     int GetCsvFormatLength() {
 		return snprintf(NULL, 0,
-				"%d,%f,%f,%f,%f",
+				"%d,%f,%f,%f,%f\n",
 				timestamp_,
 				linpot_displacement_inches_[0],
 				linpot_displacement_inches_[1],
@@ -55,7 +55,7 @@ struct DataPayload {
 
     void CsvFormat(char* buffer, int length) {
 		snprintf(buffer, length,
-				"%d,%f,%f,%f,%f",
+				"%d,%f,%f,%f,%f\n",
 				timestamp_,
 				linpot_displacement_inches_[0],
 				linpot_displacement_inches_[1],
