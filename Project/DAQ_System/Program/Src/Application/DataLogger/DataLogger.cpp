@@ -15,8 +15,8 @@ namespace application {
 
 DataLogger::DataLogger(std::shared_ptr<IFileSystem> file_system,
 					   std::shared_ptr<platform::IGpio> user_input,
-					   std::shared_ptr<CircularQueue<DataPayload>> queue,
-					   uint8_t* storage_connected_observer)
+					   CircularQueue<DataPayload>& queue,
+					   uint8_t& storage_connected_observer)
   : file_system_(file_system),
 	user_input_(user_input),
 	queue_(queue),
@@ -80,7 +80,7 @@ void DataLogger::Idle::Enter(DataLogger& context) {
 }
 
 void DataLogger::Idle::Compute(DataLogger& context) {
-	if (*context.storage_connected_observer_) {
+	if (context.storage_connected_observer_) {
 		context.SetState(&context.standby_state_);
 	}
 }
@@ -99,7 +99,7 @@ void DataLogger::Standby::Enter(DataLogger& context) {
 }
 
 void DataLogger::Standby::Compute(DataLogger& context) {
-	if (!*context.storage_connected_observer_) {
+	if (!context.storage_connected_observer_) {
 		context.SetState(&context.idle_state_);
 	}
 
@@ -126,7 +126,7 @@ void DataLogger::Logging::Enter(DataLogger& context) {
 }
 
 void DataLogger::Logging::Compute(DataLogger& context) {
-	if (!*context.storage_connected_observer_) {
+	if (!context.storage_connected_observer_) {
 		context.SetState(&context.idle_state_);
 	}
 
@@ -140,20 +140,20 @@ void DataLogger::Logging::Compute(DataLogger& context) {
 
 
 
-	context.queue_->Lock();
+	context.queue_.Lock();
 
 	DataPayload received_data;
 
-	if(!context.queue_->IsEmpty()) {
-		received_data = context.queue_->Dequeue();
+	if(!context.queue_.IsEmpty()) {
+		received_data = context.queue_.Dequeue();
 		context.RecordDataSample(received_data);
 	}
 
-	if(context.queue_->IsFull()) {
+	if(context.queue_.IsFull()) {
 		printf("Queue is full! Data samples are being dropped...\n");
 	}
 
-	context.queue_->Unlock();
+	context.queue_.Unlock();
 }
 
 void DataLogger::Logging::Exit(DataLogger& context) {

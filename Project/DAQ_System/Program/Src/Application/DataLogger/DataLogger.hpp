@@ -48,8 +48,8 @@ public:
 	/// variable with only binary values.
 	DataLogger(std::shared_ptr<IFileSystem> file_system,
 			   std::shared_ptr<platform::IGpio> user_input,
-			   std::shared_ptr<CircularQueue<DataPayload>> queue,
-			   uint8_t* storage_connected_observer);
+			   CircularQueue<DataPayload>& queue,
+			   uint8_t& storage_connected_observer);
 
 	~DataLogger();
 
@@ -105,8 +105,8 @@ private:
 
 	std::shared_ptr<IFileSystem> file_system_;
 	std::shared_ptr<platform::IGpio> user_input_;
-	std::shared_ptr<CircularQueue<DataPayload>> queue_;
-	uint8_t* storage_connected_observer_;
+	CircularQueue<DataPayload>& queue_;
+	uint8_t& storage_connected_observer_;
 
 	char file_name_[16] = "\0";
 	bool logging_enabled_ = false;

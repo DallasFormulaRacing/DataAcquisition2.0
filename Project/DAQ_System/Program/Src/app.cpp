@@ -199,7 +199,7 @@ const osMutexAttr_t queue_thread_attributes = {
 
 auto wrapper_mutex = std::make_shared<application::MutexCmsisV2>(queue_thread_attributes);
 uint8_t size = 20;
-auto q = std::make_shared<application::CircularQueue<application::DataPayload>>(size, wrapper_mutex);
+application::CircularQueue<application::DataPayload> queue(size, wrapper_mutex);
 
 void RtosInit() {
 	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
@@ -230,9 +230,9 @@ void QueueProducingThread(void *argument) {
 	data.linpot_displacement_inches_[3] = 4.0;
 
 	for(;;) {
-		q->Lock();
-		q->Enqueue(data);
-		q->Unlock();
+		queue.Lock();
+		queue.Enqueue(data);
+		queue.Unlock();
 
 		data.timestamp_*= 2;
 		data.linpot_displacement_inches_[0] *= 2;
@@ -248,14 +248,14 @@ void QueueConsumingThread(void *argument) {
 	application::DataPayload received_data;
 
 	for(;;) {
-		q->Lock();
+		queue.Lock();
 
-		if(!q->IsEmpty()) {
-			received_data = q->Dequeue();
+		if(!queue.IsEmpty()) {
+			received_data = queue.Dequeue();
 			printf("\nReceived: %d", received_data.timestamp_);
 		}
 
-		q->Unlock();
+		queue.Unlock();
 		osDelay(300);
 	}
 }
@@ -267,14 +267,12 @@ void QueueConsumingThread(void *argument) {
 void DataLoggingThread(void *argument) {
 	MX_USB_HOST_Init();
 
-	std::shared_ptr<application::IFileSystem> file_system(nullptr);
-	file_system = std::make_shared<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
+	auto file_system = std::make_shared<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
 
-	auto switch_gpio_peripheral = std::make_shared<platform::GpioStmF4>(GPIOF, GPIO_PIN_15);
-	std::shared_ptr<platform::IGpio> toggle_switch = switch_gpio_peripheral;
-	gpio_callback_ptr = switch_gpio_peripheral;
+	auto toggle_switch = std::make_shared<platform::GpioStmF4>(GPIOF, GPIO_PIN_15);
+	gpio_callback_ptr = toggle_switch;
 
-	application::DataLogger data_logger(file_system, toggle_switch, q, &usb_connected_observer);
+	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer);
 
 	for (;;) {
 		data_logger.Run();
