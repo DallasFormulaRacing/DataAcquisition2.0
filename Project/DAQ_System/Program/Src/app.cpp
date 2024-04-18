@@ -29,6 +29,9 @@ extern CAN_HandleTypeDef hcan1;
 #include "i2c.h"
 extern I2C_HandleTypeDef hi2c1;
 
+#include "tim.h"
+extern TIM_HandleTypeDef htim7;
+
 // 3rd Party Libraryes and Frameworks
 #include "cmsis_os.h"
 #include "fatfs.h"
@@ -125,10 +128,12 @@ void cppMain() {
 	float* acc_data;
 //	int16_t *gyro_data = 0;
 
-	NVIC_SetPriorityGrouping( 0 ); //TODO
-	osKernelInitialize();	// Initialize scheduler
-	RtosInit();				// Initialize thread
-	osKernelStart();		// Start scheduler
+	//NVIC_SetPriorityGrouping( 0 ); //TODO
+	//osKernelInitialize();	// Initialize scheduler
+	//RtosInit();				// Initialize thread
+	//osKernelStart();		// Start scheduler
+
+	HAL_TIM_Base_Start_IT(&htim7);
 
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
@@ -199,18 +204,19 @@ const osThreadAttr_t dataLoggingTask_attributes = {
 void RtosInit() {
 //	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
 	// creates a one-shot timer:
-	one_shot_id = osTimerNew(one_shot_Callback, osTimerOnce, (void *)0, NULL);     // (void*)0 is passed as an argument
+	/*one_shot_id = osTimerNew(one_shot_Callback, osTimerOnce, (void *)0, NULL);     // (void*)0 is passed as an argument
 	                                                                               // to the callback function
 	// creates a periodic timer:
 	periodic_id = osTimerNew(periodic_Callback, osTimerPeriodic, (void *)5, NULL); // (void*)5 is passed as an argument
-	osTimerStart(one_shot_id, 500U);
-	osTimerStart(periodic_id, 1500U);           // to the callback function
+	//osTimerStart(one_shot_id, 500U);
+	//osTimerStart(periodic_id, 1500U);           // to the callback function
 
 	//start on-shot timer again
-	osTimerStart(one_shot_id, 500U);
+	osTimerStart(one_shot_id, 500U);*/
 
 
 }
+
 
 void DataLoggingThread(void *argument) {
 	MX_USB_HOST_Init();
