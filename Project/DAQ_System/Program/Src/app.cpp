@@ -53,7 +53,22 @@ extern FIL USBHFile;       /* File object for USBH */
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
 #include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
 
+osTimerId_t one_shot_id, periodic_id;
 
+static void one_shot_Callback (void *argument) {
+  int32_t arg = (int32_t)argument; // cast back argument '0'
+  // do something, i.e. set thread/event flags
+  uint32_t timeInMilliseconds = (osKernelGetTickCount()/osKernelGetTickFreq()) * 1000;
+  printf("one shot timer: %d\n", timeInMilliseconds);
+
+}
+static void periodic_Callback (void *argument) {
+  int32_t arg = (int32_t)argument; // cast back argument '5'
+  // do something, i.e. set thread/event flags
+  uint64_t timeInMilliseconds = (osKernelGetTickCount()/osKernelGetTickFreq()) * 1000;
+  printf("periodic timer: %llu\n", static_cast<unsigned long long>(timeInMilliseconds));
+  //osDelay(2000);
+}
 
 // CAN Bus Interrupt Callback
 std::shared_ptr<platform::BxCanStmF4> bx_can_callback_ptr(nullptr);
@@ -182,7 +197,19 @@ const osThreadAttr_t dataLoggingTask_attributes = {
 };
 
 void RtosInit() {
-	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
+//	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
+	// creates a one-shot timer:
+	one_shot_id = osTimerNew(one_shot_Callback, osTimerOnce, (void *)0, NULL);     // (void*)0 is passed as an argument
+	                                                                               // to the callback function
+	// creates a periodic timer:
+	periodic_id = osTimerNew(periodic_Callback, osTimerPeriodic, (void *)5, NULL); // (void*)5 is passed as an argument
+	osTimerStart(one_shot_id, 500U);
+	osTimerStart(periodic_id, 1500U);           // to the callback function
+
+	//start on-shot timer again
+	osTimerStart(one_shot_id, 500U);
+
+
 }
 
 void DataLoggingThread(void *argument) {
