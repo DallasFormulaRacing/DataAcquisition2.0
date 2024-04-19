@@ -21,7 +21,8 @@
 
 namespace sensor{
 
-LSM303DLHC::LSM303DLHC(I2C_HandleTypeDef& hi2c):i2c_(hi2c){}
+LSM303DLHC::LSM303DLHC(std::shared_ptr<platform::II2C> i2c_line)
+		: I2C_line_ (i2c_line){}
 
 void LSM303DLHC::init() {
     static constexpr uint8_t kNumBytes = 2;
@@ -31,23 +32,23 @@ void LSM303DLHC::init() {
     // continuous conversion mode
     commands[0] = MR_REG_M;
     commands[1] = 0x00;
-    HAL_I2C_Master_Transmit(&i2c_,MAG_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+    I2C_line_->Transmit(commands,MAG_ADDRESS, kNumBytes);
 
     // data rate 75hz
     commands[0] = CRA_REG_M;
     commands[1] = 0x18; // 0b00011000
-    HAL_I2C_Master_Transmit(&i2c_,MAG_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+    I2C_line_->Transmit(commands,MAG_ADDRESS, kNumBytes);
 
     // init acc
     // data rate 100hz
     commands[0] = CTRL_REG1_A;
     commands[1] = 0x57; // 0b01010111
-    HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+    I2C_line_->Transmit(commands,ACC_ADDRESS, kNumBytes);
 
     // High Resolution mode (HR) enable
     commands[0] = CTRL_REG4_A;
     commands[1] = 0x08; // 0b00001000
-    HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+    I2C_line_->Transmit(commands,ACC_ADDRESS, kNumBytes);
 
     calibrate();
 }
@@ -128,14 +129,14 @@ void LSM303DLHC::ComputeAcceleration() {
 
 void LSM303DLHC::ReadRawAcceleration() {
 	static constexpr int ByteArraySize = 6;
-	static constexpr int I2CWriteSize = 1;
-	static constexpr int I2CReadSize = 6;
 
     uint8_t command[1] = { OUT_X_L_A | 0x80 };
-    HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, command,I2CWriteSize, HAL_MAX_DELAY);
+
+    I2C_line_->Transmit(command, ACC_ADDRESS, 1);
 
     uint8_t bytes_received[ByteArraySize];
-    HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, bytes_received,I2CReadSize, HAL_MAX_DELAY);
+
+    I2C_line_->Receive(bytes_received, ACC_ADDRESS, ByteArraySize);
 
     // 16-bit values
     raw_acceleration_data_[0] = (bytes_received[1] <<8 | bytes_received[0]);

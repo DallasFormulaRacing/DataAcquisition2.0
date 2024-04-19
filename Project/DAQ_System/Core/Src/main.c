@@ -108,7 +108,7 @@ int main(void)
   MX_FATFS_Init();
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-
+//  HAL_TIM_Base_Start_IT(&htim7);
 
 
 //  RetargetInit(&huart3);
@@ -156,7 +156,7 @@ void SystemClock_Config(void)
   * in the RCC_OscInitTypeDef structure.
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -198,6 +198,9 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+	if (htim->Instance == TIM7) {
+		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
+	}
 
 	if (htim->Instance == TIM7) {
 		HAL_GPIO_TogglePin(GPIOA, LD3_Pin);

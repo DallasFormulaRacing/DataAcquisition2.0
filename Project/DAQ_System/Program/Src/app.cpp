@@ -34,19 +34,25 @@ extern TIM_HandleTypeDef htim7;
 
 // 3rd Party Libraryes and Frameworks
 #include "cmsis_os.h"
+
 #include "fatfs.h"
-extern char USBHPath[4];   /* USBH logical drive path */
-extern FATFS USBHFatFS;    /* File system object for USBH logical drive */
-extern FIL USBHFile;       /* File object for USBH */
+extern char USBHPath[4];   // USBH logical drive path
+extern FATFS USBHFatFS;    // File system object for USBH logical drive
+extern FIL USBHFile;       // File object for USBH
+
 #include "usb_host.h"
+extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 
 
 // DFR Custom Dependencies
 #include "app.hpp"
+#include "Application/data_payload.hpp"
+#include "Application/DataLogger/DataLogger.hpp"
 #include "Application/FileSystem/fat_fs.hpp"
-#include "../../Core/Inc/retarget.h"
 #include "Platform/CAN/STM/F4/bxcan_stmf4.hpp"
 #include "Platform/CAN/Interfaces/ican.hpp"
+#include "Platform/GPIO/igpio.hpp"
+#include "Platform/GPIO/gpio_stmf4.hpp"
 #include "Sensor/Accelerometer/lsm303dlhc.hpp"
 #include "Sensor/ECU/PE3/iecu.hpp"
 #include "Sensor/ECU/PE3/pe3.hpp"
@@ -55,6 +61,17 @@ extern FIL USBHFile;       /* File object for USBH */
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
 #include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
+#include "../../Core/Inc/retarget.h"
+
+
+
+// Toggle Switch Interrupt Callback
+std::shared_ptr<platform::GpioStmF4> gpio_callback_ptr(nullptr);
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	gpio_callback_ptr->InterruptCallback(GPIO_Pin);
+}
 
 osTimerId_t one_shot_id, periodic_id;
 
@@ -82,24 +99,20 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
+
+
+
+void StartFreeRtos();
 void RtosInit();
 void DataLoggingThread(void *argument);
 
+
+
 void cppMain() {
+	HAL_TIM_Base_Start_IT(&htim7);
+
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
-
-//	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
-//	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
-//
-//	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
-//	accelerometer = std::make_unique<sensor::LSM6DSOX>(hi2c1);
-//	accelerometer->init();
-//	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
-//	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::FSR4g);
-//
-//	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
-//	gyroscope = std::make_unique<sensor::L3GD20H>(hi2c1);
 
 
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
@@ -108,10 +121,16 @@ void cppMain() {
 	auto pe3_ecu = std::make_unique<sensor::Pe3>(can_bus);
 	const std::vector<uint32_t>& can_id_list = pe3_ecu->CanIdList();
 
+	auto bx_i2c_peripheral = std::make_shared<platform::I2CStmF4>(hi2c1);
+	std::shared_ptr<platform::II2C> i2c_line = bx_i2c_peripheral;
+
+	auto accelerometer = std::make_unique<sensor::LSM303DLHC>(i2c_line);
+	accelerometer->init();
 	// Subscribe to messages with PE3's CAN IDs
 	for (const uint32_t& can_id : can_id_list) {
 		bx_can_peripheral->ConfigureFilter((can_id >> 13), (can_id & 0x1FFF));
 	}
+
 
 	bx_can_peripheral->Start();
 
@@ -120,45 +139,16 @@ void cppMain() {
 	bx_can_peripheral->ConfigureReceiveCallback(rx_interrupt_mode);
 	bx_can_peripheral->EnableInterruptMode();
 
-
 	float manifold_absolute_pressure = 0.0f;
 	float battery_voltage = 0.0f;
 
-//	float displacement_inches = 0.0f;
-	float* acc_data;
-//	int16_t *gyro_data = 0;
+	//StartFreeRtos();
 
-	//NVIC_SetPriorityGrouping( 0 ); //TODO
-	//osKernelInitialize();	// Initialize scheduler
-	//RtosInit();				// Initialize thread
-	//osKernelStart();		// Start scheduler
-
-	HAL_TIM_Base_Start_IT(&htim7);
 
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
-//
-//		displacement_inches = lin_pot->DisplacementInches();
-//		printf("\n Percentage: %f", displacement_inches);
-//
-//		accelerometer->ComputeAcceleration();
-//		acc_data = accelerometer->GetAcceleration();
-//
-//		printf("the x-axis is %lf \t\t " , acc_data[0]);
-//		printf("the y-axis is %lf \t\t " , acc_data[1]);
-//		printf("the z-axis is %lf " , acc_data[2]);
-//		printf("\r");
-//		printf("\n");
-//
-//		gyro_data = gyroscope->DegreesPerSecond();
-//		printf("x = %hd\t",gyro_data[0]);
-//		printf("y = %hd\t",gyro_data[1]);
-//		printf("z = %hd\t",gyro_data[2]);
-//		printf("\n");
-//		printf("\r");
-
 
 		if (pe3_ecu->NewMessageArrived()) {
 			__disable_irq();
@@ -188,16 +178,21 @@ void cppMain() {
 			__enable_irq();
 		}
 
-
-		//HAL_Delay(150);
-
 	}
+}
+
+
+void StartFreeRtos() {
+	NVIC_SetPriorityGrouping( 0 ); // For allowing hardware (not RTOS/software) interrupts while the Kernel is running
+	osKernelInitialize();	// Initialize scheduler
+	RtosInit();				// Initialize thread
+	osKernelStart();		// Start scheduler
 }
 
 osThreadId_t dataLoggingTaskHandle;
 const osThreadAttr_t dataLoggingTask_attributes = {
   .name = "dataLoggingTask",
-  .stack_size = 128 * 17,
+  .stack_size = 128 * 20,
   .priority = (osPriority_t) osPriorityNormal,
 };
 
@@ -221,34 +216,17 @@ void RtosInit() {
 void DataLoggingThread(void *argument) {
 	MX_USB_HOST_Init();
 
-	std::unique_ptr<application::IFileSystem> file_system(nullptr);
-	file_system = std::make_unique<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
+	std::shared_ptr<application::IFileSystem> file_system(nullptr);
+	file_system = std::make_shared<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
+
+	auto switch_gpio_peripheral = std::make_shared<platform::GpioStmF4>(GPIOF, GPIO_PIN_15);
+	std::shared_ptr<platform::IGpio> toggle_switch = switch_gpio_peripheral;
+	gpio_callback_ptr = switch_gpio_peripheral;
+
+	application::DataLogger data_logger(file_system, toggle_switch, &usb_connected_observer);
 
 	for (;;) {
-
-		if(to_log == 1) {
-			printf("logging");
-			file_system->Mount();
-			char root_file_path[] = "/ROOTFILE.csv";
-			file_system->CreateFile(root_file_path);
-
-			char root_file_header_row[] = "LinPot1,LinPot2,AccX,AccY,AccZ\n";
-			char root_file_contents[] = "2.3,2.45,2,9,200\n";
-			file_system->OpenFile(root_file_path, (char*)"a");
-			file_system->WriteFile(root_file_header_row);
-			file_system->WriteFile(root_file_contents);
-			file_system->WriteFile(root_file_contents);
-			file_system->CloseFile();
-
-			HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_SET);
-			to_log = 0;
-
-		} else if (to_unmount == 1) {
-			file_system->Unmount();
-			to_unmount = 0;
-		}
-
-		HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
+		data_logger.Run();
 	}
 }
 

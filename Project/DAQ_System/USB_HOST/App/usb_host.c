@@ -25,8 +25,7 @@
 #include "usbh_msc.h"
 
 /* USER CODE BEGIN Includes */
-uint8_t to_log = 0;
-uint8_t to_unmount = 0;
+uint8_t usb_connected_observer = 0;
 
 /* USER CODE END Includes */
 
@@ -104,12 +103,12 @@ static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
 
   case HOST_USER_DISCONNECTION:
   Appli_state = APPLICATION_DISCONNECT;
-  to_unmount = 1;
+  usb_connected_observer = 0;
   break;
 
   case HOST_USER_CLASS_ACTIVE:
   Appli_state = APPLICATION_READY;
-  to_log = 1;
+  usb_connected_observer = 1;
   break;
 
   case HOST_USER_CONNECTION:
