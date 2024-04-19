@@ -226,7 +226,7 @@ void RtosInit() {
 	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
 	osKernelInitialize(); 			// Initialize scheduler
 
-//	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
+	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
 //	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
 //	consumerTaskHandle = osThreadNew(QueueConsumingThread, NULL, &consumerTask_attributes);
 
@@ -239,22 +239,39 @@ void RtosInit() {
 }
 
 
+application::DataPayload data_payload;
+
+bool is_logging_flag = false;
+
 
 void TimestampThread(void *argument) {
 	int count = 0;
-	float timestamp = 0.0f;
 	static constexpr uint8_t kTimeDuration = 2; // seconds
 
 	for(;;) {
 		osThreadFlagsWait(0x00000001U, osFlagsWaitAny, osWaitForever);
-		count++;
-		timestamp = count * kTimeDuration;
-		printf("Time: %f seconds\n", timestamp);
+
+		if (is_logging_flag) {
+			count++;
+			data_payload.timestamp_ = count * kTimeDuration;
+			printf("Time: %f seconds\n", data_payload.timestamp_);
+
+			queue.Lock();
+
+			if(queue.IsFull()) {
+				printf("Queue is full! Data samples are being dropped...\n");
+			}
+
+			queue.Enqueue(data_payload);
+			queue.Unlock();
+		}
+		else {
+			count = 0;
+		}
+
+
 	}
 }
-
-
-
 
 
 void QueueProducingThread(void *argument) {
@@ -281,26 +298,6 @@ void QueueProducingThread(void *argument) {
 	}
 }
 
-void QueueConsumingThread(void *argument) {
-	application::DataPayload received_data;
-
-	for(;;) {
-		queue.Lock();
-
-		if(!queue.IsEmpty()) {
-			received_data = queue.Dequeue();
-			printf("\nReceived: %d", received_data.timestamp_);
-		}
-
-		queue.Unlock();
-		osDelay(300);
-	}
-}
-
-
-
-
-
 void DataLoggingThread(void *argument) {
 	MX_USB_HOST_Init();
 
@@ -309,7 +306,7 @@ void DataLoggingThread(void *argument) {
 	auto toggle_switch = std::make_shared<platform::GpioStmF4>(GPIOF, GPIO_PIN_15);
 	gpio_callback_ptr = toggle_switch;
 
-	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer);
+	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer, is_logging_flag);
 
 	for (;;) {
 		data_logger.Run();

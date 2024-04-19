@@ -24,7 +24,7 @@ namespace application {
 struct DataPayload {
     DataPayload() { }
     
-    int timestamp_ = 0;
+    float timestamp_ = 0.0f;
 
     static constexpr uint8_t kNumOfLinPots = 4;
     std::array<float, kNumOfLinPots> linpot_displacement_inches_{};
@@ -45,7 +45,7 @@ struct DataPayload {
 
     int GetCsvFormatLength() {
 		return snprintf(NULL, 0,
-				"%d,%f,%f,%f,%f\n",
+				"%f,%f,%f,%f,%f\n",
 				timestamp_,
 				linpot_displacement_inches_[0],
 				linpot_displacement_inches_[1],
@@ -55,7 +55,7 @@ struct DataPayload {
 
     void CsvFormat(char* buffer, int length) {
 		snprintf(buffer, length,
-				"%d,%f,%f,%f,%f\n",
+				"%f,%f,%f,%f,%f\n",
 				timestamp_,
 				linpot_displacement_inches_[0],
 				linpot_displacement_inches_[1],
