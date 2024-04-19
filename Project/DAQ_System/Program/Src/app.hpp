@@ -8,6 +8,7 @@
 #include "main.h"
 
 void cppMain(void);
+void TimerCallback(void);
 
 #ifdef __cplusplus
 }

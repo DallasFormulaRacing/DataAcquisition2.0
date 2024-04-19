@@ -55,6 +55,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+extern osThreadId_t timestampTaskHandle;
 
 /* USER CODE END PV */
 
@@ -199,8 +200,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
 	if (htim->Instance == TIM7) {
-		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
+//		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
+		osThreadFlagsSet(timestampTaskHandle, 0x00000001U);
 	}
+
+
 
 	if (htim->Instance == TIM7) {
 		HAL_GPIO_TogglePin(GPIOA, LD3_Pin);

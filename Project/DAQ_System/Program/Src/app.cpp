@@ -90,17 +90,27 @@ using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
 
 
+void TimerCallback(void) {
+	HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
+}
+
+
 void StartFreeRtos();
 void RtosInit();
 void DataLoggingThread(void *argument);
-
+void TimestampThread(void *argument);
 
 
 void cppMain() {
-	HAL_TIM_Base_Start_IT(&htim7);
-
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
+
+	RtosInit();
+
+	/*
+	 * When `RtosInit()` is enabled, the following code does NOT execute.
+	 */
+
 
 
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
@@ -127,7 +137,7 @@ void cppMain() {
 	float manifold_absolute_pressure = 0.0f;
 	float battery_voltage = 0.0f;
 
-	RtosInit();
+
 
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
@@ -204,13 +214,24 @@ auto wrapper_mutex = std::make_shared<application::MutexCmsisV2>(queue_thread_at
 uint8_t size = 20;
 application::CircularQueue<application::DataPayload> queue(size, wrapper_mutex);
 
+osThreadId_t timestampTaskHandle;
+const osThreadAttr_t timestampTask_attributes = {
+  .name = "timestampTask",
+  .stack_size = 128 * 8,
+  .priority = (osPriority_t) osPriorityHigh,
+};
+
+
 void RtosInit() {
 	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
 	osKernelInitialize(); 			// Initialize scheduler
 
-	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
-	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
+//	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
+//	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
 //	consumerTaskHandle = osThreadNew(QueueConsumingThread, NULL, &consumerTask_attributes);
+
+	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
+	HAL_TIM_Base_Start_IT(&htim7);
 
 	wrapper_mutex->Create();
 
@@ -218,6 +239,19 @@ void RtosInit() {
 }
 
 
+
+void TimestampThread(void *argument) {
+	int count = 0;
+	float timestamp = 0.0f;
+	static constexpr uint8_t kTimeDuration = 2; // seconds
+
+	for(;;) {
+		osThreadFlagsWait(0x00000001U, osFlagsWaitAny, osWaitForever);
+		count++;
+		timestamp = count * kTimeDuration;
+		printf("Time: %f seconds\n", timestamp);
+	}
+}
 
 
 
