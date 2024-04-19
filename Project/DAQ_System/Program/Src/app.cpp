@@ -32,6 +32,7 @@ extern I2C_HandleTypeDef hi2c1;
 #include "tim.h"
 extern TIM_HandleTypeDef htim7;
 
+
 // 3rd Party Libraryes and Frameworks
 #include "cmsis_os.h"
 
@@ -46,9 +47,11 @@ extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 
 // DFR Custom Dependencies
 #include "app.hpp"
+#include "Application/circular_queue.hpp"
 #include "Application/data_payload.hpp"
 #include "Application/DataLogger/DataLogger.hpp"
 #include "Application/FileSystem/fat_fs.hpp"
+#include "Application/Mutex/mutex_cmsisv2.hpp"
 #include "Platform/CAN/STM/F4/bxcan_stmf4.hpp"
 #include "Platform/CAN/Interfaces/ican.hpp"
 #include "Platform/GPIO/igpio.hpp"
@@ -64,21 +67,25 @@ extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 #include "../../Core/Inc/retarget.h"
 
 
+void RtosInit();
+void DataLoggingThread(void *argument);
+void TimestampThread(void *argument);
+void QueueProducingThread(void *argument);
 
-// Toggle Switch Interrupt Callback
+
+/**************************************************************
+ * 				Toggle Switch Interrupt Callback
+ **************************************************************/
 std::shared_ptr<platform::GpioStmF4> gpio_callback_ptr(nullptr);
-
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	gpio_callback_ptr->InterruptCallback(GPIO_Pin);
 }
 
-osTimerId_t one_shot_id, periodic_id;
 
-#include "Application/circular_queue.hpp"
-#include "Application/Mutex/mutex_cmsisv2.hpp"
-
-// CAN Bus Interrupt Callback
+/**************************************************************
+ * 				CAN Bus Interrupt Callback
+ **************************************************************/
 std::shared_ptr<platform::BxCanStmF4> bx_can_callback_ptr(nullptr);
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
@@ -90,16 +97,6 @@ using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
 
 
-void TimerCallback(void) {
-	HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
-}
-
-
-void StartFreeRtos();
-void RtosInit();
-void DataLoggingThread(void *argument);
-void TimestampThread(void *argument);
-
 
 void cppMain() {
 	// Enable `printf()` using USART
@@ -108,7 +105,7 @@ void cppMain() {
 	RtosInit();
 
 	/*
-	 * When `RtosInit()` is enabled, the following code does NOT execute.
+	 * When `RtosInit()` is enabled, the rest of this function does NOT execute.
 	 */
 
 
@@ -175,6 +172,39 @@ void cppMain() {
 	}
 }
 
+
+
+
+
+/**************************************************************
+ * 						RTOS Mutexes
+ **************************************************************/
+const osMutexAttr_t queue_thread_attributes = {
+  "myThreadMutex",
+  osMutexRecursive | osMutexPrioInherit,
+  NULL,
+  0U
+};
+
+auto wrapper_mutex = std::make_shared<application::MutexCmsisV2>(queue_thread_attributes);
+
+
+
+/**************************************************************
+ * 					Shared Components
+ **************************************************************/
+static constexpr uint8_t size = 20;
+application::CircularQueue<application::DataPayload> queue(size, wrapper_mutex);
+
+application::DataPayload data_payload;
+
+bool is_logging_flag = false;
+
+
+
+/**************************************************************
+ * 					RTOS Thread Properties
+ **************************************************************/
 osThreadId_t dataLoggingTaskHandle;
 const osThreadAttr_t dataLoggingTask_attributes = {
   .name = "dataLoggingTask",
@@ -182,37 +212,12 @@ const osThreadAttr_t dataLoggingTask_attributes = {
   .priority = (osPriority_t) osPriorityHigh,
 };
 
-
-
-void QueueProducingThread(void *argument);
-void QueueConsumingThread(void *argument);
-
 osThreadId_t producerTaskHandle;
 const osThreadAttr_t producerTask_attributes = {
   .name = "dataLoggingTask",
   .stack_size = 128 * 17,
   .priority = (osPriority_t) osPriorityNormal,
 };
-
-osThreadId_t consumerTaskHandle;
-const osThreadAttr_t consumerTask_attributes = {
-  .name = "dataLoggingTask",
-  .stack_size = 128 * 17,
-  .priority = (osPriority_t) osPriorityHigh,
-};
-
-
-
-const osMutexAttr_t queue_thread_attributes = {
-  "myThreadMutex",                          // human readable mutex name
-  osMutexRecursive | osMutexPrioInherit,    // attr_bits
-  NULL,                                     // memory for control block
-  0U                                        // size for control block
-};
-
-auto wrapper_mutex = std::make_shared<application::MutexCmsisV2>(queue_thread_attributes);
-uint8_t size = 20;
-application::CircularQueue<application::DataPayload> queue(size, wrapper_mutex);
 
 osThreadId_t timestampTaskHandle;
 const osThreadAttr_t timestampTask_attributes = {
@@ -222,28 +227,10 @@ const osThreadAttr_t timestampTask_attributes = {
 };
 
 
-void RtosInit() {
-	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
-	osKernelInitialize(); 			// Initialize scheduler
 
-	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
-//	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
-//	consumerTaskHandle = osThreadNew(QueueConsumingThread, NULL, &consumerTask_attributes);
-
-	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
-	HAL_TIM_Base_Start_IT(&htim7);
-
-	wrapper_mutex->Create();
-
-	osKernelStart(); 				// Start scheduler
-}
-
-
-application::DataPayload data_payload;
-
-bool is_logging_flag = false;
-
-
+/**************************************************************
+ * 						RTOS Threads
+ **************************************************************/
 void TimestampThread(void *argument) {
 	int count = 0;
 	static constexpr uint8_t kTimeDuration = 2; // seconds
@@ -268,11 +255,8 @@ void TimestampThread(void *argument) {
 		else {
 			count = 0;
 		}
-
-
 	}
 }
-
 
 void QueueProducingThread(void *argument) {
 	application::DataPayload data;
@@ -312,6 +296,24 @@ void DataLoggingThread(void *argument) {
 		data_logger.Run();
 		osDelay(2300);
 	}
+}
+
+
+
+void RtosInit() {
+	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
+	osKernelInitialize(); 			// Initialize scheduler
+
+	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
+//	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
+//	consumerTaskHandle = osThreadNew(QueueConsumingThread, NULL, &consumerTask_attributes);
+
+	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
+	HAL_TIM_Base_Start_IT(&htim7);
+
+	wrapper_mutex->Create();
+
+	osKernelStart(); 				// Start scheduler
 }
 
 
