@@ -109,7 +109,6 @@ int main(void)
   MX_FATFS_Init();
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-//  HAL_TIM_Base_Start_IT(&htim7);
 
 
 //  RetargetInit(&huart3);
@@ -200,14 +199,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
 	if (htim->Instance == TIM7) {
-//		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
 		osThreadFlagsSet(timestampTaskHandle, 0x00000001U);
-	}
-
-
-
-	if (htim->Instance == TIM7) {
-		HAL_GPIO_TogglePin(GPIOA, LD3_Pin);
 	}
 
   /* USER CODE END Callback 0 */
