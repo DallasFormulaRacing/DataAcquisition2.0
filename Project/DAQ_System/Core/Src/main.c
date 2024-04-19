@@ -24,6 +24,7 @@
 #include "eth.h"
 #include "fatfs.h"
 #include "i2c.h"
+#include "tim.h"
 #include "usart.h"
 #include "usb_host.h"
 #include "gpio.h"
@@ -75,6 +76,7 @@ void MX_FREERTOS_Init(void);
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -104,8 +106,9 @@ int main(void)
   MX_CAN1_Init();
   MX_I2C1_Init();
   MX_FATFS_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-
+//  HAL_TIM_Base_Start_IT(&htim7);
 
 
 //  RetargetInit(&huart3);
@@ -116,13 +119,14 @@ int main(void)
   /* Init scheduler */
   osKernelInitialize();
 
-  /* Call init function for freertos objects (in freertos.c) */
+  /* Call init function for freertos objects (in cmsis_os2.c) */
   MX_FREERTOS_Init();
 
   /* Start scheduler */
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -152,7 +156,7 @@ void SystemClock_Config(void)
   * in the RCC_OscInitTypeDef structure.
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -194,6 +198,9 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+	if (htim->Instance == TIM7) {
+		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
+	}
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM6) {

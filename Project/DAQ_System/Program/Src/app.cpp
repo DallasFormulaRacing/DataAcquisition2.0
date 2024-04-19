@@ -29,6 +29,9 @@ extern CAN_HandleTypeDef hcan1;
 #include "i2c.h"
 extern I2C_HandleTypeDef hi2c1;
 
+#include "tim.h"
+extern TIM_HandleTypeDef htim7;
+
 // 3rd Party Libraryes and Frameworks
 #include "cmsis_os.h"
 
@@ -90,6 +93,8 @@ void DataLoggingThread(void *argument);
 
 
 void cppMain() {
+	HAL_TIM_Base_Start_IT(&htim7);
+
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
 
@@ -121,7 +126,7 @@ void cppMain() {
 	float manifold_absolute_pressure = 0.0f;
 	float battery_voltage = 0.0f;
 
-	StartFreeRtos();
+	//StartFreeRtos();
 
 
 	for(;;) {
