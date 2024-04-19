@@ -68,6 +68,7 @@ extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 // Toggle Switch Interrupt Callback
 std::shared_ptr<platform::GpioStmF4> gpio_callback_ptr(nullptr);
 
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	gpio_callback_ptr->InterruptCallback(GPIO_Pin);
 }
@@ -161,10 +162,6 @@ void cppMain() {
 
 			__enable_irq();
 		}
-
-
-
-
 
 	}
 }
