@@ -15,17 +15,12 @@ namespace application {
 
 DataLogger::DataLogger(std::shared_ptr<IFileSystem> file_system,
 					   std::shared_ptr<platform::IGpio> user_input,
-					   uint8_t* storage_connected_observer)
+					   CircularQueue<DataPayload>& queue,
+					   uint8_t& storage_connected_observer)
   : file_system_(file_system),
 	user_input_(user_input),
-	storage_connected_observer_(storage_connected_observer) {
-
-	dummy_data_.timestamp_ = 15;
-	dummy_data_.linpot_displacement_inches_[0] = 2.5;
-	dummy_data_.linpot_displacement_inches_[1] = 0.5;
-	dummy_data_.linpot_displacement_inches_[2] = 1.3;
-	dummy_data_.linpot_displacement_inches_[3] = 4.0;
-}
+	queue_(queue),
+	storage_connected_observer_(storage_connected_observer) { }
 
 DataLogger::~DataLogger() { }
 
@@ -85,7 +80,7 @@ void DataLogger::Idle::Enter(DataLogger& context) {
 }
 
 void DataLogger::Idle::Compute(DataLogger& context) {
-	if (*context.storage_connected_observer_) {
+	if (context.storage_connected_observer_) {
 		context.SetState(&context.standby_state_);
 	}
 }
@@ -104,7 +99,7 @@ void DataLogger::Standby::Enter(DataLogger& context) {
 }
 
 void DataLogger::Standby::Compute(DataLogger& context) {
-	if (!*context.storage_connected_observer_) {
+	if (!context.storage_connected_observer_) {
 		context.SetState(&context.idle_state_);
 	}
 
@@ -131,7 +126,7 @@ void DataLogger::Logging::Enter(DataLogger& context) {
 }
 
 void DataLogger::Logging::Compute(DataLogger& context) {
-	if (!*context.storage_connected_observer_) {
+	if (!context.storage_connected_observer_) {
 		context.SetState(&context.idle_state_);
 	}
 
@@ -145,8 +140,20 @@ void DataLogger::Logging::Compute(DataLogger& context) {
 
 
 
-	// TODO: check the queue and log
-	context.RecordDataSample(context.dummy_data_);
+	context.queue_.Lock();
+
+	DataPayload received_data;
+
+	if(!context.queue_.IsEmpty()) {
+		received_data = context.queue_.Dequeue();
+		context.RecordDataSample(received_data);
+	}
+
+	if(context.queue_.IsFull()) {
+		printf("Queue is full! Data samples are being dropped...\n");
+	}
+
+	context.queue_.Unlock();
 }
 
 void DataLogger::Logging::Exit(DataLogger& context) {

@@ -16,6 +16,8 @@
 #include <cstdint>
 #include <vector>
 
+// DFR Custom Dependencies
+#include "Mutex/imutex.hpp"
 
 namespace application {
 
@@ -25,6 +27,12 @@ public:
     CircularQueue(const uint8_t size)
         : buffer_(std::vector<T>(size)),
           kMaxSize(size) { }
+
+    CircularQueue(const uint8_t size,
+        			  std::shared_ptr<application::IMutex> mutex)
+            : buffer_(std::vector<T>(size)),
+              kMaxSize(size),
+    		  mutex_(mutex) { }
     
     void Enqueue(T data) {
         buffer_[head_] = data;
@@ -58,14 +66,21 @@ public:
         return full_;
     }
 
+    void Lock() { mutex_->Lock(); }
+
+    void Unlock() { mutex_->Unlock(); }
+
 
 private:
     void IncrementIndex(uint8_t &index) {
         index = (index + 1) % kMaxSize;   
     }
 
+
+
     std::vector<T> buffer_;
     const uint8_t kMaxSize;
+    std::shared_ptr<application::IMutex> mutex_;
     uint8_t head_ = 0;
     uint8_t tail_ = 0;
     bool empty_ = true;
