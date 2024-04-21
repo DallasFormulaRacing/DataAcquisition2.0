@@ -61,17 +61,24 @@ void cppMain() {
 //	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
 //	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
 //
-	std::unique_ptr<sensor::IAccelerometer> accelerometer(nullptr);
-	accelerometer = std::make_unique<sensor::LSM6DSOX>(hi2c1);
+
+
+	auto LSM6DSOX_Accelerometer = std::make_shared<sensor::LSM6DSOX_Accelerometer>(hi2c1);
+	std::shared_ptr<sensor::IAccelerometer> accelerometer = LSM6DSOX_Accelerometer;
 	accelerometer->init();
-	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
-	static_cast<sensor::LSM6DSOX*>(accelerometer.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::FSR4g);
-//
-	std::unique_ptr<sensor::IGyroscope> gyroscope(nullptr);
-	gyroscope = std::make_unique<sensor::LSM6DSOX>(hi2c1);
-	static_cast<sensor::LSM6DSOX*>(gyroscope.get())->SetODR(sensor::LSM6DSOX::SensorConfiguration::ODR12_5);
-	static_cast<sensor::LSM6DSOX*>(gyroscope.get())->SetFSR(sensor::LSM6DSOX::SensorConfiguration::DPS250);
-	
+
+
+	LSM6DSOX_Accelerometer ->SetFSR(sensor::AccelerometerConfiguration::FSR::FSR2g);
+	LSM6DSOX_Accelerometer ->SetODR(sensor::AccelerometerConfiguration::ODR::ODR208);
+
+
+	auto LSM6DSOX_Gyroscope = std::make_shared<sensor::LSM6DSOX_Gyroscope>(hi2c1);
+	std::shared_ptr<sensor::IGyroscope> gyroscope = LSM6DSOX_Gyroscope;
+
+	LSM6DSOX_Gyroscope -> SetFSR(sensor::GyroscopeConfiguration::FSR::DPS250);
+	LSM6DSOX_Gyroscope -> SetODR(sensor::GyroscopeConfiguration::ODR::ODR12_5);
+
+
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
 	std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
 
@@ -106,8 +113,8 @@ void cppMain() {
 //		displacement_inches = lin_pot->DisplacementInches();
 //		printf("\n Percentage: %f", displacement_inches);
 //
-		accelerometer->ComputeAcceleration();
-		acc_data = accelerometer->GetAcceleration();
+//		accelerometer->ComputeAcceleration();
+//		acc_data = accelerometer->GetAcceleration();
 //
 		printf("the x-axis is %lf \t\t " , acc_data[0]);
 		printf("the y-axis is %lf \t\t " , acc_data[1]);
@@ -115,7 +122,7 @@ void cppMain() {
 		printf("\r");
 		printf("\n");
 //
-		gyro_data = gyroscope->DegreesPerSecond();
+//		gyro_data = gyroscope->DegreesPerSecond();
 		printf("x = %hd\t",gyro_data[0]);
 		printf("y = %hd\t",gyro_data[1]);
 		printf("z = %hd\t",gyro_data[2]);

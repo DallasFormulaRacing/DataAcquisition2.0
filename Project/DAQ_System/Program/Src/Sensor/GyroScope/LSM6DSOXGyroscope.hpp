@@ -27,33 +27,34 @@
 
 namespace sensor{
 
-class LSM6DSOX: public IGyroscope{
-    public:
-		class SensorConfiguration{
-		public:
-			enum ODR : uint8_t{
-				ODR12_5  = 0x01,
-				ODR26    = 0x02,
-				ODR52    = 0x03,
-				ODR104   = 0x04,
-				ODR208   = 0x05,
-				ODR416   = 0x06,
-				ODR833   = 0x07,
-				ODR1_66K = 0x09,
-				ODR3_33K = 0x08,
-				ODR6_66K = 0x0A
-			};
+namespace GyroscopeConfiguration{
+	enum class ODR : uint8_t{
+		ODR12_5  = 0x01,
+		ODR26    = 0x02,
+		ODR52    = 0x03,
+		ODR104   = 0x04,
+		ODR208   = 0x05,
+		ODR416   = 0x06,
+		ODR833   = 0x07,
+		ODR1_66K = 0x09,
+		ODR3_33K = 0x08,
+		ODR6_66K = 0x0A
+	};
 
-			enum FSR : uint8_t{
-				DPS250  = 0x00,
-				DPS500  = 0x01,
-				DPS1000 = 0x02,
-				DPS2000 = 0x03
-			};
-		};
+	enum class FSR : uint8_t{
+		DPS250  = 0x00,
+		DPS500  = 0x01,
+		DPS1000 = 0x02,
+		DPS2000 = 0x03
+	};
+}
+
+
+class LSM6DSOX_Gyroscope: public IGyroscope{
+    public:
 		/// @param hi2c an I2C peripheral from ST's HAL.
-        LSM6DSOX(I2C_HandleTypeDef &hi2c);
-        virtual ~LSM6DSOX() = default;
+	    LSM6DSOX_Gyroscope(I2C_HandleTypeDef &hi2c);
+        virtual ~LSM6DSOX_Gyroscope() = default;
 
         /// Converts the raw values from the gyroscope to Degrees/second
         /// @return ± 250 on each axis
@@ -64,11 +65,11 @@ class LSM6DSOX: public IGyroscope{
 
         /// sets the ODR of the gyroscope
         /// @param value from ODR enumeration
-        void SetODR(SensorConfiguration::ODR ODRValue);
+        void SetODR(GyroscopeConfiguration::ODR SelectedODRValue);
 
         /// sets the FSR of the gyroscope
         /// @param value from FSR enumeration
-        void SetFSR(SensorConfiguration::FSR FSRValue);
+        void SetFSR(GyroscopeConfiguration::FSR SelectedFSRValue);
 
     private:
         /// takes in raw data from the gyroscope

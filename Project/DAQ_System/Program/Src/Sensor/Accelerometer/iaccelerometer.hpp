@@ -11,7 +11,10 @@
 #ifndef IACCELEROMETER
 #define IACCELEROMETER
 
+#include <cstdint>
+
 namespace sensor{
+
 
 class IAccelerometer {
     public:

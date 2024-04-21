@@ -21,10 +21,13 @@ namespace sensor{
 
 class IGyroscope{
     public:
+
         virtual ~IGyroscope() = default;
 
         virtual short* DegreesPerSecond() = 0;
         virtual float* RadiansPerSecond() = 0;
+
+
     private:
         virtual bool AngularVelocity() = 0;
 };
