@@ -44,6 +44,10 @@ add_executable(
   ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe15.hpp
   ../DAQ_System/Program/Src/Sensor/ECU/PE3/Frames/frame_pe16.hpp
   Src/Sensor/ECU/PE3/pe_frames_tests.cpp
+
+  # Circular Queue Tests
+  ../DAQ_System/Program/Src/Application/circular_queue.hpp
+  Src/Application/circular_queue_tests.cpp
 )
 
 # Linking with `gtest_main` instead of `gtest` allows us to bypass having

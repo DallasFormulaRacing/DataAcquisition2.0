@@ -23,8 +23,8 @@
 ## User Features
 | Supported Logging Method | Library Completion    |
 | :----------------------- | :--------------------:|
-| Micro-SD Card            | <span>&#10004;</span> |
-| USB Flash Drive          |                       |
+| Micro-SD Card            |                       |
+| USB Flash Drive          | <span>&#10004;</span> |
 | Wireless Transmission    |                       |
 
 ## Hardware and Equipment
@@ -43,7 +43,7 @@ The [STM32 Nucleo F429ZI](https://www.st.com/en/evaluation-tools/nucleo-f429zi.h
 | GPS/GNSS              | - [NEO-M9N](https://www.sparkfun.com/products/15733)                                                                 |                       |
 | Strain Gauges         |                                                                                                                      |                       |
 | Tire Temperature      | - [MLX90614](https://www.sparkfun.com/products/9570)                                                                 |                       |
-| ECU                   | - [PE3-8400P](https://pe-ltd.com/product/pe3-8400p/)                                                                 |                       |
+| ECU                   | - [PE3-8400P](https://pe-ltd.com/product/pe3-8400p/)                                                                 | <span>&#10004;</span> |
 
 For additional information regarding each device and its implemention, refer to our [Wiki](https://github.com/DallasFormulaRacing/DataAcquisition2.0/wiki).
 
