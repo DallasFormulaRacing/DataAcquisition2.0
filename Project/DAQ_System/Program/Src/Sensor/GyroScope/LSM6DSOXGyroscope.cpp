@@ -86,7 +86,7 @@ void LSM6DSOX_Gyroscope::ComputeInitialOffset(){
     offset_average_[2] = sum[2] / average_sample_size;
 }
 
-void LSM6DSOX_Gyroscope::SetODR(GyroscopeConfiguration::ODR SelectedODRValue){
+void LSM6DSOX_Gyroscope::SetODR(ODR SelectedODRValue){
 
 		static constexpr uint8_t kNumBytes = 2;
 	    uint8_t commands[kNumBytes] = {0};
@@ -107,7 +107,7 @@ void LSM6DSOX_Gyroscope::SetODR(GyroscopeConfiguration::ODR SelectedODRValue){
 		HAL_I2C_Master_Transmit(&i2c_,LSM6DSOX_GYR_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
 }
 
-void LSM6DSOX_Gyroscope::SetFSR(GyroscopeConfiguration::FSR SelectedFSRValue){
+void LSM6DSOX_Gyroscope::SetFSR(FSR SelectedFSRValue){
 
 	static constexpr uint8_t kNumBytes = 2;
     uint8_t commands[kNumBytes] = {0};
@@ -129,16 +129,16 @@ void LSM6DSOX_Gyroscope::SetFSR(GyroscopeConfiguration::FSR SelectedFSRValue){
 
 	// setting up sensitivity factor based on the selected FSR Value. used to convert raw values to degrees
 	switch(SelectedFSRValue){
-	case GyroscopeConfiguration::FSR::DPS250:
+	case FSR::DPS250:
 		SensitivityFactor = 0.00875;
 		break;
-	case GyroscopeConfiguration::FSR::DPS500:
+	case FSR::DPS500:
 		SensitivityFactor = 0.01750;
 		break;
-	case GyroscopeConfiguration::FSR::DPS1000:
+	case FSR::DPS1000:
 		SensitivityFactor =  0.0350;
 		break;
-	case GyroscopeConfiguration::FSR::DPS2000:
+	case FSR::DPS2000:
 		SensitivityFactor = 0.0700;
 		break;
 

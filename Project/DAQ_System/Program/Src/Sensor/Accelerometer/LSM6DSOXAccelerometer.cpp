@@ -78,7 +78,7 @@ void LSM6DSOX_Accelerometer::calibrate() {
 
 }
 
-void LSM6DSOX_Accelerometer::SetODR(AccelerometerConfiguration::ODR ODRValue){
+void LSM6DSOX_Accelerometer::SetODR(ODR ODRValue){
 	static constexpr uint8_t kNumBytes = 2;
     uint8_t commands[kNumBytes] = {0};
     commands[0] = CTRL1_XL;
@@ -97,7 +97,7 @@ void LSM6DSOX_Accelerometer::SetODR(AccelerometerConfiguration::ODR ODRValue){
 
 }
 
-void LSM6DSOX_Accelerometer::SetFSR(AccelerometerConfiguration::FSR FSRValue){
+void LSM6DSOX_Accelerometer::SetFSR(FSR FSRValue){
 
 	static constexpr uint8_t kNumBytes = 2;
     uint8_t commands[kNumBytes] = {0};
@@ -117,16 +117,16 @@ void LSM6DSOX_Accelerometer::SetFSR(AccelerometerConfiguration::FSR FSRValue){
 
 	// each FSR has a different sensitivity factor to convert raw data to G
 	switch (FSRValue){
-	case AccelerometerConfiguration::FSR::FSR2g:
+	case FSR::FSR2g:
 		sensitivity_factor = 0.0000610;
 		break;
-	case AccelerometerConfiguration::FSR::FSR4g:
+	case FSR::FSR4g:
 		sensitivity_factor = 0.000122;
 		break;
-	case AccelerometerConfiguration::FSR::FSR8g:
+	case FSR::FSR8g:
 		sensitivity_factor = 0.000244;
 		break;
-	case AccelerometerConfiguration::FSR::FSR16g:
+	case FSR::FSR16g:
 		sensitivity_factor = 0.000488;
 		break;
 	}

@@ -27,7 +27,10 @@
 
 namespace sensor{
 
-namespace GyroscopeConfiguration{
+
+
+class LSM6DSOX_Gyroscope: public IGyroscope{
+    public:
 	enum class ODR : uint8_t{
 		ODR12_5  = 0x01,
 		ODR26    = 0x02,
@@ -47,11 +50,7 @@ namespace GyroscopeConfiguration{
 		DPS1000 = 0x02,
 		DPS2000 = 0x03
 	};
-}
 
-
-class LSM6DSOX_Gyroscope: public IGyroscope{
-    public:
 		/// @param hi2c an I2C peripheral from ST's HAL.
 	    LSM6DSOX_Gyroscope(I2C_HandleTypeDef &hi2c);
         virtual ~LSM6DSOX_Gyroscope() = default;
@@ -65,11 +64,11 @@ class LSM6DSOX_Gyroscope: public IGyroscope{
 
         /// sets the ODR of the gyroscope
         /// @param value from ODR enumeration
-        void SetODR(GyroscopeConfiguration::ODR SelectedODRValue);
+        void SetODR(ODR SelectedODRValue);
 
         /// sets the FSR of the gyroscope
         /// @param value from FSR enumeration
-        void SetFSR(GyroscopeConfiguration::FSR SelectedFSRValue);
+        void SetFSR(FSR SelectedFSRValue);
 
     private:
         /// takes in raw data from the gyroscope

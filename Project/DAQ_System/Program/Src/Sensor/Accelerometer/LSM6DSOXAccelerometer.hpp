@@ -28,7 +28,9 @@
 
 namespace sensor{
 
-namespace AccelerometerConfiguration{
+
+class LSM6DSOX_Accelerometer: public IAccelerometer {
+    public:
 	enum class ODR : uint8_t{
 		ODR12_5  = 0x01,
 		ODR26    = 0x02,
@@ -48,11 +50,8 @@ namespace AccelerometerConfiguration{
 		FSR8g  = 0x03,
 		FSR16g = 0x1
 	};
-}
 
 
-class LSM6DSOX_Accelerometer: public IAccelerometer {
-    public:
 		/// @param hi2c an I2C peripheral from ST's HAL
 		LSM6DSOX_Accelerometer(I2C_HandleTypeDef &hi2c);
         virtual ~LSM6DSOX_Accelerometer() = default;
@@ -70,9 +69,9 @@ class LSM6DSOX_Accelerometer: public IAccelerometer {
 
 
         // Sets the ODR value
-        void SetODR(AccelerometerConfiguration::ODR ODRValue);
+        void SetODR(ODR ODRValue);
         // Sets the FSR value
-        void SetFSR(AccelerometerConfiguration::FSR FSRValue);
+        void SetFSR(FSR FSRValue);
 
     private:
 

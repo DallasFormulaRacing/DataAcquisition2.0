@@ -68,15 +68,15 @@ void cppMain() {
 	accelerometer->init();
 
 
-	LSM6DSOX_Accelerometer ->SetFSR(sensor::AccelerometerConfiguration::FSR::FSR2g);
-	LSM6DSOX_Accelerometer ->SetODR(sensor::AccelerometerConfiguration::ODR::ODR208);
+	LSM6DSOX_Accelerometer ->SetFSR(sensor::LSM6DSOX_Accelerometer::FSR::FSR2g);
+	LSM6DSOX_Accelerometer ->SetODR(sensor::LSM6DSOX_Accelerometer::ODR::ODR208);
 
 
 	auto LSM6DSOX_Gyroscope = std::make_shared<sensor::LSM6DSOX_Gyroscope>(hi2c1);
 	std::shared_ptr<sensor::IGyroscope> gyroscope = LSM6DSOX_Gyroscope;
 
-	LSM6DSOX_Gyroscope -> SetFSR(sensor::GyroscopeConfiguration::FSR::DPS250);
-	LSM6DSOX_Gyroscope -> SetODR(sensor::GyroscopeConfiguration::ODR::ODR12_5);
+	LSM6DSOX_Gyroscope -> SetFSR(sensor::LSM6DSOX_Gyroscope::FSR::DPS250);
+	LSM6DSOX_Gyroscope -> SetODR(sensor::LSM6DSOX_Gyroscope::ODR::ODR12_5);
 
 
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
