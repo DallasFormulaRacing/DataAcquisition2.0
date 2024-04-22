@@ -15,29 +15,31 @@
 
 namespace sensor {
 
-SLS1322::SLS1322(ADC_HandleTypeDef& hadc) : adc_(hadc) { }
+SLS1322::SLS1322(ADC_HandleTypeDef& hadc) : adc_(hadc) {
+	 HAL_ADC_Start_DMA(&adc_,ADCBuf,ADCBufSize);
+}
 SLS1322::~SLS1322() { }
 
-float SLS1322::DisplacementInches() {
-	float displacement_ratio = DisplacementRatio();
-	return displacement_ratio * kMaxLengthInches;
+void SLS1322::DisplacementInches(float data[]) {
+	DisplacementRatio();
+	for(int channel = 0; channel < ADCBufSize; channel++){
+		data[channel] = retraction_ratio[channel] * kMaxLengthInches;
+
+	}
 }
 
-float SLS1322::DisplacementMillimeters() {
-	float displacement_ratio = DisplacementRatio();
-	return displacement_ratio * kMaxLengthMillimeters;
+void SLS1322::DisplacementMillimeters(float data[]) {
+	DisplacementRatio();
+	for(int channel = 0; channel <ADCBufSize; channel++){
+		data[channel] = retraction_ratio[channel] * kMaxLengthMillimeters;
+	}
 }
 
-uint32_t SLS1322::ReadQuantizedInput() {
-	HAL_ADC_Start(&adc_);
-	HAL_ADC_PollForConversion(&adc_, 1);
-	return HAL_ADC_GetValue(&adc_);
-}
+void SLS1322::DisplacementRatio() {
+	for(int channel = 0;channel < ADCBufSize; channel++){
+		retraction_ratio[channel] = (float)ADCBuf[channel] / kMaxResolution;
 
-float SLS1322::DisplacementRatio() {
-	uint32_t quantized_count = ReadQuantizedInput();
-	float retraction_ratio = (float)(quantized_count) / kMaxResolution;
-	return 1 - retraction_ratio;
+	}
 }
 
 }

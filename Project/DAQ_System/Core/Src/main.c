@@ -21,6 +21,7 @@
 #include "cmsis_os.h"
 #include "adc.h"
 #include "can.h"
+#include "dma.h"
 #include "eth.h"
 #include "fatfs.h"
 #include "i2c.h"
@@ -98,6 +99,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ETH_Init();
   MX_USART3_UART_Init();
   MX_ADC1_Init();
