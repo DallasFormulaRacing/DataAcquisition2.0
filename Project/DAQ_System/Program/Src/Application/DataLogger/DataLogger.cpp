@@ -16,11 +16,13 @@ namespace application {
 DataLogger::DataLogger(std::shared_ptr<IFileSystem> file_system,
 					   std::shared_ptr<platform::IGpio> user_input,
 					   CircularQueue<DataPayload>& queue,
-					   uint8_t& storage_connected_observer)
+					   uint8_t& storage_connected_observer,
+					   bool& logging_enabled_sharer)
   : file_system_(file_system),
 	user_input_(user_input),
 	queue_(queue),
-	storage_connected_observer_(storage_connected_observer) { }
+	storage_connected_observer_(storage_connected_observer),
+	logging_enabled_(logging_enabled_sharer) { }
 
 DataLogger::~DataLogger() { }
 
@@ -54,7 +56,7 @@ bool DataLogger::RecordDataSample(DataPayload& data) {
 	data.CsvFormat(csv_row, length + 1);
 	bool status = file_system_->WriteFile(csv_row);
 
-	delete csv_row;
+	delete[] csv_row;
 	return status;
 }
 
@@ -123,6 +125,10 @@ void DataLogger::Standby::Exit(DataLogger& context) {
 void DataLogger::Logging::Enter(DataLogger& context) {
 	printf("[DataLogger] Entering Logging state.\n");
 	context.CreateCsvFile();
+
+	context.queue_.Lock();
+	context.queue_.Clear();
+	context.queue_.Unlock();
 }
 
 void DataLogger::Logging::Compute(DataLogger& context) {
@@ -139,18 +145,12 @@ void DataLogger::Logging::Compute(DataLogger& context) {
 	}
 
 
-
 	context.queue_.Lock();
 
 	DataPayload received_data;
-
 	if(!context.queue_.IsEmpty()) {
 		received_data = context.queue_.Dequeue();
 		context.RecordDataSample(received_data);
-	}
-
-	if(context.queue_.IsFull()) {
-		printf("Queue is full! Data samples are being dropped...\n");
 	}
 
 	context.queue_.Unlock();

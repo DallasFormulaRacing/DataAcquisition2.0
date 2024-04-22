@@ -49,13 +49,16 @@ public:
 	DataLogger(std::shared_ptr<IFileSystem> file_system,
 			   std::shared_ptr<platform::IGpio> user_input,
 			   CircularQueue<DataPayload>& queue,
-			   uint8_t& storage_connected_observer);
+			   uint8_t& storage_connected_observer,
+			   bool& logging_enabled_sharer);
 
 	~DataLogger();
 
 	/// Informs the `DataLogger` to evaluate its current state and perform
 	/// the according tasks.
 	void Run();
+
+	bool IsLogging();
 
 protected:
 	class State {
@@ -107,9 +110,9 @@ private:
 	std::shared_ptr<platform::IGpio> user_input_;
 	CircularQueue<DataPayload>& queue_;
 	uint8_t& storage_connected_observer_;
+	bool& logging_enabled_;
 
 	char file_name_[16] = "\0";
-	bool logging_enabled_ = false;
 
 	Idle idle_state_;
 	Standby standby_state_;
