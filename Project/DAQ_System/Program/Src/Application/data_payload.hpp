@@ -17,13 +17,17 @@
 #include <cstdint>
 #include <array>
 
-
+// DFR Custom Dependencies
+#include "Mutex/imutex.hpp"
 
 namespace application {
 
 struct DataPayload {
     DataPayload() { }
     
+    DataPayload(std::shared_ptr<application::IMutex> mutex)
+      : mutex_(mutex) { }
+
     float timestamp_ = 0.0f;
 
     static constexpr uint8_t kNumOfLinPots = 4;
@@ -62,6 +66,13 @@ struct DataPayload {
 				linpot_displacement_inches_[2],
 				linpot_displacement_inches_[3]);
 	}
+
+    void Lock() { mutex_->Lock(); }
+
+    void Unlock() { mutex_->Unlock(); }
+
+private:
+    std::shared_ptr<application::IMutex> mutex_;
 
 
 };

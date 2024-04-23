@@ -179,24 +179,31 @@ void cppMain() {
 /**************************************************************
  * 						RTOS Mutexes
  **************************************************************/
-const osMutexAttr_t queue_thread_attributes = {
+const osMutexAttr_t queue_mutex_attributes = {
   "myThreadMutex",
   osMutexRecursive | osMutexPrioInherit,
   NULL,
   0U
 };
 
-auto wrapper_mutex = std::make_shared<application::MutexCmsisV2>(queue_thread_attributes);
+const osMutexAttr_t data_mutex_attributes = {
+  "myThreadMutex",
+  osMutexRecursive | osMutexPrioInherit,
+  NULL,
+  0U
+};
 
+auto queue_mutex = std::make_shared<application::MutexCmsisV2>(queue_mutex_attributes);
+auto data_mutex = std::make_shared<application::MutexCmsisV2>(data_mutex_attributes);
 
 
 /**************************************************************
  * 					Shared Components
  **************************************************************/
 static constexpr uint8_t size = 20;
-application::CircularQueue<application::DataPayload> queue(size, wrapper_mutex);
+application::CircularQueue<application::DataPayload> queue(size, queue_mutex);
 
-application::DataPayload data_payload;
+application::DataPayload data_payload(data_mutex);
 
 bool is_logging_flag = false;
 
@@ -212,13 +219,8 @@ const osThreadAttr_t dataLoggingTask_attributes = {
   .priority = (osPriority_t) osPriorityHigh,
 };
 
-osThreadId_t producerTaskHandle;
-const osThreadAttr_t producerTask_attributes = {
-  .name = "dataLoggingTask",
-  .stack_size = 128 * 17,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 
+uint32_t timestamp_thread_flag = 0x00000001U;
 osThreadId_t timestampTaskHandle;
 const osThreadAttr_t timestampTask_attributes = {
   .name = "timestampTask",
@@ -226,62 +228,17 @@ const osThreadAttr_t timestampTask_attributes = {
   .priority = (osPriority_t) osPriorityHigh,
 };
 
+osThreadId_t ecuTaskHandle;
+const osThreadAttr_t ecuTask_attributes = {
+  .name = "ecuTask",
+  .stack_size = 128 * 17,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 
 /**************************************************************
  * 						RTOS Threads
  **************************************************************/
-void TimestampThread(void *argument) {
-	int count = 0;
-	static constexpr uint8_t kTimeDuration = 2; // seconds
-
-	for(;;) {
-		osThreadFlagsWait(0x00000001U, osFlagsWaitAny, osWaitForever);
-
-		if (is_logging_flag) {
-			count++;
-			data_payload.timestamp_ = count * kTimeDuration;
-			printf("Time: %f seconds\n", data_payload.timestamp_);
-
-			queue.Lock();
-
-			if(queue.IsFull()) {
-				printf("Queue is full! Data samples are being dropped...\n");
-			}
-
-			queue.Enqueue(data_payload);
-			queue.Unlock();
-		}
-		else {
-			count = 0;
-		}
-	}
-}
-
-void QueueProducingThread(void *argument) {
-	application::DataPayload data;
-
-	data.timestamp_ = 1;
-	data.linpot_displacement_inches_[0] = 2.5;
-	data.linpot_displacement_inches_[1] = 0.5;
-	data.linpot_displacement_inches_[2] = 1.3;
-	data.linpot_displacement_inches_[3] = 4.0;
-
-	for(;;) {
-		queue.Lock();
-		queue.Enqueue(data);
-		queue.Unlock();
-
-		data.timestamp_*= 2;
-		data.linpot_displacement_inches_[0] *= 2;
-		data.linpot_displacement_inches_[1] *= 2;
-		data.linpot_displacement_inches_[2] *= 2;
-		data.linpot_displacement_inches_[3] *= 2;
-
-		osDelay(1000);
-	}
-}
-
 void DataLoggingThread(void *argument) {
 	MX_USB_HOST_Init();
 
@@ -294,9 +251,60 @@ void DataLoggingThread(void *argument) {
 
 	for (;;) {
 		data_logger.Run();
-		osDelay(2300);
+		osDelay(1000);
 	}
 }
+
+void TimestampThread(void *argument) {
+	int count = 0;
+	static constexpr float kTimeDuration = 2.0f; // seconds
+
+	for(;;) {
+		osThreadFlagsWait(timestamp_thread_flag, osFlagsWaitAny, osWaitForever);
+
+		if (is_logging_flag) {
+			count++;
+
+			data_payload.Lock();
+			data_payload.timestamp_ = count * kTimeDuration;
+			printf("Time: %f seconds\n", data_payload.timestamp_);
+
+
+			queue.Lock();
+			if(queue.IsFull()) {
+				printf("Queue is full! Data samples are being dropped...\n");
+			}
+			queue.Enqueue(data_payload);
+			queue.Unlock();
+			data_payload.Unlock();
+		}
+		else {
+			count = 0;
+		}
+	}
+}
+
+void EcuThread(void *argument) {
+	data_payload.Lock();
+	data_payload.linpot_displacement_inches_[0] = 2.5;
+	data_payload.linpot_displacement_inches_[1] = 0.5;
+	data_payload.linpot_displacement_inches_[2] = 1.3;
+	data_payload.linpot_displacement_inches_[3] = 4.0;
+	data_payload.Unlock();
+
+	for(;;) {
+		data_payload.Lock();
+		data_payload.linpot_displacement_inches_[0] *= 2;
+		data_payload.linpot_displacement_inches_[1] *= 2;
+		data_payload.linpot_displacement_inches_[2] *= 2;
+		data_payload.linpot_displacement_inches_[3] *= 2;
+		data_payload.Unlock();
+
+		osDelay(1000);
+	}
+}
+
+
 
 
 
@@ -304,14 +312,17 @@ void RtosInit() {
 	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
 	osKernelInitialize(); 			// Initialize scheduler
 
+	// Threads
 	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
-//	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
-//	consumerTaskHandle = osThreadNew(QueueConsumingThread, NULL, &consumerTask_attributes);
-
 	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
-	HAL_TIM_Base_Start_IT(&htim7);
+	ecuTaskHandle = osThreadNew(EcuThread, NULL, &ecuTask_attributes);
 
-	wrapper_mutex->Create();
+	// Mutexes
+	queue_mutex->Create();
+	data_mutex->Create();
+
+	// Hardware Timers
+	HAL_TIM_Base_Start_IT(&htim7);
 
 	osKernelStart(); 				// Start scheduler
 }
