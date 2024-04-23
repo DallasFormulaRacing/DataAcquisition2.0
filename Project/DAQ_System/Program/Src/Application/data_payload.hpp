@@ -42,32 +42,54 @@ struct DataPayload {
     float tps_ = 0.0f;
     float fuel_open_time_ = 0.0f;
     float ignition_angle_ = 0.0f;
+
+    float barometer_ = 0.0f;
     float map_ = 0.0f;
     float lambda_ = 0.0f;
+
+    static constexpr uint8_t kNumAnalogFields = 8;
+	std::array<float, kNumAnalogFields> analog_inputs_{};
+
     float battery_voltage_ = 0.0f;
     float air_temp_ = 0.0f;
     float coolant_temp_ = 0.0f;
 
     int GetCsvFormatLength() {
 		return snprintf(NULL, 0,
-				"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%" PRIx16 ",%f,%f,%f,%f,%f,%f,%f,%f\n",
+				"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%" PRIx16 ",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
 				timestamp_,
+
 				linpot_displacement_mm_[0],
 				linpot_displacement_mm_[1],
 				linpot_displacement_mm_[2],
 				linpot_displacement_mm_[3],
+
 				acceleration_[0],
 				acceleration_[1],
 				acceleration_[2],
+
 				angular_velocity_[0],
 				angular_velocity_[1],
 				angular_velocity_[2],
+
 				rpm_,
 				tps_,
 				fuel_open_time_,
 				ignition_angle_,
+
+				barometer_,
 				map_,
 				lambda_,
+
+				analog_inputs_[0],
+				analog_inputs_[1],
+				analog_inputs_[2],
+				analog_inputs_[3],
+				analog_inputs_[4],
+				analog_inputs_[5],
+				analog_inputs_[6],
+				analog_inputs_[7],
+
 				battery_voltage_,
 				air_temp_,
 				coolant_temp_);
@@ -75,24 +97,40 @@ struct DataPayload {
 
     void CsvFormat(char* buffer, int length) {
 		snprintf(buffer, length,
-				"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%" PRIx16 ",%f,%f,%f,%f,%f,%f,%f,%f\n",
+				"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%" PRIx16 ",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
 				timestamp_,
+
 				linpot_displacement_mm_[0],
 				linpot_displacement_mm_[1],
 				linpot_displacement_mm_[2],
 				linpot_displacement_mm_[3],
+
 				acceleration_[0],
 				acceleration_[1],
 				acceleration_[2],
+
 				angular_velocity_[0],
 				angular_velocity_[1],
 				angular_velocity_[2],
+
 				rpm_,
 				tps_,
 				fuel_open_time_,
 				ignition_angle_,
+
+				barometer_,
 				map_,
 				lambda_,
+
+				analog_inputs_[0],
+				analog_inputs_[1],
+				analog_inputs_[2],
+				analog_inputs_[3],
+				analog_inputs_[4],
+				analog_inputs_[5],
+				analog_inputs_[6],
+				analog_inputs_[7],
+
 				battery_voltage_,
 				air_temp_,
 				coolant_temp_);

@@ -35,15 +35,38 @@ bool DataLogger::CreateCsvFile() {
 			file_system_->OpenFile(file_name_, (char*)"a") &&
 			file_system_->WriteFile((char*)
 					"Timestamp,"
-					"Linpot1,Linpot2,Linpot3,Linpot4,"
-					"AccX,AccY,AccZ,"
-					"GyroX,GyroY,GyroZ,"
+
+					"Linpot1,"
+					"Linpot2,"
+					"Linpot3,"
+					"Linpot4,"
+
+					"AccX,"
+					"AccY,"
+					"AccZ,"
+
+					"GyroX,"
+					"GyroY,"
+					"GyroZ,"
+
 					"RPM,"
 					"TPS,"
 					"FuelOpenTime,"
 					"IgnitionAngle,"
+
+					"Barometer,"
 					"MAP,"
 					"Lambda,"
+
+					"AnalogInput1,"
+					"AnalogInput2,"
+					"AnalogInput3,"
+					"AnalogInput4,"
+					"AnalogInput5,"
+					"AnalogInput6,"
+					"AnalogInput7,"
+					"AnalogInput8,"
+
 					"BatteryVoltage,"
 					"AirTemp,"
 					"CoolantTemp\n");
