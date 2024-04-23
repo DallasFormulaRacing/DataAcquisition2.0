@@ -36,6 +36,8 @@ bool DataLogger::CreateCsvFile() {
 			file_system_->WriteFile((char*)
 					"Timestamp,"
 					"Linpot1,Linpot2,Linpot3,Linpot4,"
+					"AccX,AccY,AccZ,"
+					"GyroX,GyroY,GyroZ,"
 					"RPM,"
 					"TPS,"
 					"FuelOpenTime,"
