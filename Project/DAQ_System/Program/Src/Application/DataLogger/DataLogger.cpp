@@ -33,7 +33,18 @@ bool DataLogger::CreateCsvFile() {
 	// Create CSV with header row
 	return file_system_->CreateFile(file_name_) &&
 			file_system_->OpenFile(file_name_, (char*)"a") &&
-			file_system_->WriteFile((char*)"Timestamp,Linpot1,Linpot2,Linpot3,Linpot4\n");
+			file_system_->WriteFile((char*)
+					"Timestamp,"
+					"Linpot1,Linpot2,Linpot3,Linpot4,"
+					"RPM,"
+					"TPS,"
+					"FuelOpenTime,"
+					"IgnitionAngle,"
+					"MAP,"
+					"Lambda,"
+					"BatteryVoltage,"
+					"AirTemp,"
+					"CoolantTemp\n");
 }
 
 void DataLogger::FindUniqueFileName() {

@@ -286,18 +286,18 @@ void TimestampThread(void *argument) {
 
 void EcuThread(void *argument) {
 	data_payload.Lock();
-	data_payload.linpot_displacement_inches_[0] = 2.5;
-	data_payload.linpot_displacement_inches_[1] = 0.5;
-	data_payload.linpot_displacement_inches_[2] = 1.3;
-	data_payload.linpot_displacement_inches_[3] = 4.0;
+	data_payload.linpot_displacement_mm_[0] = 2.5;
+	data_payload.linpot_displacement_mm_[1] = 0.5;
+	data_payload.linpot_displacement_mm_[2] = 1.3;
+	data_payload.linpot_displacement_mm_[3] = 4.0;
 	data_payload.Unlock();
 
 	for(;;) {
 		data_payload.Lock();
-		data_payload.linpot_displacement_inches_[0] *= 2;
-		data_payload.linpot_displacement_inches_[1] *= 2;
-		data_payload.linpot_displacement_inches_[2] *= 2;
-		data_payload.linpot_displacement_inches_[3] *= 2;
+		data_payload.linpot_displacement_mm_[0] *= 2;
+		data_payload.linpot_displacement_mm_[1] *= 2;
+		data_payload.linpot_displacement_mm_[2] *= 2;
+		data_payload.linpot_displacement_mm_[3] *= 2;
 		data_payload.Unlock();
 
 		osDelay(1000);

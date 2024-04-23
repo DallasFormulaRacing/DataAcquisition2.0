@@ -15,6 +15,7 @@
 // Standard Libraries
 #include <stdio.h>
 #include <cstdint>
+#include <cinttypes>
 #include <array>
 
 // DFR Custom Dependencies
@@ -31,7 +32,7 @@ struct DataPayload {
     float timestamp_ = 0.0f;
 
     static constexpr uint8_t kNumOfLinPots = 4;
-    std::array<float, kNumOfLinPots> linpot_displacement_inches_{};
+    std::array<float, kNumOfLinPots> linpot_displacement_mm_{};
 
     static constexpr uint8_t kDegreesOfFreedom = 3;
     std::array<float, kDegreesOfFreedom> acceleration_{};
@@ -49,22 +50,40 @@ struct DataPayload {
 
     int GetCsvFormatLength() {
 		return snprintf(NULL, 0,
-				"%f,%f,%f,%f,%f\n",
+				"%f,%f,%f,%f,%f,%" PRIx16 ",%f,%f,%f,%f,%f,%f,%f,%f\n",
 				timestamp_,
-				linpot_displacement_inches_[0],
-				linpot_displacement_inches_[1],
-				linpot_displacement_inches_[2],
-				linpot_displacement_inches_[3]);
+				linpot_displacement_mm_[0],
+				linpot_displacement_mm_[1],
+				linpot_displacement_mm_[2],
+				linpot_displacement_mm_[3],
+				rpm_,
+				tps_,
+				fuel_open_time_,
+				ignition_angle_,
+				map_,
+				lambda_,
+				battery_voltage_,
+				air_temp_,
+				coolant_temp_);
 	}
 
     void CsvFormat(char* buffer, int length) {
 		snprintf(buffer, length,
-				"%f,%f,%f,%f,%f\n",
+				"%f,%f,%f,%f,%f,%" PRIx16 ",%f,%f,%f,%f,%f,%f,%f,%f\n",
 				timestamp_,
-				linpot_displacement_inches_[0],
-				linpot_displacement_inches_[1],
-				linpot_displacement_inches_[2],
-				linpot_displacement_inches_[3]);
+				linpot_displacement_mm_[0],
+				linpot_displacement_mm_[1],
+				linpot_displacement_mm_[2],
+				linpot_displacement_mm_[3],
+				rpm_,
+				tps_,
+				fuel_open_time_,
+				ignition_angle_,
+				map_,
+				lambda_,
+				battery_voltage_,
+				air_temp_,
+				coolant_temp_);
 	}
 
     void Lock() { mutex_->Lock(); }
