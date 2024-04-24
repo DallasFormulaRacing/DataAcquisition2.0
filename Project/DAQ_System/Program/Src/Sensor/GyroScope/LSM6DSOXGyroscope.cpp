@@ -24,14 +24,20 @@ LSM6DSOX_Gyroscope::LSM6DSOX_Gyroscope(I2C_HandleTypeDef& hi2c):i2c_(hi2c){
 
 bool LSM6DSOX_Gyroscope::ReadRawData(short arr[3]) {
     uint8_t bytes[6] = {0};
+    uint8_t addr =  LSM6DSOX_OUTX_L_G; // addr needs to be a reference so assigning define to a variable to reference
 
-    if (Receive(bytes)) {
+    HAL_I2C_Master_Transmit(&i2c_, LSM6DSOX_GYR_ADDRESS, &addr, 1, HAL_MAX_DELAY);
+
+    // sequential reading function for LSM6DSOX. Reads all the registers that contain axis
+    // data. [0x22, 0x23, 0x24, 0x25, 0x26, 0x27]
+    if(HAL_I2C_Master_Receive(&i2c_, LSM6DSOX_GYR_ADDRESS, bytes, 6, HAL_MAX_DELAY) != HAL_OK){
+
         arr[0] = (bytes[1] << 8 | bytes[0]);
         arr[1] = (bytes[3] << 8 | bytes[2]);
         arr[2] = (bytes[5] << 8 | bytes[4]);
 
         return true;
-    }
+	}
 
     return false;
 }
@@ -153,17 +159,5 @@ bool LSM6DSOX_Gyroscope::WriteReg(uint8_t addr_i2c, uint8_t addr_reg, uint8_t re
 }
 
 
-
-bool LSM6DSOX_Gyroscope::Receive(uint8_t data_buf[]){
-	uint8_t addr_reg = LSM6DSOX_OUTX_L_G;
-	if(HAL_I2C_Master_Transmit(&i2c_, LSM6DSOX_GYR_ADDRESS, &addr_reg, 1, HAL_MAX_DELAY) != HAL_OK){
-		return false;
-	}
-	if(HAL_I2C_Master_Receive(&i2c_, LSM6DSOX_GYR_ADDRESS, data_buf, 6, HAL_MAX_DELAY) != HAL_OK){
-		return false;
-	}
-
-	return true;
-}
 
 }
