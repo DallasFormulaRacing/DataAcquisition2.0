@@ -29,7 +29,11 @@ extern CAN_HandleTypeDef hcan1;
 #include "i2c.h"
 extern I2C_HandleTypeDef hi2c1;
 
-// 3rd Party Libraries and Frameworks
+#include "tim.h"
+extern TIM_HandleTypeDef htim7;
+
+
+// 3rd Party Libraryes and Frameworks
 #include "cmsis_os.h"
 
 #include "fatfs.h"
@@ -43,9 +47,11 @@ extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 
 // DFR Custom Dependencies
 #include "app.hpp"
+#include "Application/circular_queue.hpp"
 #include "Application/data_payload.hpp"
 #include "Application/DataLogger/DataLogger.hpp"
 #include "Application/FileSystem/fat_fs.hpp"
+#include "Application/Mutex/mutex_cmsisv2.hpp"
 #include "Platform/CAN/STM/F4/bxcan_stmf4.hpp"
 #include "Platform/CAN/Interfaces/ican.hpp"
 #include "Platform/GPIO/igpio.hpp"
@@ -62,8 +68,15 @@ extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 #include "../../Core/Inc/retarget.h"
 
 
+void RtosInit();
+void DataLoggingThread(void *argument);
+void TimestampThread(void *argument);
+void QueueProducingThread(void *argument);
 
-// Toggle Switch Interrupt Callback
+
+/**************************************************************
+ * 				Toggle Switch Interrupt Callback
+ **************************************************************/
 std::shared_ptr<platform::GpioStmF4> gpio_callback_ptr(nullptr);
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
@@ -71,10 +84,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 }
 
 
-#include "Application/circular_queue.hpp"
-#include "Application/Mutex/mutex_cmsisv2.hpp"
-
-// CAN Bus Interrupt Callback
+/**************************************************************
+ * 				CAN Bus Interrupt Callback
+ **************************************************************/
 std::shared_ptr<platform::BxCanStmF4> bx_can_callback_ptr(nullptr);
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
@@ -86,15 +98,17 @@ using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
 
 
-void StartFreeRtos();
-void RtosInit();
-void DataLoggingThread(void *argument);
-
-
 
 void cppMain() {
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
+
+	RtosInit();
+
+	/*
+	 * When `RtosInit()` is enabled, the rest of this function does NOT execute.
+	 */
+
 
 //	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
 //	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
@@ -144,7 +158,7 @@ void cppMain() {
 //	float displacement_inches = 0.0f;
 	int16_t *gyro_data = 0;
 	float* acc_data;
-	RtosInit();
+
 
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
@@ -199,24 +213,48 @@ void cppMain() {
 			__enable_irq();
 		}
 
-
-
-
-
 	}
 }
 
+
+
+
+
+/**************************************************************
+ * 						RTOS Mutexes
+ **************************************************************/
+const osMutexAttr_t queue_thread_attributes = {
+  "myThreadMutex",
+  osMutexRecursive | osMutexPrioInherit,
+  NULL,
+  0U
+};
+
+auto wrapper_mutex = std::make_shared<application::MutexCmsisV2>(queue_thread_attributes);
+
+
+
+/**************************************************************
+ * 					Shared Components
+ **************************************************************/
+static constexpr uint8_t size = 20;
+application::CircularQueue<application::DataPayload> queue(size, wrapper_mutex);
+
+application::DataPayload data_payload;
+
+bool is_logging_flag = false;
+
+
+
+/**************************************************************
+ * 					RTOS Thread Properties
+ **************************************************************/
 osThreadId_t dataLoggingTaskHandle;
 const osThreadAttr_t dataLoggingTask_attributes = {
   .name = "dataLoggingTask",
   .stack_size = 128 * 20,
   .priority = (osPriority_t) osPriorityHigh,
 };
-
-
-
-void QueueProducingThread(void *argument);
-void QueueConsumingThread(void *argument);
 
 osThreadId_t producerTaskHandle;
 const osThreadAttr_t producerTask_attributes = {
@@ -225,44 +263,44 @@ const osThreadAttr_t producerTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 
-osThreadId_t consumerTaskHandle;
-const osThreadAttr_t consumerTask_attributes = {
-  .name = "dataLoggingTask",
-  .stack_size = 128 * 17,
+osThreadId_t timestampTaskHandle;
+const osThreadAttr_t timestampTask_attributes = {
+  .name = "timestampTask",
+  .stack_size = 128 * 8,
   .priority = (osPriority_t) osPriorityHigh,
 };
 
 
 
-const osMutexAttr_t queue_thread_attributes = {
-  "myThreadMutex",                          // human readable mutex name
-  osMutexRecursive | osMutexPrioInherit,    // attr_bits
-  NULL,                                     // memory for control block
-  0U                                        // size for control block
-};
+/**************************************************************
+ * 						RTOS Threads
+ **************************************************************/
+void TimestampThread(void *argument) {
+	int count = 0;
+	static constexpr uint8_t kTimeDuration = 2; // seconds
 
-auto wrapper_mutex = std::make_shared<application::MutexCmsisV2>(queue_thread_attributes);
-uint8_t size = 20;
-application::CircularQueue<application::DataPayload> queue(size, wrapper_mutex);
+	for(;;) {
+		osThreadFlagsWait(0x00000001U, osFlagsWaitAny, osWaitForever);
 
-void RtosInit() {
-	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
-	osKernelInitialize(); 			// Initialize scheduler
+		if (is_logging_flag) {
+			count++;
+			data_payload.timestamp_ = count * kTimeDuration;
+			printf("Time: %f seconds\n", data_payload.timestamp_);
 
-	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
-	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
-//	consumerTaskHandle = osThreadNew(QueueConsumingThread, NULL, &consumerTask_attributes);
+			queue.Lock();
 
-	wrapper_mutex->Create();
+			if(queue.IsFull()) {
+				printf("Queue is full! Data samples are being dropped...\n");
+			}
 
-	osKernelStart(); 				// Start scheduler
+			queue.Enqueue(data_payload);
+			queue.Unlock();
+		}
+		else {
+			count = 0;
+		}
+	}
 }
-
-
-
-
-
-
 
 void QueueProducingThread(void *argument) {
 	application::DataPayload data;
@@ -288,26 +326,6 @@ void QueueProducingThread(void *argument) {
 	}
 }
 
-void QueueConsumingThread(void *argument) {
-	application::DataPayload received_data;
-
-	for(;;) {
-		queue.Lock();
-
-		if(!queue.IsEmpty()) {
-			received_data = queue.Dequeue();
-			printf("\nReceived: %d", received_data.timestamp_);
-		}
-
-		queue.Unlock();
-		osDelay(300);
-	}
-}
-
-
-
-
-
 void DataLoggingThread(void *argument) {
 	MX_USB_HOST_Init();
 
@@ -316,12 +334,30 @@ void DataLoggingThread(void *argument) {
 	auto toggle_switch = std::make_shared<platform::GpioStmF4>(GPIOF, GPIO_PIN_15);
 	gpio_callback_ptr = toggle_switch;
 
-	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer);
+	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer, is_logging_flag);
 
 	for (;;) {
 		data_logger.Run();
 		osDelay(2300);
 	}
+}
+
+
+
+void RtosInit() {
+	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
+	osKernelInitialize(); 			// Initialize scheduler
+
+	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
+//	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
+//	consumerTaskHandle = osThreadNew(QueueConsumingThread, NULL, &consumerTask_attributes);
+
+	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
+	HAL_TIM_Base_Start_IT(&htim7);
+
+	wrapper_mutex->Create();
+
+	osKernelStart(); 				// Start scheduler
 }
 
 

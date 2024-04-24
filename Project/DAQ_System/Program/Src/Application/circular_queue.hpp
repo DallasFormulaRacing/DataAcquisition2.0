@@ -66,6 +66,12 @@ public:
         return full_;
     }
 
+    void Clear() {
+    	while (!IsEmpty()) {
+    		Dequeue();
+    	}
+    }
+
     void Lock() { mutex_->Lock(); }
 
     void Unlock() { mutex_->Unlock(); }
