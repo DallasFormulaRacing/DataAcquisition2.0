@@ -15,6 +15,7 @@
 
 namespace sensor{
 
+
 class IAccelerometer {
     public:
         virtual ~IAccelerometer() = default;

@@ -63,6 +63,7 @@ extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 #include "Sensor/GyroScope/l3gd20h.hpp"
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
+#include "Sensor/GyroScope/LSM6DSOXGyroscope.hpp"
 #include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
 #include "../../Core/Inc/retarget.h"
 
@@ -109,6 +110,26 @@ void cppMain() {
 	 */
 
 
+//	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
+//	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
+//
+
+
+	auto LSM6DSOX_Accelerometer = std::make_shared<sensor::LSM6DSOX_Accelerometer>(hi2c1);
+	std::shared_ptr<sensor::IAccelerometer> accelerometer = LSM6DSOX_Accelerometer;
+	accelerometer->init();
+
+
+	LSM6DSOX_Accelerometer ->SetFSR(sensor::LSM6DSOX_Accelerometer::FSR::FSR2g);
+	LSM6DSOX_Accelerometer ->SetODR(sensor::LSM6DSOX_Accelerometer::ODR::ODR208);
+
+
+	auto LSM6DSOX_Gyroscope = std::make_shared<sensor::LSM6DSOX_Gyroscope>(hi2c1);
+	std::shared_ptr<sensor::IGyroscope> gyroscope = LSM6DSOX_Gyroscope;
+
+	LSM6DSOX_Gyroscope -> SetFSR(sensor::LSM6DSOX_Gyroscope::FSR::DPS250);
+	LSM6DSOX_Gyroscope -> SetODR(sensor::LSM6DSOX_Gyroscope::ODR::ODR12_5);
+
 
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
 	std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
@@ -134,12 +155,35 @@ void cppMain() {
 	float manifold_absolute_pressure = 0.0f;
 	float battery_voltage = 0.0f;
 
+//	float displacement_inches = 0.0f;
+	int16_t *gyro_data = 0;
+	float* acc_data;
 
 
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
+//
+//		displacement_inches = lin_pot->DisplacementInches();
+//		printf("\n Percentage: %f", displacement_inches);
+//
+//		accelerometer->ComputeAcceleration();
+//		acc_data = accelerometer->GetAcceleration();
+//
+		printf("the x-axis is %lf \t\t " , acc_data[0]);
+		printf("the y-axis is %lf \t\t " , acc_data[1]);
+		printf("the z-axis is %lf " , acc_data[2]);
+		printf("\r");
+		printf("\n");
+//
+//		gyro_data = gyroscope->DegreesPerSecond();
+		printf("x = %hd\t",gyro_data[0]);
+		printf("y = %hd\t",gyro_data[1]);
+		printf("z = %hd\t",gyro_data[2]);
+		printf("\n");
+		printf("\r");
+
 
 		if (pe3_ecu->NewMessageArrived()) {
 			__disable_irq();
