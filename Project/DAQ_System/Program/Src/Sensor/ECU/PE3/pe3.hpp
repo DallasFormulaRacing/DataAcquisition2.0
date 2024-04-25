@@ -251,21 +251,21 @@ private:
 	void ProcessFramePe15();
 	void ProcessFramePe16();
 
-	const std::vector<uint32_t> can_id_list_ = {  //FramePe1Id,
+	const std::vector<uint32_t> can_id_list_ = {  FramePe1Id,
 												  FramePe2Id,
-												  //FramePe3Id,
-												  //FramePe4Id,
-												  //FramePe5Id,
+												  FramePe3Id,
+												  FramePe4Id,
+												  FramePe5Id,
 												  FramePe6Id,
-												  //FramePe7Id,
-												  //FramePe8Id,
-												  //FramePe9Id,
-												  //FramePe10Id,
-												  //FramePe11Id,
-												  //FramePe12Id,
-												  //FramePe13Id,
-												  //FramePe14Id,
-												  //FramePe15Id,
+												  FramePe7Id,
+												  FramePe8Id,
+												  FramePe9Id,
+												  FramePe10Id,
+												  FramePe11Id,
+												  FramePe12Id,
+												  FramePe13Id,
+												  FramePe14Id,
+												  FramePe15Id,
 												  FramePe16Id  };
 
 	std::shared_ptr<platform::ICan> can_bus_;
