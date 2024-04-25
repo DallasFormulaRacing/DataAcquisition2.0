@@ -92,6 +92,11 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 	bx_can_callback_ptr->ReceiveCallback();
 }
 
+bool test;
+void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *hcan) {
+	test = true;
+}
+
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
 
@@ -102,7 +107,7 @@ void cppMain() {
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
 
-	RtosInit();
+//	RtosInit();
 
 	/*
 	 * When `RtosInit()` is enabled, the rest of this function does NOT execute.
@@ -140,6 +145,7 @@ void cppMain() {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
+
 
 		if (pe3_ecu->NewMessageArrived()) {
 			__disable_irq();
