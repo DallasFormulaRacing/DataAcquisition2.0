@@ -98,10 +98,12 @@ private:
 	uint8_t rx_buffer_[kMaxBytes] = { 0 };
 	bool message_arrived_ = false;
 	uint32_t can_id_ = 0;
+	uint32_t can_mailbox_;
 
 	// ST's HAL library.
 	CAN_HandleTypeDef& bx_can_; 			// BxCAN (Basic Extended) peripheral
 	CAN_RxHeaderTypeDef rx_message_header_; // Receiving message info
+	CAN_TxHeaderTypeDef tx_message_header_; // Transmit message info
 	CAN_FilterTypeDef filter_;				// Filter bank configuration
 	uint8_t filter_bank_num_;
 

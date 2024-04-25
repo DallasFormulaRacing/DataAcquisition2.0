@@ -57,7 +57,8 @@ void BxCanStmF4::Receive(uint8_t rx_buffer[kMaxBytes]) {
 }
 
 void BxCanStmF4::Transmit(uint8_t tx_buffer[kMaxBytes]) {
-	// TODO
+	// TODO: Encrypt Data into CAN
+	HAL_CAN_AddTxMessage(&bx_can_, &tx_message_header_, tx_buffer, &can_mailbox_);
 }
 
 void BxCanStmF4::ClearMessageArrivedFlag() { message_arrived_ = false; }
