@@ -143,6 +143,7 @@ void cppMain() {
 
 		if (pe3_ecu->NewMessageArrived()) {
 			__disable_irq();
+//			can_bus->DisableInterruptMode();
 
 			pe3_ecu->Update();
 			uint32_t can_id = pe3_ecu->LatestCanId();
@@ -167,6 +168,7 @@ void cppMain() {
 			}
 
 			__enable_irq();
+//			can_bus->EnableInterruptMode();
 		}
 
 	}
@@ -285,20 +287,81 @@ void TimestampThread(void *argument) {
 }
 
 void EcuThread(void *argument) {
-	data_payload.Lock();
-	data_payload.linpot_displacement_mm_[0] = 2.5;
-	data_payload.linpot_displacement_mm_[1] = 0.5;
-	data_payload.linpot_displacement_mm_[2] = 1.3;
-	data_payload.linpot_displacement_mm_[3] = 4.0;
-	data_payload.Unlock();
+	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
+	std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
+
+	sensor::Pe3 pe3_ecu(can_bus);
+	const std::vector<uint32_t>& can_id_list = pe3_ecu.CanIdList();
+
+	// Subscribe to messages with PE3's CAN IDs
+	for (const uint32_t& can_id : can_id_list) {
+		bx_can_peripheral->ConfigureFilter((can_id >> 13), (can_id & 0x1FFF));
+	}
+
+	bx_can_peripheral->Start();
+
+	// Configure and enable CAN message arrival interrupts
+	bx_can_callback_ptr = bx_can_peripheral;
+	ReceiveInterruptMode rx_interrupt_mode = ReceiveInterruptMode::kFifo0MessagePending;
+	bx_can_peripheral->ConfigureReceiveCallback(rx_interrupt_mode);
+	bx_can_peripheral->EnableInterruptMode();
 
 	for(;;) {
-		data_payload.Lock();
-		data_payload.linpot_displacement_mm_[0] *= 2;
-		data_payload.linpot_displacement_mm_[1] *= 2;
-		data_payload.linpot_displacement_mm_[2] *= 2;
-		data_payload.linpot_displacement_mm_[3] *= 2;
-		data_payload.Unlock();
+
+		if (pe3_ecu.NewMessageArrived()) {
+//			__disable_irq();
+			can_bus->DisableInterruptMode();
+
+			pe3_ecu.Update();
+			uint32_t can_id = pe3_ecu.LatestCanId();
+
+			data_payload.Lock();
+
+			switch(can_id) {
+			case FramePe1Id:
+				data_payload.rpm_ = pe3_ecu.Rpm();
+				data_payload.tps_ = pe3_ecu.Tps();
+				data_payload.fuel_open_time_ = pe3_ecu.FuelOpenTime();
+				data_payload.ignition_angle_ = pe3_ecu.IgnitionAngle();
+				break;
+
+			case FramePe2Id:
+				data_payload.barometer_ = pe3_ecu.BarometerPressure();
+				data_payload.map_ = pe3_ecu.Map();
+				data_payload.lambda_ = pe3_ecu.Lambda();
+				break;
+
+			case FramePe3Id:
+				data_payload.analog_inputs_.at(0) = pe3_ecu.AnalogInputVoltage(0);
+				data_payload.analog_inputs_.at(1) = pe3_ecu.AnalogInputVoltage(1);
+				data_payload.analog_inputs_.at(2) = pe3_ecu.AnalogInputVoltage(2);
+				data_payload.analog_inputs_.at(3) = pe3_ecu.AnalogInputVoltage(3);
+				break;
+
+			case FramePe4Id:
+				data_payload.analog_inputs_.at(4) = pe3_ecu.AnalogInputVoltage(4);
+				data_payload.analog_inputs_.at(5) = pe3_ecu.AnalogInputVoltage(5);
+				data_payload.analog_inputs_.at(6) = pe3_ecu.AnalogInputVoltage(6);
+				data_payload.analog_inputs_.at(7) = pe3_ecu.AnalogInputVoltage(7);
+				break;
+
+
+			case FramePe6Id:
+				data_payload.battery_voltage_ = pe3_ecu.BatteryVoltage();
+				data_payload.air_temp_ = pe3_ecu.AirTemperature();
+				data_payload.coolant_temp_ = pe3_ecu.CoolantTemperature();
+				break;
+
+			default:
+				printf("Unhandled CAN ID:%" PRIu32 "\n", can_id);
+			}
+
+			data_payload.Unlock();
+
+//			__enable_irq();
+			can_bus->EnableInterruptMode();
+		}
+
 
 		osDelay(1000);
 	}
