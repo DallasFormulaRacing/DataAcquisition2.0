@@ -23,6 +23,9 @@ extern UART_HandleTypeDef huart3;
 #include "adc.h"
 extern ADC_HandleTypeDef hadc1;
 
+#include "dma.h"
+extern DMA_HandleTypeDef hdma_adc1;
+
 #include "can.h"
 extern CAN_HandleTypeDef hcan1;
 
@@ -80,6 +83,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 	bx_can_callback_ptr->ReceiveCallback();
 }
 
+
+
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
 
@@ -101,6 +106,7 @@ void cppMain() {
 	linear_potentiometer = std::make_unique<sensor::SLS1322>(hadc1);
 	linear_potentiometer ->DisplacementInches(displacementInches);
 	linear_potentiometer ->DisplacementMillimeters(displacementMillimeters);
+
 
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
 	std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
@@ -126,13 +132,17 @@ void cppMain() {
 	float manifold_absolute_pressure = 0.0f;
 	float battery_voltage = 0.0f;
 
-	RtosInit();
+//	RtosInit();
 
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
 
+		linear_potentiometer ->DisplacementInches(displacementInches);
+		linear_potentiometer ->DisplacementMillimeters(displacementMillimeters);
+
+		printf("%f \t %f \t %f \t %f \t \n\r ", displacementMillimeters[0],displacementMillimeters[1],displacementMillimeters[2],displacementMillimeters[3]);
 		if (pe3_ecu->NewMessageArrived()) {
 			__disable_irq();
 
@@ -163,7 +173,7 @@ void cppMain() {
 
 
 
-
+		HAL_Delay(500);
 
 	}
 }

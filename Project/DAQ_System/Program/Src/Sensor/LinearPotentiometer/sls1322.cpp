@@ -37,7 +37,7 @@ void SLS1322::DisplacementMillimeters(float data[]) {
 
 void SLS1322::DisplacementRatio() {
 	for(int channel = 0;channel < ADCBufSize; channel++){
-		retraction_ratio[channel] = (float)ADCBuf[channel] / kMaxResolution;
+		retraction_ratio[channel] = 1 - ((float)ADCBuf[channel] / (kMaxResolution));
 
 	}
 }
