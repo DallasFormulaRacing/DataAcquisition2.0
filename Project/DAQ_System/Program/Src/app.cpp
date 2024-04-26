@@ -104,8 +104,6 @@ void cppMain() {
 	float displacementMillimeters[4] = {0};
 	std::unique_ptr<sensor::ILinearPotentiometer> linear_potentiometer(nullptr);
 	linear_potentiometer = std::make_unique<sensor::SLS1322>(hadc1);
-	linear_potentiometer ->DisplacementInches(displacementInches);
-	linear_potentiometer ->DisplacementMillimeters(displacementMillimeters);
 
 
 	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
@@ -142,7 +140,6 @@ void cppMain() {
 		linear_potentiometer ->DisplacementInches(displacementInches);
 		linear_potentiometer ->DisplacementMillimeters(displacementMillimeters);
 
-		printf("%f \t %f \t %f \t %f \t \n\r ", displacementMillimeters[0],displacementMillimeters[1],displacementMillimeters[2],displacementMillimeters[3]);
 		if (pe3_ecu->NewMessageArrived()) {
 			__disable_irq();
 
