@@ -63,6 +63,7 @@ extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 #include "Sensor/GyroScope/l3gd20h.hpp"
 #include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
 #include "Sensor/LinearPotentiometer/sls1322.hpp"
+#include "Sensor/GyroScope/LSM6DSOXGyroscope.hpp"
 #include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
 #include "../../Core/Inc/retarget.h"
 

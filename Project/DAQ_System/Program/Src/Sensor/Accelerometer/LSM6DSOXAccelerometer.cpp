@@ -20,21 +20,21 @@
 
 namespace sensor{
 
-LSM6DSOX::LSM6DSOX(I2C_HandleTypeDef& hi2c):i2c_(hi2c){}
+LSM6DSOX_Accelerometer::LSM6DSOX_Accelerometer(I2C_HandleTypeDef& hi2c):i2c_(hi2c){}
 
-void LSM6DSOX::init() {
+void LSM6DSOX_Accelerometer::init() {
     static constexpr uint8_t kNumBytes = 2;
     uint8_t commands[kNumBytes] = {0};
 
     // data rate 104hz
     commands[0] = CTRL1_XL;
     commands[1] = 0x40; // 0b01000000
-    HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+    HAL_I2C_Master_Transmit(&i2c_,LSM6DSOX_ACCELEROMETER_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
 
     calibrate();
 }
 
-void LSM6DSOX::calibrate() {
+void LSM6DSOX_Accelerometer::calibrate() {
     static constexpr uint8_t kSampleCount = 100;
     double acc_magnitude = 0;
     double average_array[kSampleCount];
@@ -78,65 +78,66 @@ void LSM6DSOX::calibrate() {
 
 }
 
-void LSM6DSOX::SetODR(SensorConfiguration::ODR ODRValue){
+void LSM6DSOX_Accelerometer::SetODR(ODR ODRValue){
 	static constexpr uint8_t kNumBytes = 2;
     uint8_t commands[kNumBytes] = {0};
     commands[0] = CTRL1_XL;
     uint8_t currentRegisterValue[1] = {0};
 
     // read the current register values for the CTRL_X register
-	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,1, HAL_MAX_DELAY);
-	HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Transmit(&i2c_,LSM6DSOX_ACCELEROMETER_ADDRESS, commands,1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Receive(&i2c_,LSM6DSOX_ACCELEROMETER_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
 
 	// set the ODR bits to the desired value without touching the other bits in the register
 	// ODRValue is shifter 4 bits to properly align the desired ODR bits to the proper bits in the register
-	commands[1] = (currentRegisterValue[0] & 0x0F) | ODRValue << 4;
+	commands[1] = (currentRegisterValue[0] & 0x0F) | static_cast<uint8_t>(ODRValue) << 4;
 
 	// write to register with the desired bit values
-	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+	HAL_I2C_Master_Transmit(&i2c_,LSM6DSOX_ACCELEROMETER_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
 
 }
 
-void LSM6DSOX::SetFSR(SensorConfiguration::FSR FSRValue){
+void LSM6DSOX_Accelerometer::SetFSR(FSR FSRValue){
+
 	static constexpr uint8_t kNumBytes = 2;
     uint8_t commands[kNumBytes] = {0};
     commands[0] = CTRL1_XL;
     uint8_t currentRegisterValue[1] = {0};
 
     // read the current register values for the CTRL1_XL register
-	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,1, HAL_MAX_DELAY);
-	HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Transmit(&i2c_,LSM6DSOX_ACCELEROMETER_ADDRESS, commands,1, HAL_MAX_DELAY);
+	HAL_I2C_Master_Receive(&i2c_,LSM6DSOX_ACCELEROMETER_ADDRESS, currentRegisterValue,1, HAL_MAX_DELAY);
 
 	// set the FSR bits to the desired value without touching the other bits in the register
 	// FSRValue is shifted to properly align the FSR bits in to the register.
-	commands[1] = (currentRegisterValue[0] & 0xF3) | FSRValue << 2  ;
+	commands[1] = (currentRegisterValue[0] & 0xF3) | static_cast<uint8_t>(FSRValue) << 2  ;
 
 	// write to register with the desired bit values
-	HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
+	HAL_I2C_Master_Transmit(&i2c_,LSM6DSOX_ACCELEROMETER_ADDRESS, commands,kNumBytes, HAL_MAX_DELAY);
 
 	// each FSR has a different sensitivity factor to convert raw data to G
 	switch (FSRValue){
-	case SensorConfiguration::FSR2g:
+	case FSR::FSR2g:
 		sensitivity_factor = 0.0000610;
 		break;
-	case SensorConfiguration::FSR4g:
+	case FSR::FSR4g:
 		sensitivity_factor = 0.000122;
 		break;
-	case SensorConfiguration::FSR8g:
+	case FSR::FSR8g:
 		sensitivity_factor = 0.000244;
 		break;
-	case SensorConfiguration::FSR16g:
+	case FSR::FSR16g:
 		sensitivity_factor = 0.000488;
 		break;
 	}
 
 }
 
-float* LSM6DSOX::GetAcceleration() {
+float* LSM6DSOX_Accelerometer::GetAcceleration() {
     return real_acceleration_data_;
 }
 
-void LSM6DSOX::ComputeAcceleration() {
+void LSM6DSOX_Accelerometer::ComputeAcceleration() {
     ReadRawAcceleration();
 /*   old calculations for accelerometer
     static constexpr float kMG_LSB = .001F;
@@ -151,16 +152,16 @@ void LSM6DSOX::ComputeAcceleration() {
     real_acceleration_data_[2] = (sensitivity_factor *raw_acceleration_data_[2] * 9.81) * (9.81/9.95); // used 9.81/9.9 to further calibrate the z-axis since it was a little bit off
 }
 
-void LSM6DSOX::ReadRawAcceleration() {
+void LSM6DSOX_Accelerometer::ReadRawAcceleration() {
 	static constexpr int ByteArraySize = 6;
 	static constexpr int I2CWriteSize = 1;
 	static constexpr int I2CReadSize = 6;
 
     uint8_t command[1] = { OUTX_L_A };
-    HAL_I2C_Master_Transmit(&i2c_,ACC_ADDRESS, command,I2CWriteSize, HAL_MAX_DELAY);
+    HAL_I2C_Master_Transmit(&i2c_,LSM6DSOX_ACCELEROMETER_ADDRESS, command,I2CWriteSize, HAL_MAX_DELAY);
 
     uint8_t bytes_received[ByteArraySize];
-    HAL_I2C_Master_Receive(&i2c_,ACC_ADDRESS, bytes_received,I2CReadSize, HAL_MAX_DELAY);
+    HAL_I2C_Master_Receive(&i2c_,LSM6DSOX_ACCELEROMETER_ADDRESS, bytes_received,I2CReadSize, HAL_MAX_DELAY);
 
     // 16-bit values
     raw_acceleration_data_[0] = (bytes_received[1] <<8 | bytes_received[0]);
