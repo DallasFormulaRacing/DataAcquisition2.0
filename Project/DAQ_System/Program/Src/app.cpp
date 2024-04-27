@@ -169,9 +169,6 @@ void cppMain() {
 		}
 
 
-
-		HAL_Delay(500);
-
 	}
 }
 

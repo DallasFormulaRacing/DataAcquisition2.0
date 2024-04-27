@@ -20,18 +20,18 @@ SLS1322::SLS1322(ADC_HandleTypeDef& hadc) : adc_(hadc) {
 }
 SLS1322::~SLS1322() { }
 
-void SLS1322::DisplacementInches(float data[]) {
+void SLS1322::DisplacementInches(float quantized_counts[]) {
 	DisplacementRatio();
 	for(int channel = 0; channel < ADCBufSize; channel++){
-		data[channel] = retraction_ratio[channel] * kMaxLengthInches;
+		quantized_counts[channel] = retraction_ratio[channel] * kMaxLengthInches;
 
 	}
 }
 
-void SLS1322::DisplacementMillimeters(float data[]) {
+void SLS1322::DisplacementMillimeters(float quantized_counts[]) {
 	DisplacementRatio();
 	for(int channel = 0; channel <ADCBufSize; channel++){
-		data[channel] = retraction_ratio[channel] * kMaxLengthMillimeters;
+		quantized_counts[channel] = retraction_ratio[channel] * kMaxLengthMillimeters;
 	}
 }
 
