@@ -33,43 +33,7 @@ bool DataLogger::CreateCsvFile() {
 	// Create CSV with header row
 	return file_system_->CreateFile(file_name_) &&
 			file_system_->OpenFile(file_name_, (char*)"a") &&
-			file_system_->WriteFile((char*)
-					"Timestamp,"
-
-					"Linpot1,"
-					"Linpot2,"
-					"Linpot3,"
-					"Linpot4,"
-
-					"AccX,"
-					"AccY,"
-					"AccZ,"
-
-					"GyroX,"
-					"GyroY,"
-					"GyroZ,"
-
-					"RPM,"
-					"TPS,"
-					"FuelOpenTime,"
-					"IgnitionAngle,"
-
-					"Barometer,"
-					"MAP,"
-					"Lambda,"
-
-					"AnalogInput1,"
-					"AnalogInput2,"
-					"AnalogInput3,"
-					"AnalogInput4,"
-					"AnalogInput5,"
-					"AnalogInput6,"
-					"AnalogInput7,"
-					"AnalogInput8,"
-
-					"BatteryVoltage,"
-					"AirTemp,"
-					"CoolantTemp\n");
+			file_system_->WriteFile(DataPayload::kCsvHeaderRow);
 }
 
 void DataLogger::FindUniqueFileName() {

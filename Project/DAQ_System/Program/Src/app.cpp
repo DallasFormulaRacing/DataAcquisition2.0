@@ -92,11 +92,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 	bx_can_callback_ptr->ReceiveCallback();
 }
 
-bool test;
-void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *hcan) {
-	test = true;
-}
-
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
 
@@ -118,7 +113,9 @@ void cppMain() {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
-//		HAL_Delay(1000);
+		HAL_Delay(1000);
+
+		printf("hi\n");
 
 	}
 }

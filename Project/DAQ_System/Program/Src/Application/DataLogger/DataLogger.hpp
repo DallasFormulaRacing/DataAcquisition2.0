@@ -43,9 +43,11 @@ public:
 	///	  clearing this flag after it has been read.
 	/// @param queue A FIFO data structure to be shared with sensors for sharing
 	/// data samples.
-	/// @param storage_connected_observer A pointer to a flag that monitors whether the
+	/// @param storage_connected_observer A flag that monitors whether the
 	/// storage block device is connected or ejected. To be used as a boolean
 	/// variable with only binary values.
+	/// @param logging_enabled_sharer A flag to share with other components
+	/// about whether the `DataLogger` is currently logging.
 	DataLogger(std::shared_ptr<IFileSystem> file_system,
 			   std::shared_ptr<platform::IGpio> user_input,
 			   CircularQueue<DataPayload>& queue,
@@ -57,8 +59,6 @@ public:
 	/// Informs the `DataLogger` to evaluate its current state and perform
 	/// the according tasks.
 	void Run();
-
-	bool IsLogging();
 
 protected:
 	class State {
