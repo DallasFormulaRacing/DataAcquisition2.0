@@ -23,6 +23,9 @@ extern UART_HandleTypeDef huart3;
 #include "adc.h"
 extern ADC_HandleTypeDef hadc1;
 
+#include "dma.h"
+extern DMA_HandleTypeDef hdma_adc1;
+
 #include "can.h"
 extern CAN_HandleTypeDef hcan1;
 
@@ -93,6 +96,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 	bx_can_callback_ptr->ReceiveCallback();
 }
 
+
+
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
 
@@ -103,16 +108,16 @@ void cppMain() {
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
 
+	float displacementInches[4] = {0};
+	float displacementMillimeters[4] = {0};
+	std::unique_ptr<sensor::ILinearPotentiometer> linear_potentiometer(nullptr);
+	linear_potentiometer = std::make_unique<sensor::SLS1322>(hadc1);
+
 	RtosInit();
 
 	/*
 	 * When `RtosInit()` is enabled, the rest of this function does NOT execute.
 	 */
-
-
-//	std::unique_ptr<sensor::ILinearPotentiometer> lin_pot(nullptr);
-//	lin_pot = std::make_unique<sensor::SLS1322>(hadc1);
-//
 
 
 	auto LSM6DSOX_Accelerometer = std::make_shared<sensor::LSM6DSOX_Accelerometer>(hi2c1);
@@ -155,7 +160,6 @@ void cppMain() {
 	float manifold_absolute_pressure = 0.0f;
 	float battery_voltage = 0.0f;
 
-//	float displacement_inches = 0.0f;
 	int16_t *gyro_data = 0;
 	float* acc_data;
 
@@ -164,9 +168,9 @@ void cppMain() {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
-//
-//		displacement_inches = lin_pot->DisplacementInches();
-//		printf("\n Percentage: %f", displacement_inches);
+
+		linear_potentiometer ->DisplacementInches(displacementInches);
+		linear_potentiometer ->DisplacementMillimeters(displacementMillimeters);
 //
 //		accelerometer->ComputeAcceleration();
 //		acc_data = accelerometer->GetAcceleration();

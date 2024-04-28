@@ -35,26 +35,27 @@ class SLS1322 : public ILinearPotentiometer {
 
         /// Converts the ADC signal to the measured displacement of the potentiometer.
         /// @return 0.0 to 3.0 inches.
-        float DisplacementInches() override;
+        void DisplacementInches(float quantized_counts[]) override;
 
         /// Converts the ADC signal to the measured displacement of the potentiometer.
         /// @return 0.0 to 76.2 millimeters.
-        float DisplacementMillimeters() override;
+        void DisplacementMillimeters(float quantized_counts[]) override;
 
     private:
-        /// Provides the ADC reading after the sampling undergoes quantization.
-        /// The accuracy and range varies on the hardware resolution.
-        /// @return ADC reading in a range of 0 to 2^(n bits)-1.
-		uint32_t ReadQuantizedInput();
-        
         /// @brief Represents the quantized input as a ratio.
-        /// @return ADC reading in a range of 0.0 to 1.0.
-        float DisplacementRatio();
+        void DisplacementRatio();
 
         /// Resolution for a 12-bit ADC, 2^(12 bits) - 1
         static constexpr uint16_t kMaxResolution = 0x0FFF;
         static constexpr uint8_t kMaxLengthInches = 3;
         static constexpr float kMaxLengthMillimeters = 25.4f * kMaxLengthInches;
+
+        //DMA variables
+        static constexpr uint32_t ADCBufSize = 4;
+        uint32_t ADCBuf[ADCBufSize] = {0};
+
+        // ratio of displacement
+    	float retraction_ratio[ADCBufSize] = {0};
 
         /// The ADC peripheral from ST's HAL library.
         ADC_HandleTypeDef& adc_;
