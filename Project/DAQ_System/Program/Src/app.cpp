@@ -23,6 +23,9 @@ extern UART_HandleTypeDef huart3;
 #include "adc.h"
 extern ADC_HandleTypeDef hadc1;
 
+#include "dma.h"
+extern DMA_HandleTypeDef hdma_adc1;
+
 #include "can.h"
 extern CAN_HandleTypeDef hcan1;
 
@@ -93,6 +96,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 	bx_can_callback_ptr->ReceiveCallback();
 }
 
+
+
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
 
@@ -102,6 +107,11 @@ using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 void cppMain() {
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
+
+	float displacementInches[4] = {0};
+	float displacementMillimeters[4] = {0};
+	std::unique_ptr<sensor::ILinearPotentiometer> linear_potentiometer(nullptr);
+	linear_potentiometer = std::make_unique<sensor::SLS1322>(hadc1);
 
 	RtosInit();
 
