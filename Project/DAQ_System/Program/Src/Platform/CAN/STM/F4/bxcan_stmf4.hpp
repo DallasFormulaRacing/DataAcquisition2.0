@@ -96,8 +96,8 @@ public:
 private:
 
 	uint8_t rx_buffer_[kMaxBytes] = { 0 };
-	bool message_arrived_ = false;
-	uint32_t can_id_ = 0;
+	volatile bool message_arrived_ = false;
+	volatile uint32_t can_id_ = 0;
 
 	// ST's HAL library.
 	CAN_HandleTypeDef& bx_can_; 			// BxCAN (Basic Extended) peripheral
