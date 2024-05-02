@@ -120,102 +120,13 @@ void cppMain() {
 	 */
 
 
-	auto LSM6DSOX_Accelerometer = std::make_shared<sensor::LSM6DSOX_Accelerometer>(hi2c1);
-	std::shared_ptr<sensor::IAccelerometer> accelerometer = LSM6DSOX_Accelerometer;
-	accelerometer->init();
-
-
-	LSM6DSOX_Accelerometer ->SetFSR(sensor::LSM6DSOX_Accelerometer::FSR::FSR2g);
-	LSM6DSOX_Accelerometer ->SetODR(sensor::LSM6DSOX_Accelerometer::ODR::ODR208);
-
-
-	auto LSM6DSOX_Gyroscope = std::make_shared<sensor::LSM6DSOX_Gyroscope>(hi2c1);
-	std::shared_ptr<sensor::IGyroscope> gyroscope = LSM6DSOX_Gyroscope;
-
-	LSM6DSOX_Gyroscope -> SetFSR(sensor::LSM6DSOX_Gyroscope::FSR::DPS250);
-	LSM6DSOX_Gyroscope -> SetODR(sensor::LSM6DSOX_Gyroscope::ODR::ODR12_5);
-
-
-	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
-	std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
-
-	auto pe3_ecu = std::make_unique<sensor::Pe3>(can_bus);
-	const std::vector<uint32_t>& can_id_list = pe3_ecu->CanIdList();
-
-	auto bx_i2c_peripheral = std::make_shared<platform::I2CStmF4>(hi2c1);
-	std::shared_ptr<platform::II2C> i2c_line = bx_i2c_peripheral;
-
-	// Subscribe to messages with PE3's CAN IDs
-	for (const uint32_t& can_id : can_id_list) {
-		bx_can_peripheral->ConfigureFilter((can_id >> 13), (can_id & 0x1FFF));
-	}
-
-	bx_can_peripheral->Start();
-
-	bx_can_callback_ptr = bx_can_peripheral;
-	ReceiveInterruptMode rx_interrupt_mode = ReceiveInterruptMode::kFifo0MessagePending;
-	bx_can_peripheral->ConfigureReceiveCallback(rx_interrupt_mode);
-	bx_can_peripheral->EnableInterruptMode();
-
-	float manifold_absolute_pressure = 0.0f;
-	float battery_voltage = 0.0f;
-
-	int16_t *gyro_data = 0;
-	float* acc_data;
-
-
 	for(;;) {
 //		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
+		HAL_Delay(1000);
 
-		linear_potentiometer ->DisplacementInches(displacementInches);
-		linear_potentiometer ->DisplacementMillimeters(displacementMillimeters);
-//
-//		accelerometer->ComputeAcceleration();
-//		acc_data = accelerometer->GetAcceleration();
-//
-		printf("the x-axis is %lf \t\t " , acc_data[0]);
-		printf("the y-axis is %lf \t\t " , acc_data[1]);
-		printf("the z-axis is %lf " , acc_data[2]);
-		printf("\r");
-		printf("\n");
-//
-//		gyro_data = gyroscope->DegreesPerSecond();
-		printf("x = %hd\t",gyro_data[0]);
-		printf("y = %hd\t",gyro_data[1]);
-		printf("z = %hd\t",gyro_data[2]);
-		printf("\n");
-		printf("\r");
-
-
-		if (pe3_ecu->NewMessageArrived()) {
-			__disable_irq();
-
-			pe3_ecu->Update();
-			uint32_t can_id = pe3_ecu->LatestCanId();
-
-			switch(can_id) {
-			case FramePe2Id:
-				manifold_absolute_pressure = pe3_ecu->Map();
-
-				printf("\t\t %" PRIu32 "\n", can_id);
-				printf("Manifold Pressure: %f\n", manifold_absolute_pressure);
-				printf("\r");
-				break;
-
-
-			case FramePe6Id:
-				battery_voltage = pe3_ecu->BatteryVoltage();
-
-				printf("\t\t %" PRIu32 "\n", can_id);
-				printf("Battery Voltage: %f\n", battery_voltage);
-				printf("\r");
-				break;
-			}
-
-			__enable_irq();
-		}
+		printf("hi\n");
 
 	}
 }
@@ -227,24 +138,31 @@ void cppMain() {
 /**************************************************************
  * 						RTOS Mutexes
  **************************************************************/
-const osMutexAttr_t queue_thread_attributes = {
+const osMutexAttr_t queue_mutex_attributes = {
   "myThreadMutex",
   osMutexRecursive | osMutexPrioInherit,
   NULL,
   0U
 };
 
-auto wrapper_mutex = std::make_shared<application::MutexCmsisV2>(queue_thread_attributes);
+const osMutexAttr_t data_mutex_attributes = {
+  "myThreadMutex",
+  osMutexRecursive | osMutexPrioInherit,
+  NULL,
+  0U
+};
 
+auto queue_mutex = std::make_shared<application::MutexCmsisV2>(queue_mutex_attributes);
+auto data_mutex = std::make_shared<application::MutexCmsisV2>(data_mutex_attributes);
 
 
 /**************************************************************
  * 					Shared Components
  **************************************************************/
 static constexpr uint8_t size = 20;
-application::CircularQueue<application::DataPayload> queue(size, wrapper_mutex);
+application::CircularQueue<application::DataPayload> queue(size, queue_mutex);
 
-application::DataPayload data_payload;
+application::DataPayload data_payload(data_mutex);
 
 bool is_logging_flag = false;
 
@@ -260,13 +178,8 @@ const osThreadAttr_t dataLoggingTask_attributes = {
   .priority = (osPriority_t) osPriorityHigh,
 };
 
-osThreadId_t producerTaskHandle;
-const osThreadAttr_t producerTask_attributes = {
-  .name = "dataLoggingTask",
-  .stack_size = 128 * 17,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 
+uint32_t timestamp_thread_flag = 0x00000001U;
 osThreadId_t timestampTaskHandle;
 const osThreadAttr_t timestampTask_attributes = {
   .name = "timestampTask",
@@ -274,62 +187,17 @@ const osThreadAttr_t timestampTask_attributes = {
   .priority = (osPriority_t) osPriorityHigh,
 };
 
+osThreadId_t ecuTaskHandle;
+const osThreadAttr_t ecuTask_attributes = {
+  .name = "ecuTask",
+  .stack_size = 128 * 17,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 
 /**************************************************************
  * 						RTOS Threads
  **************************************************************/
-void TimestampThread(void *argument) {
-	int count = 0;
-	static constexpr uint8_t kTimeDuration = 2; // seconds
-
-	for(;;) {
-		osThreadFlagsWait(0x00000001U, osFlagsWaitAny, osWaitForever);
-
-		if (is_logging_flag) {
-			count++;
-			data_payload.timestamp_ = count * kTimeDuration;
-			printf("Time: %f seconds\n", data_payload.timestamp_);
-
-			queue.Lock();
-
-			if(queue.IsFull()) {
-				printf("Queue is full! Data samples are being dropped...\n");
-			}
-
-			queue.Enqueue(data_payload);
-			queue.Unlock();
-		}
-		else {
-			count = 0;
-		}
-	}
-}
-
-void QueueProducingThread(void *argument) {
-	application::DataPayload data;
-
-	data.timestamp_ = 1;
-	data.linpot_displacement_inches_[0] = 2.5;
-	data.linpot_displacement_inches_[1] = 0.5;
-	data.linpot_displacement_inches_[2] = 1.3;
-	data.linpot_displacement_inches_[3] = 4.0;
-
-	for(;;) {
-		queue.Lock();
-		queue.Enqueue(data);
-		queue.Unlock();
-
-		data.timestamp_*= 2;
-		data.linpot_displacement_inches_[0] *= 2;
-		data.linpot_displacement_inches_[1] *= 2;
-		data.linpot_displacement_inches_[2] *= 2;
-		data.linpot_displacement_inches_[3] *= 2;
-
-		osDelay(1000);
-	}
-}
-
 void DataLoggingThread(void *argument) {
 	MX_USB_HOST_Init();
 
@@ -342,9 +210,124 @@ void DataLoggingThread(void *argument) {
 
 	for (;;) {
 		data_logger.Run();
-		osDelay(2300);
+		osDelay(1000);
 	}
 }
+
+void TimestampThread(void *argument) {
+	int count = 0;
+	static constexpr float kTimeDuration = 2.0f; // seconds
+
+	for(;;) {
+		osThreadFlagsWait(timestamp_thread_flag, osFlagsWaitAny, osWaitForever);
+
+		if (is_logging_flag) {
+			count++;
+
+			data_payload.Lock();
+			data_payload.timestamp_ = count * kTimeDuration;
+			printf("Time: %f seconds\n", data_payload.timestamp_);
+
+
+			queue.Lock();
+			if(queue.IsFull()) {
+				printf("Queue is full! Data samples are being dropped...\n");
+			}
+			queue.Enqueue(data_payload);
+			queue.Unlock();
+			data_payload.Unlock();
+		}
+		else {
+			count = 0;
+		}
+	}
+}
+
+void EcuThread(void *argument) {
+	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
+	std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
+
+	sensor::Pe3 pe3_ecu(can_bus);
+	const std::vector<uint32_t>& can_id_list = pe3_ecu.CanIdList();
+
+	// Subscribe to messages with PE3's CAN IDs
+	for (const uint32_t& can_id : can_id_list) {
+		bx_can_peripheral->ConfigureFilter((can_id >> 13), (can_id & 0x1FFF));
+	}
+
+	bx_can_peripheral->Start();
+
+	// Configure and enable CAN message arrival interrupts
+	bx_can_callback_ptr = bx_can_peripheral;
+	ReceiveInterruptMode rx_interrupt_mode = ReceiveInterruptMode::kFifo0MessagePending;
+	bx_can_peripheral->ConfigureReceiveCallback(rx_interrupt_mode);
+	bx_can_peripheral->EnableInterruptMode();
+
+	for(;;) {
+
+		if (pe3_ecu.NewMessageArrived()) {
+			can_bus->DisableInterruptMode();
+
+			pe3_ecu.Update();
+			uint32_t can_id = pe3_ecu.LatestCanId();
+
+			data_payload.Lock();
+
+			switch(can_id) {
+			case FramePe1Id:
+				printf("[ECU] PE1 arrived\n");
+				data_payload.rpm_ = pe3_ecu.Rpm();
+				data_payload.tps_ = pe3_ecu.Tps();
+				data_payload.fuel_open_time_ = pe3_ecu.FuelOpenTime();
+				data_payload.ignition_angle_ = pe3_ecu.IgnitionAngle();
+				break;
+
+			case FramePe2Id:
+				printf("[ECU] PE2 arrived\n");
+				data_payload.barometer_ = pe3_ecu.BarometerPressure();
+				data_payload.map_ = pe3_ecu.Map();
+				data_payload.lambda_ = pe3_ecu.Lambda();
+				break;
+
+			case FramePe3Id:
+				printf("[ECU] PE3 arrived\n");
+				data_payload.analog_inputs_.at(0) = pe3_ecu.AnalogInputVoltage(0);
+				data_payload.analog_inputs_.at(1) = pe3_ecu.AnalogInputVoltage(1);
+				data_payload.analog_inputs_.at(2) = pe3_ecu.AnalogInputVoltage(2);
+				data_payload.analog_inputs_.at(3) = pe3_ecu.AnalogInputVoltage(3);
+				break;
+
+			case FramePe4Id:
+				printf("[ECU] PE4 arrived\n");
+				data_payload.analog_inputs_.at(4) = pe3_ecu.AnalogInputVoltage(4);
+				data_payload.analog_inputs_.at(5) = pe3_ecu.AnalogInputVoltage(5);
+				data_payload.analog_inputs_.at(6) = pe3_ecu.AnalogInputVoltage(6);
+				data_payload.analog_inputs_.at(7) = pe3_ecu.AnalogInputVoltage(7);
+				break;
+
+
+			case FramePe6Id:
+				printf("[ECU] PE6 arrived\n");
+				data_payload.battery_voltage_ = pe3_ecu.BatteryVoltage();
+				data_payload.air_temp_ = pe3_ecu.AirTemperature();
+				data_payload.coolant_temp_ = pe3_ecu.CoolantTemperature();
+				break;
+
+			default:
+				printf("[ECU] Un-handled CAN ID:%" PRIu32 "\n", can_id);
+			}
+
+			data_payload.Unlock();
+
+			can_bus->EnableInterruptMode();
+		}
+
+
+		osDelay(25);
+	}
+}
+
+
 
 
 
@@ -352,14 +335,17 @@ void RtosInit() {
 	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
 	osKernelInitialize(); 			// Initialize scheduler
 
+	// Threads
 	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
-//	producerTaskHandle = osThreadNew(QueueProducingThread, NULL, &producerTask_attributes);
-//	consumerTaskHandle = osThreadNew(QueueConsumingThread, NULL, &consumerTask_attributes);
-
 	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
-	HAL_TIM_Base_Start_IT(&htim7);
+	ecuTaskHandle = osThreadNew(EcuThread, NULL, &ecuTask_attributes);
 
-	wrapper_mutex->Create();
+	// Mutexes
+	queue_mutex->Create();
+	data_mutex->Create();
+
+	// Hardware Timers
+	HAL_TIM_Base_Start_IT(&htim7);
 
 	osKernelStart(); 				// Start scheduler
 }

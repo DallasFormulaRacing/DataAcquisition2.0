@@ -38,7 +38,7 @@ public:
 private:
 	GPIO_TypeDef* port_;
 	uint16_t pin_;
-	bool interrupt_flag_ = false;
+	volatile bool interrupt_flag_ = false;
 
 };
 
