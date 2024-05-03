@@ -50,31 +50,30 @@ extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 
 // DFR Custom Dependencies
 #include "app.hpp"
-#include "Application/circular_queue.hpp"
-#include "Application/data_payload.hpp"
-#include "Application/DataLogger/DataLogger.hpp"
-#include "Application/FileSystem/fat_fs.hpp"
-#include "Application/Mutex/mutex_cmsisv2.hpp"
-#include "Platform/CAN/STM/F4/bxcan_stmf4.hpp"
-#include "Platform/CAN/Interfaces/ican.hpp"
-#include "Platform/GPIO/igpio.hpp"
-#include "Platform/GPIO/gpio_stmf4.hpp"
-#include "Sensor/Accelerometer/lsm303dlhc.hpp"
-#include "Sensor/ECU/PE3/iecu.hpp"
-#include "Sensor/ECU/PE3/pe3.hpp"
-#include "Sensor/GyroScope/igyroscope.hpp"
-#include "Sensor/GyroScope/l3gd20h.hpp"
-#include "Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
-#include "Sensor/LinearPotentiometer/sls1322.hpp"
-#include "Sensor/GyroScope/LSM6DSOXGyroscope.hpp"
-#include "Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
+#include "../DFR_Libraries/Application/circular_queue.hpp"
+#include "../DFR_Libraries/Application/data_payload.hpp"
+#include "../DFR_Libraries/Application/DataLogger/DataLogger.hpp"
+#include "../DFR_Libraries/Application/FileSystem/fat_fs.hpp"
+#include "../DFR_Libraries/Application/Mutex/mutex_cmsisv2.hpp"
+#include "../DFR_Libraries/Platform/CAN/STM/F4/bxcan_stmf4.hpp"
+#include "../DFR_Libraries/Platform/CAN/Interfaces/ican.hpp"
+#include "../DFR_Libraries/Platform/GPIO/igpio.hpp"
+#include "../DFR_Libraries/Platform/GPIO/gpio_stmf4.hpp"
+#include "../DFR_Libraries/Sensor/Accelerometer/lsm303dlhc.hpp"
+#include "../DFR_Libraries/Sensor/ECU/PE3/iecu.hpp"
+#include "../DFR_Libraries/Sensor/ECU/PE3/pe3.hpp"
+#include "../DFR_Libraries/Sensor/GyroScope/igyroscope.hpp"
+#include "../DFR_Libraries/Sensor/GyroScope/l3gd20h.hpp"
+#include "../DFR_Libraries/Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
+#include "../DFR_Libraries/Sensor/LinearPotentiometer/sls1322.hpp"
+#include "../DFR_Libraries/Sensor/GyroScope/LSM6DSOXGyroscope.hpp"
+#include "../DFR_Libraries/Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
 #include "../../Core/Inc/retarget.h"
 
 
 void RtosInit();
 void DataLoggingThread(void *argument);
 void TimestampThread(void *argument);
-void QueueProducingThread(void *argument);
 
 
 /**************************************************************
