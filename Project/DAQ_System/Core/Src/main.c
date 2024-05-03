@@ -21,6 +21,7 @@
 #include "cmsis_os.h"
 #include "adc.h"
 #include "can.h"
+#include "dma.h"
 #include "eth.h"
 #include "fatfs.h"
 #include "i2c.h"
@@ -55,6 +56,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+extern uint32_t timestamp_thread_flag;
 extern osThreadId_t timestampTaskHandle;
 
 /* USER CODE END PV */
@@ -101,6 +103,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ETH_Init();
   MX_USART3_UART_Init();
   MX_ADC1_Init();
@@ -199,7 +202,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
 	if (htim->Instance == TIM7) {
-		osThreadFlagsSet(timestampTaskHandle, 0x00000001U);
+		osThreadFlagsSet(timestampTaskHandle, timestamp_thread_flag);
 	}
 
   /* USER CODE END Callback 0 */
