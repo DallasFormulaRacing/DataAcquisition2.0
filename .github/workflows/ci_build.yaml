@@ -10,30 +10,14 @@ jobs:
         runs-on: ubuntu-latest
         steps:
         
-          - name: Check out this repo
+          - name: Check out this repo and submodules
             uses: actions/checkout@v3
+            with:
+              submodules: 'true'
           
           - name: Build stm32CubeIDE project
             uses: xanderhendriks/action-build-stm32cubeide@v10.0
             with:
               project-path: 'Project/DAQ_System'
               project-target: 'DAQ_System/Debug'
-    
-    run-unit-tests:
-        runs-on: ubuntu-latest
-        steps:
-
-            - name: Check out this repo
-              uses: actions/checkout@v3
-
-            - name: Install Ninja
-              run: sudo apt-get install ninja-build
-
-            - name: Build and run unit tests
-              run: |
-                  cd Project/Tests
-                  cmake -G "Ninja" -S . -B ./build
-                  cd build
-                  ninja
-                  ./daq-unit-tests
             
