@@ -107,11 +107,6 @@ void cppMain() {
 	// Enable `printf()` using USART
 	RetargetInit(&huart3);
 
-	float displacementInches[4] = {0};
-	float displacementMillimeters[4] = {0};
-	std::unique_ptr<sensor::ILinearPotentiometer> linear_potentiometer(nullptr);
-	linear_potentiometer = std::make_unique<sensor::SLS1322>(hadc1);
-
 	RtosInit();
 
 	/*
