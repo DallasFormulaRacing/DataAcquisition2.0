@@ -55,6 +55,7 @@ extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 #include "../DFR_Libraries/Application/DataLogger/DataLogger.hpp"
 #include "../DFR_Libraries/Application/FileSystem/fat_fs.hpp"
 #include "../DFR_Libraries/Application/Mutex/mutex_cmsisv2.hpp"
+#include "../DFR_Libraries/Application/Relay/Can_Relay.hpp"
 #include "../DFR_Libraries/Platform/STM/F4/CAN/bxcan_stmf4.hpp"
 #include "../DFR_Libraries/Platform/Interfaces/ican.hpp"
 #include "../DFR_Libraries/Platform/Interfaces/igpio.hpp"
@@ -158,6 +159,10 @@ application::CircularQueue<application::DataPayload> queue(size, queue_mutex);
 
 application::DataPayload data_payload(data_mutex);
 
+auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
+std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
+
+
 bool is_logging_flag = false;
 
 
@@ -200,7 +205,9 @@ void DataLoggingThread(void *argument) {
 	auto toggle_switch = std::make_shared<platform::GpioStmF4>(GPIOF, GPIO_PIN_15);
 	gpio_callback_ptr = toggle_switch;
 
-	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer, is_logging_flag);
+	auto relay = application::Can_Relay(can_bus, queue);
+
+	application::DataLogger data_logger(file_system, toggle_switch, queue, relay, usb_connected_observer, is_logging_flag);
 
 	for (;;) {
 		data_logger.Run();
@@ -238,8 +245,6 @@ void TimestampThread(void *argument) {
 }
 
 void EcuThread(void *argument) {
-	auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
-	std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
 
 	sensor::Pe3 pe3_ecu(can_bus);
 	const std::vector<uint32_t>& can_id_list = pe3_ecu.CanIdList();
