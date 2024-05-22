@@ -207,7 +207,7 @@ void DataLoggingThread(void *argument) {
 
 	auto relay = application::Can_Relay(can_bus, queue);
 
-	application::DataLogger data_logger(file_system, toggle_switch, queue, relay, usb_connected_observer, is_logging_flag);
+	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer, is_logging_flag);
 
 	for (;;) {
 		data_logger.Run();
