@@ -75,6 +75,7 @@ extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 void RtosInit();
 void DataLoggingThread(void *argument);
 void TimestampThread(void *argument);
+void RelayThread(void *argument);
 
 
 /**************************************************************
@@ -193,6 +194,12 @@ const osThreadAttr_t ecuTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 
+osThreadId_t canRelayHandle;
+const osThreadAttr_t canRelayTask_attributes = {
+		.name = "relayTask",
+		.stack_size = 128 * 8, //no idea what im doing
+		.priority = (osPriority_t) osPriorityNormal,
+};
 
 /**************************************************************
  * 						RTOS Threads
@@ -205,8 +212,6 @@ void DataLoggingThread(void *argument) {
 	auto toggle_switch = std::make_shared<platform::GpioStmF4>(GPIOF, GPIO_PIN_15);
 	gpio_callback_ptr = toggle_switch;
 
-	auto relay = application::Can_Relay(can_bus, queue);
-
 	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer, is_logging_flag);
 
 	for (;;) {
@@ -214,6 +219,7 @@ void DataLoggingThread(void *argument) {
 		osDelay(1000);
 	}
 }
+
 
 void TimestampThread(void *argument) {
 	int count = 0;
@@ -240,6 +246,20 @@ void TimestampThread(void *argument) {
 		}
 		else {
 			count = 0;
+		}
+	}
+}
+
+void RelayThread(void *argument){
+	queue.Lock();
+	auto relay = application::Can_Relay(can_bus, queue);
+	queue.Unlock();
+	for(;;){
+		if(is_logging_flag){ // coupled somewhat strongly with logger function, change after testing
+			data_payload.Lock();
+			relay.Generate_Messages(data_payload);
+			relay.Send_Messages();
+			data_payload.Unlock();
 		}
 	}
 }
