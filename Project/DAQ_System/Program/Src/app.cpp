@@ -55,7 +55,7 @@ extern uint8_t usb_connected_observer; // USB connected/ejected interrupt
 #include "../DFR_Libraries/Application/DataLogger/DataLogger.hpp"
 #include "../DFR_Libraries/Application/FileSystem/fat_fs.hpp"
 #include "../DFR_Libraries/Application/Mutex/mutex_cmsisv2.hpp"
-#include "../DFR_Libraries/Application/Relay/Can_Relay.hpp"
+#include "../DFR_Libraries/Application/Relay/can_relay.hpp"
 #include "../DFR_Libraries/Platform/STM/F4/CAN/bxcan_stmf4.hpp"
 #include "../DFR_Libraries/Platform/Interfaces/ican.hpp"
 #include "../DFR_Libraries/Platform/Interfaces/igpio.hpp"
