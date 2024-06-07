@@ -184,7 +184,7 @@ osThreadId_t timestampTaskHandle;
 const osThreadAttr_t timestampTask_attributes = {
   .name = "timestampTask",
   .stack_size = 128 * 8,
-  .priority = (osPriority_t) osPriorityHigh,
+  .priority = (osPriority_t) osPriorityHigh7,
 };
 
 osThreadId_t ecuTaskHandle;
@@ -198,7 +198,7 @@ osThreadId_t canRelayHandle;
 const osThreadAttr_t canRelayTask_attributes = {
 		.name = "relayTask",
 		.stack_size = 128 * 8, //no idea what im doing
-		.priority = (osPriority_t) osPriorityNormal,
+		.priority = (osPriority_t) osPriorityHigh6,//relay needs to happen before logger but after timestamp
 };
 
 /**************************************************************
