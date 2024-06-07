@@ -1,7 +1,7 @@
 name: CI Build
 
 # Define the trigger event(s)
-on: push
+on: pull_request
 
 # Jobs run in parallel by default, each runs steps in sequence
 jobs:
@@ -20,7 +20,6 @@ jobs:
 
           - name : Update the submodules
             run: |
-              git submodule sync
               git submodule update --init --recursive
               git submodule update --recursive --remote
           
