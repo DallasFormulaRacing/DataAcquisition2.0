@@ -15,6 +15,9 @@ jobs:
             with:
               submodules: 'true'
 
+          - name : List files in this repo
+            run : ls -R
+
           - name : Update the submodules
             run: |
               git submodule update --init --recursive
