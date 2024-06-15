@@ -164,7 +164,7 @@ auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
 std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
 
 
-bool is_logging_flag = false;
+bool is_logging_flag = true; // changed from false
 
 
 
@@ -184,7 +184,7 @@ osThreadId_t timestampTaskHandle;
 const osThreadAttr_t timestampTask_attributes = {
   .name = "timestampTask",
   .stack_size = 128 * 8,
-  .priority = (osPriority_t) osPriorityHigh7,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 
 osThreadId_t ecuTaskHandle;
@@ -198,7 +198,7 @@ osThreadId_t canRelayHandle;
 const osThreadAttr_t canRelayTask_attributes = {
 		.name = "relayTask",
 		.stack_size = 128 * 8, //no idea what im doing
-		.priority = (osPriority_t) osPriorityHigh6,//relay needs to happen before logger but after timestamp
+		.priority = (osPriority_t) osPriorityHigh,//relay needs to happen before logger but after timestamp
 };
 
 /**************************************************************
@@ -251,6 +251,7 @@ void TimestampThread(void *argument) {
 }
 
 void RelayThread(void *argument){
+	printf("Relay Thread Running");
 	queue.Lock();
 	auto relay = application::Can_Relay(can_bus, queue);
 	queue.Unlock();
@@ -351,6 +352,7 @@ void EcuThread(void *argument) {
 
 
 void RtosInit() {
+	printf("Starting DAQ");
 	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
 	osKernelInitialize(); 			// Initialize scheduler
 
@@ -358,6 +360,7 @@ void RtosInit() {
 	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
 	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
 	ecuTaskHandle = osThreadNew(EcuThread, NULL, &ecuTask_attributes);
+	canRelayHandle = osThreadNew(RelayThread, NULL, &canRelayTask_attributes);
 
 	// Mutexes
 	queue_mutex->Create();
