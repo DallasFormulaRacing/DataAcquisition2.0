@@ -352,7 +352,6 @@ void EcuThread(void *argument) {
 
 
 void RtosInit() {
-	printf("Starting DAQ");
 	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
 	osKernelInitialize(); 			// Initialize scheduler
 
@@ -368,6 +367,10 @@ void RtosInit() {
 
 	// Hardware Timers
 	HAL_TIM_Base_Start_IT(&htim7);
+
+	uint8_t txTestingBuffer[] = "hello";
+
+	can_bus->Transmit(txTestingBuffer);
 
 	osKernelStart(); 				// Start scheduler
 }
