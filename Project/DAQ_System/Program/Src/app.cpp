@@ -101,36 +101,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
 
-
-
-
-
-void cppMain() {
-	// Enable `printf()` using USART
-	RetargetInit(&huart3);
-
-	RtosInit();
-
-	/*
-	 * When `RtosInit()` is enabled, the rest of this function does NOT execute.
-	 */
-
-
-	for(;;) {
-//		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
-//		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
-//		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
-		HAL_Delay(1000);
-
-		printf("hi\n");
-
-	}
-}
-
-
-
-
-
 /**************************************************************
  * 						RTOS Mutexes
  **************************************************************/
@@ -243,6 +213,7 @@ void TimestampThread(void *argument) {
 			queue.Enqueue(data_payload);
 			queue.Unlock();
 			data_payload.Unlock();
+
 		}
 		else {
 			count = 0;
@@ -251,7 +222,9 @@ void TimestampThread(void *argument) {
 }
 
 void RelayThread(void *argument){
-	printf("Relay Thread Running");
+	can_bus->Start();
+	printf("CAN Peripheral started \n");
+
 	queue.Lock();
 	auto relay = application::Can_Relay(can_bus, queue);
 	queue.Unlock();
@@ -276,6 +249,7 @@ void EcuThread(void *argument) {
 	}
 
 	bx_can_peripheral->Start();
+	printf("CAN Peripheral started \n");
 
 	// Configure and enable CAN message arrival interrupts
 	bx_can_callback_ptr = bx_can_peripheral;
@@ -349,11 +323,34 @@ void EcuThread(void *argument) {
 
 
 
+void cppMain() {
+	// Enable `printf()` using USART
+	RetargetInit(&huart3);
+
+	RtosInit();
+
+	/*
+	 * When `RtosInit()` is enabled, the rest of this function does NOT execute.
+	 */
+
+
+	for(;;) {
+//		HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
+//		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
+//		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
+		HAL_Delay(1000);
+
+		//printf("hi\n");
+
+	}
+}
 
 
 void RtosInit() {
 	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
 	osKernelInitialize(); 			// Initialize scheduler
+
+	//testing one time transmission
 
 	// Threads
 	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
@@ -367,10 +364,6 @@ void RtosInit() {
 
 	// Hardware Timers
 	HAL_TIM_Base_Start_IT(&htim7);
-
-	uint8_t txTestingBuffer[] = "hello";
-
-	can_bus->Transmit(txTestingBuffer);
 
 	osKernelStart(); 				// Start scheduler
 }
