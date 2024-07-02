@@ -350,8 +350,6 @@ void RtosInit() {
 	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
 	osKernelInitialize(); 			// Initialize scheduler
 
-	//testing one time transmission
-
 	// Threads
 	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
 	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
