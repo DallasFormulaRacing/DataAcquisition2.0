@@ -168,7 +168,7 @@ osThreadId_t canRelayHandle;
 const osThreadAttr_t canRelayTask_attributes = {
 		.name = "relayTask",
 		.stack_size = 128 * 8, //no idea what im doing
-		.priority = (osPriority_t) osPriorityHigh,//relay needs to happen before logger but after timestamp
+		.priority = (osPriority_t) osPriorityNormal,//relay needs to happen before logger but after timestamp
 };
 
 /**************************************************************
@@ -222,7 +222,8 @@ void TimestampThread(void *argument) {
 }
 
 void RelayThread(void *argument){
-	can_bus->Start();
+	//move to CAN2
+	bx_can_peripheral->Start();
 	printf("CAN Peripheral started \n");
 
 	queue.Lock();
