@@ -225,7 +225,6 @@ void RelayThread(void *argument){
 	//move to CAN2
 	bx_can_peripheral->Start();
 	printf("CAN Peripheral started \n");
-
 	queue.Lock();
 	auto relay = application::Can_Relay(can_bus, queue);
 	queue.Unlock();
