@@ -28,6 +28,7 @@ extern DMA_HandleTypeDef hdma_adc1;
 
 #include "can.h"
 extern CAN_HandleTypeDef hcan1;
+extern CAN_HandleTypeDef hcan2;
 
 #include "i2c.h"
 extern I2C_HandleTypeDef hi2c1;
@@ -130,8 +131,11 @@ application::CircularQueue<application::DataPayload> queue(size, queue_mutex);
 
 application::DataPayload data_payload(data_mutex);
 
-auto bx_can_peripheral = std::make_shared<platform::BxCanStmF4>(hcan1);
-std::shared_ptr<platform::ICan> can_bus = bx_can_peripheral;
+auto bx_can_peripheral_data = std::make_shared<platform::BxCanStmF4>(hcan1);
+std::shared_ptr<platform::ICan> can_data_bus = bx_can_peripheral_data;
+
+auto bx_can_peripheral_communications = std::make_shared<platform::BxCanStmF4>(hcan2);
+std::shared_ptr<platform::ICan> can_coms_bus = bx_can_peripheral_communications;
 
 
 bool is_logging_flag = true; // changed from false
@@ -223,10 +227,10 @@ void TimestampThread(void *argument) {
 
 void RelayThread(void *argument){
 	//move to CAN2
-	bx_can_peripheral->Start();
+	bx_can_peripheral_communications->Start();
 	printf("CAN Peripheral started \n");
 	queue.Lock();
-	auto relay = application::Can_Relay(can_bus, queue);
+	auto relay = application::Can_Relay(can_coms_bus, queue);
 	queue.Unlock();
 	for(;;){
 		if(is_logging_flag){ // coupled somewhat strongly with logger function, change after testing
@@ -240,27 +244,27 @@ void RelayThread(void *argument){
 
 void EcuThread(void *argument) {
 
-	sensor::Pe3 pe3_ecu(can_bus);
+	sensor::Pe3 pe3_ecu(can_data_bus);
 	const std::vector<uint32_t>& can_id_list = pe3_ecu.CanIdList();
 
 	// Subscribe to messages with PE3's CAN IDs
 	for (const uint32_t& can_id : can_id_list) {
-		bx_can_peripheral->ConfigureFilter((can_id >> 13), (can_id & 0x1FFF));
+		bx_can_peripheral_data->ConfigureFilter((can_id >> 13), (can_id & 0x1FFF));
 	}
 
-	bx_can_peripheral->Start();
+	bx_can_peripheral_data->Start();
 	printf("CAN Peripheral started \n");
 
 	// Configure and enable CAN message arrival interrupts
-	bx_can_callback_ptr = bx_can_peripheral;
+	bx_can_callback_ptr = bx_can_peripheral_data;
 	ReceiveInterruptMode rx_interrupt_mode = ReceiveInterruptMode::kFifo0MessagePending;
-	bx_can_peripheral->ConfigureReceiveCallback(rx_interrupt_mode);
-	bx_can_peripheral->EnableInterruptMode();
+	bx_can_peripheral_data->ConfigureReceiveCallback(rx_interrupt_mode);
+	bx_can_peripheral_data->EnableInterruptMode();
 
 	for(;;) {
 
 		if (pe3_ecu.NewMessageArrived()) {
-			can_bus->DisableInterruptMode();
+			can_data_bus->DisableInterruptMode();
 
 			pe3_ecu.Update();
 			uint32_t can_id = pe3_ecu.LatestCanId();
@@ -313,7 +317,7 @@ void EcuThread(void *argument) {
 
 			data_payload.Unlock();
 
-			can_bus->EnableInterruptMode();
+			can_data_bus->EnableInterruptMode();
 		}
 
 

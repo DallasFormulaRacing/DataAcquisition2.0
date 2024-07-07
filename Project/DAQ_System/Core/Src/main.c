@@ -108,9 +108,11 @@ int main(void)
   MX_USART3_UART_Init();
   MX_ADC1_Init();
   MX_CAN1_Init();
+  MX_CAN2_Init();
   MX_I2C1_Init();
   MX_FATFS_Init();
   MX_TIM7_Init();
+  MX_CAN2_Init();
   /* USER CODE BEGIN 2 */
 
 
