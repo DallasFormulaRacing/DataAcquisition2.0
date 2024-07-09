@@ -171,7 +171,7 @@ const osThreadAttr_t ecuTask_attributes = {
 osThreadId_t canRelayHandle;
 const osThreadAttr_t canRelayTask_attributes = {
 		.name = "relayTask",
-		.stack_size = 128 * 8, //no idea what im doing
+		.stack_size = 128 * 8,
 		.priority = (osPriority_t) osPriorityNormal,//relay needs to happen before logger but after timestamp
 };
 
@@ -226,14 +226,13 @@ void TimestampThread(void *argument) {
 }
 
 void RelayThread(void *argument){
-	//move to CAN2
 	bx_can_peripheral_communications->Start();
-	printf("CAN Peripheral started \n");
+	printf("CAN Communication Peripheral started \n");
 	queue.Lock();
 	auto relay = application::Can_Relay(can_coms_bus, queue);
 	queue.Unlock();
 	for(;;){
-		if(is_logging_flag){ // coupled somewhat strongly with logger function, change after testing
+		if(is_logging_flag){
 			data_payload.Lock();
 			relay.Generate_Messages(data_payload);
 			relay.Send_Messages();
@@ -253,7 +252,7 @@ void EcuThread(void *argument) {
 	}
 
 	bx_can_peripheral_data->Start();
-	printf("CAN Peripheral started \n");
+	printf("CAN Data Peripheral started \n");
 
 	// Configure and enable CAN message arrival interrupts
 	bx_can_callback_ptr = bx_can_peripheral_data;
