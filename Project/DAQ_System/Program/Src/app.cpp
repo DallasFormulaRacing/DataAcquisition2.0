@@ -138,7 +138,7 @@ auto bx_can_peripheral_communications = std::make_shared<platform::BxCanStmF4>(h
 std::shared_ptr<platform::ICan> can_coms_bus = bx_can_peripheral_communications;
 
 
-bool is_logging_flag = true; // changed from false
+bool is_logging_flag = false;
 
 
 
@@ -193,10 +193,6 @@ void DataLoggingThread(void *argument) {
 
 	for (;;) {
 		data_logger.Run();
-		data_payload.Lock();
-		linear_potentiometer->DisplacementMillimeters(data_payload.linpot_displacement_mm_.data());
-		printf("%f \n", data_payload.linpot_displacement_mm_[0]);
-		data_payload.Unlock();
 		osDelay(1000);
 	}
 }
@@ -214,7 +210,7 @@ void TimestampThread(void *argument) {
 
 			data_payload.Lock();
 			data_payload.timestamp_ = count * kTimeDuration;
-			//printf("Time: %f seconds\n", data_payload.timestamp_);
+			printf("Time: %f seconds\n", data_payload.timestamp_);
 
 
 			queue.Lock();
