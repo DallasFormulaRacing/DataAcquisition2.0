@@ -188,8 +188,15 @@ void DataLoggingThread(void *argument) {
 
 	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer, is_logging_flag);
 
+	std::unique_ptr<sensor::ILinearPotentiometer> linear_potentiometer(nullptr);
+	linear_potentiometer = std::make_unique<sensor::SLS1322>(hadc1);
+
 	for (;;) {
 		data_logger.Run();
+		data_payload.Lock();
+		linear_potentiometer->DisplacementMillimeters(data_payload.linpot_displacement_mm_.data());
+		printf("%f \n", data_payload.linpot_displacement_mm_[0]);
+		data_payload.Unlock();
 		osDelay(1000);
 	}
 }
@@ -207,7 +214,7 @@ void TimestampThread(void *argument) {
 
 			data_payload.Lock();
 			data_payload.timestamp_ = count * kTimeDuration;
-			printf("Time: %f seconds\n", data_payload.timestamp_);
+			//printf("Time: %f seconds\n", data_payload.timestamp_);
 
 
 			queue.Lock();
