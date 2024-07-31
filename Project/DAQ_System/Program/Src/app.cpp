@@ -122,12 +122,12 @@ const osMutexAttr_t data_mutex_attributes = {
 auto queue_mutex = std::make_shared<application::MutexCmsisV2>(queue_mutex_attributes);
 auto data_mutex = std::make_shared<application::MutexCmsisV2>(data_mutex_attributes);
 
-
 /**************************************************************
  * 					Shared Components
  **************************************************************/
 static constexpr uint8_t size = 20;
 application::CircularQueue<application::DataPayload> queue(size, queue_mutex);
+application::CircularQueue<application::DataPayload> relay_queue(size, queue_mutex);
 
 application::DataPayload data_payload(data_mutex);
 
@@ -149,7 +149,7 @@ osThreadId_t dataLoggingTaskHandle;
 const osThreadAttr_t dataLoggingTask_attributes = {
   .name = "dataLoggingTask",
   .stack_size = 128 * 20,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 
 
@@ -158,7 +158,7 @@ osThreadId_t timestampTaskHandle;
 const osThreadAttr_t timestampTask_attributes = {
   .name = "timestampTask",
   .stack_size = 128 * 8,
-  .priority = (osPriority_t) osPriorityRealtime,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 
 osThreadId_t ecuTaskHandle;
@@ -172,7 +172,7 @@ osThreadId_t canRelayHandle;
 const osThreadAttr_t canRelayTask_attributes = {
 		.name = "relayTask",
 		.stack_size = 128 * 8,
-		.priority = (osPriority_t) osPriorityHigh,//relay needs to happen before logger but after timestamp
+		.priority = (osPriority_t) osPriorityNormal,//relay needs to happen before logger but after timestamp
 };
 
 /**************************************************************
@@ -209,13 +209,19 @@ void TimestampThread(void *argument) {
 			data_payload.timestamp_ = count * kTimeDuration;
 			printf("Time: %f seconds\n", data_payload.timestamp_);
 
-
 			queue.Lock();
-			if(queue.IsFull()) {
+			relay_queue.Lock();
+
+			if(queue.IsFull() || relay_queue.IsFull()) {
 				printf("Queue is full! Data samples are being dropped...\n");
 			}
+
 			queue.Enqueue(data_payload);
+			relay_queue.Enqueue(data_payload);
+
+			relay_queue.Unlock();
 			queue.Unlock();
+
 			data_payload.Unlock();
 
 		}
@@ -228,15 +234,19 @@ void TimestampThread(void *argument) {
 void RelayThread(void *argument){
 	bx_can_peripheral_communications->Start();
 	printf("CAN Communication Peripheral started \n");
-	queue.Lock();
-	auto relay = application::Can_Relay(can_coms_bus, queue);
-	queue.Unlock();
+	relay_queue.Lock();
+	auto relay = application::Can_Relay(can_coms_bus, relay_queue);
+	relay_queue.Unlock();
+	application::DataPayload relay_payload;
 	for(;;){
 		if(is_logging_flag){
-			data_payload.Lock();
-			relay.Generate_Messages(data_payload);
+			relay_queue.Lock();
+
+			relay_payload = relay_queue.Dequeue();
+			relay.Generate_Messages(relay_payload);
 			relay.Send_Messages();
-			data_payload.Unlock();
+
+			relay_queue.Unlock();
 		}
 		osDelay(1000);
 	}
