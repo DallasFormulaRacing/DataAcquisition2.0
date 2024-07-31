@@ -149,7 +149,7 @@ osThreadId_t dataLoggingTaskHandle;
 const osThreadAttr_t dataLoggingTask_attributes = {
   .name = "dataLoggingTask",
   .stack_size = 128 * 20,
-  .priority = (osPriority_t) osPriorityHigh,
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 
 
@@ -158,7 +158,7 @@ osThreadId_t timestampTaskHandle;
 const osThreadAttr_t timestampTask_attributes = {
   .name = "timestampTask",
   .stack_size = 128 * 8,
-  .priority = (osPriority_t) osPriorityHigh,
+  .priority = (osPriority_t) osPriorityRealtime,
 };
 
 osThreadId_t ecuTaskHandle;
@@ -172,7 +172,7 @@ osThreadId_t canRelayHandle;
 const osThreadAttr_t canRelayTask_attributes = {
 		.name = "relayTask",
 		.stack_size = 128 * 8,
-		.priority = (osPriority_t) osPriorityNormal,//relay needs to happen before logger but after timestamp
+		.priority = (osPriority_t) osPriorityHigh,//relay needs to happen before logger but after timestamp
 };
 
 /**************************************************************
@@ -187,9 +187,6 @@ void DataLoggingThread(void *argument) {
 	gpio_callback_ptr = toggle_switch;
 
 	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer, is_logging_flag);
-
-	std::unique_ptr<sensor::ILinearPotentiometer> linear_potentiometer(nullptr);
-	linear_potentiometer = std::make_unique<sensor::SLS1322>(hadc1);
 
 	for (;;) {
 		data_logger.Run();
@@ -241,6 +238,7 @@ void RelayThread(void *argument){
 			relay.Send_Messages();
 			data_payload.Unlock();
 		}
+		osDelay(1000);
 	}
 }
 
