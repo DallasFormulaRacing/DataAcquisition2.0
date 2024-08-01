@@ -141,7 +141,6 @@ std::shared_ptr<platform::ICan> can_coms_bus = bx_can_peripheral_communications;
 bool is_logging_flag = false;
 
 
-
 /**************************************************************
  * 					RTOS Thread Properties
  **************************************************************/
@@ -232,12 +231,17 @@ void TimestampThread(void *argument) {
 }
 
 void RelayThread(void *argument){
+
 	bx_can_peripheral_communications->Start();
 	printf("CAN Communication Peripheral started \n");
 	relay_queue.Lock();
+
 	auto relay = application::Can_Relay(can_coms_bus, relay_queue);
+
 	relay_queue.Unlock();
+
 	application::DataPayload relay_payload;
+
 	for(;;){
 		if(is_logging_flag){
 			relay_queue.Lock();
@@ -248,6 +252,7 @@ void RelayThread(void *argument){
 
 			relay_queue.Unlock();
 		}
+		relay.End_Transmission(is_logging_flag);
 		osDelay(1000);
 	}
 }
