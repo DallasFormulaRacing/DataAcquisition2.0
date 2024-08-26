@@ -196,14 +196,14 @@ void DataLoggingThread(void *argument) {
 		data_payload.Lock();
 		linear_potentiometer->DisplacementMillimeters(data_payload.linpot_displacement_mm_.data());
 		data_payload.Unlock();
-		osDelay(1000);
+		osDelay(100);
 	}
 }
 
 
 void TimestampThread(void *argument) {
 	int count = 0;
-	static constexpr float kTimeDuration = 1.0f; // seconds
+	static constexpr float kTimeDuration = 2.0f; // seconds
 
 	for(;;) {
 		osThreadFlagsWait(timestamp_thread_flag, osFlagsWaitAny, osWaitForever);
@@ -252,15 +252,17 @@ void RelayThread(void *argument){
 	for(;;){
 		if(is_logging_flag){
 			relay_queue.Lock();
+			if(!relay_queue.IsEmpty()){
+				relay_payload = relay_queue.Dequeue();
+				//printf("relay analog 0: %f", relay_payload.analog_inputs_.at(0));
+				relay.Generate_Messages(relay_payload);
+				relay.Send_Messages();
 
-			relay_payload = relay_queue.Dequeue();
-			relay.Generate_Messages(relay_payload);
-			relay.Send_Messages();
-
+			}
 			relay_queue.Unlock();
 		}
 		relay.End_Transmission(is_logging_flag);
-		osDelay(1000);
+		osDelay(100);
 	}
 }
 
