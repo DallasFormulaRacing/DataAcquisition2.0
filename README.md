@@ -3,7 +3,8 @@
 
 - Firmware libraries are maintained in the [DAQ Firmware Libraries](https://github.com/DallasFormulaRacing/DAQ-Firmware-Libraries) repo.
 - Custom PCB revisions are maintained in the [DAQ-PCB](https://github.com/DallasFormulaRacing/DAQ-PCB) repo.
-
+- When you clone this library, make sure that you add the --recurse-submodules flag
+  
 ## Table of Contents
 1. [Objective](#objective)
 2. [User Features](#user-features)
