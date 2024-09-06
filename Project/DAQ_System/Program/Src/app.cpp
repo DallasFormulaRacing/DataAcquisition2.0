@@ -125,7 +125,7 @@ auto data_mutex = std::make_shared<application::MutexCmsisV2>(data_mutex_attribu
 /**************************************************************
  * 					Shared Components
  **************************************************************/
-static constexpr uint8_t size = 20;
+static constexpr uint8_t size = 50;
 application::CircularQueue<application::DataPayload> queue(size, queue_mutex);
 application::CircularQueue<application::DataPayload> relay_queue(size, queue_mutex);
 
@@ -138,7 +138,7 @@ auto bx_can_peripheral_communications = std::make_shared<platform::BxCanStmF4>(h
 std::shared_ptr<platform::ICan> can_coms_bus = bx_can_peripheral_communications;
 
 
-bool is_logging_flag = false;
+bool is_logging_flag = true;
 
 
 /**************************************************************
@@ -171,7 +171,7 @@ osThreadId_t canRelayHandle;
 const osThreadAttr_t canRelayTask_attributes = {
 		.name = "relayTask",
 		.stack_size = 128 * 8,
-		.priority = (osPriority_t) osPriorityNormal,//relay needs to happen before logger but after timestamp
+		.priority = (osPriority_t) osPriorityNormal,
 };
 
 /**************************************************************
@@ -192,55 +192,64 @@ void DataLoggingThread(void *argument) {
 
 
 	for (;;) {
+		//printf("running datalogger \n");
 		data_logger.Run();
-		data_payload.Lock();
-		linear_potentiometer->DisplacementMillimeters(data_payload.linpot_displacement_mm_.data());
-		data_payload.Unlock();
-		osDelay(100);
+		osDelay(1000);
 	}
 }
 
 
 void TimestampThread(void *argument) {
 	int count = 0;
-	static constexpr float kTimeDuration = 2.0f; // seconds
+	static constexpr float kTimeDuration = 1.0f; // seconds
 
 	for(;;) {
 		osThreadFlagsWait(timestamp_thread_flag, osFlagsWaitAny, osWaitForever);
-
 		if (is_logging_flag) {
 			count++;
 
 			data_payload.Lock();
+
+			//printf(" timestamp payload locked ");
+
 			data_payload.timestamp_ = count * kTimeDuration;
 			printf("Time: %f seconds\n", data_payload.timestamp_);
 
 			queue.Lock();
 			relay_queue.Lock();
 
-			if(queue.IsFull() || relay_queue.IsFull()) {
-				printf("Queue is full! Data samples are being dropped...\n");
+			//printf(" timestamp queues locked ");
+
+			if(relay_queue.IsFull()) {
+				//printf("Queue is full! Data samples are being dropped...\n");
 			}
 
 			queue.Enqueue(data_payload);
 			relay_queue.Enqueue(data_payload);
 
+			//printf(" timestamp enqueued ");
+
 			relay_queue.Unlock();
 			queue.Unlock();
 
+			//printf(" timestamp queue unlocked ");
+
 			data_payload.Unlock();
+
+			//printf(" timestamp payload unlocked ");
 
 		}
 		else {
 			count = 0;
 		}
+		osDelay(100);
 	}
 }
 
 void RelayThread(void *argument){
 
 	bx_can_peripheral_communications->Start();
-	printf("CAN Communication Peripheral started \n");
+	////printf("CAN Communication Peripheral started \n");
 	relay_queue.Lock();
 
 	auto relay = application::Can_Relay(can_coms_bus, relay_queue);
@@ -251,17 +260,25 @@ void RelayThread(void *argument){
 
 	for(;;){
 		if(is_logging_flag){
-			relay_queue.Lock();
 			if(!relay_queue.IsEmpty()){
+				//printf(" RUNNING RELAY ");
+				relay_queue.Lock();
+				//printf(" relay queue locked ");
 				relay_payload = relay_queue.Dequeue();
+				//printf(" relay dequeued ");
 				//printf("relay analog 0: %f", relay_payload.analog_inputs_.at(0));
 				relay.Generate_Messages(relay_payload);
+				//printf(" relay generated ");
 				relay.Send_Messages();
-
+				//printf(" relay send ");
+				relay_queue.Unlock();
+				//printf(" relay queue unlocked ");
 			}
-			relay_queue.Unlock();
 		}
 		relay.End_Transmission(is_logging_flag);
+
+		//printf(" end transmission method ");
+
 		osDelay(100);
 	}
 }
@@ -277,7 +294,7 @@ void EcuThread(void *argument) {
 	}
 
 	bx_can_peripheral_data->Start();
-	printf("CAN Data Peripheral started \n");
+	//printf("CAN Data Peripheral started \n");
 
 	// Configure and enable CAN message arrival interrupts
 	bx_can_callback_ptr = bx_can_peripheral_data;
@@ -286,7 +303,6 @@ void EcuThread(void *argument) {
 	bx_can_peripheral_data->EnableInterruptMode();
 
 	for(;;) {
-
 		if (pe3_ecu.NewMessageArrived()) {
 			can_data_bus->DisableInterruptMode();
 
@@ -294,6 +310,8 @@ void EcuThread(void *argument) {
 			uint32_t can_id = pe3_ecu.LatestCanId();
 
 			data_payload.Lock();
+			printf(" ecu locked ");
+
 
 			switch(can_id) {
 			case FramePe1Id:
@@ -340,19 +358,18 @@ void EcuThread(void *argument) {
 			}
 
 			data_payload.Unlock();
+			//printf("ecu locked ");
 
 			can_data_bus->EnableInterruptMode();
 		}
-
-
-		osDelay(25);
+		osDelay(100);
 	}
 }
 
 
 
 void cppMain() {
-	// Enable `printf()` using USART
+	// Enable `//printf()` using USART
 	RetargetInit(&huart3);
 
 	RtosInit();
@@ -368,7 +385,7 @@ void cppMain() {
 //		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
 		HAL_Delay(1000);
 
-		//printf("hi\n");
+		////printf("hi\n");
 
 	}
 }
@@ -379,10 +396,10 @@ void RtosInit() {
 	osKernelInitialize(); 			// Initialize scheduler
 
 	// Threads
-	dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
+	canRelayHandle = osThreadNew(RelayThread, NULL, &canRelayTask_attributes);
+	//dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
 	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
 	ecuTaskHandle = osThreadNew(EcuThread, NULL, &ecuTask_attributes);
-	canRelayHandle = osThreadNew(RelayThread, NULL, &canRelayTask_attributes);
 
 	// Mutexes
 	queue_mutex->Create();
