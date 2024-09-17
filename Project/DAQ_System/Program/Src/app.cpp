@@ -120,14 +120,16 @@ const osMutexAttr_t data_mutex_attributes = {
 };
 
 auto queue_mutex = std::make_shared<application::MutexCmsisV2>(queue_mutex_attributes);
+auto relay_queue_mutex = std::make_shared<application::MutexCmsisV2>(queue_mutex_attributes);
+
 auto data_mutex = std::make_shared<application::MutexCmsisV2>(data_mutex_attributes);
 
 /**************************************************************
  * 					Shared Components
  **************************************************************/
-static constexpr uint8_t size = 50;
+static constexpr uint8_t size = 20;
 application::CircularQueue<application::DataPayload> queue(size, queue_mutex);
-application::CircularQueue<application::DataPayload> relay_queue(size, queue_mutex);
+application::CircularQueue<application::DataPayload> relay_queue(size, relay_queue_mutex);
 
 application::DataPayload data_payload(data_mutex);
 
@@ -170,8 +172,8 @@ const osThreadAttr_t ecuTask_attributes = {
 osThreadId_t canRelayHandle;
 const osThreadAttr_t canRelayTask_attributes = {
 		.name = "relayTask",
-		.stack_size = 128 * 8,
-		.priority = (osPriority_t) osPriorityNormal,
+		.stack_size = 128 * 20,
+		.priority = (osPriority_t) osPriorityHigh,
 };
 
 /**************************************************************
@@ -187,21 +189,21 @@ void DataLoggingThread(void *argument) {
 
 	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer, is_logging_flag);
 
-	std::unique_ptr<sensor::ILinearPotentiometer> linear_potentiometer(nullptr);
-	linear_potentiometer = std::make_unique<sensor::SLS1322>(hadc1);
-
-
 	for (;;) {
-		//printf("running datalogger \n");
-		data_logger.Run();
-		osDelay(1000);
+		printf("running datalogger \n");
+		//data_logger.Run();
+		osDelay(100);
 	}
 }
 
 
 void TimestampThread(void *argument) {
 	int count = 0;
-	static constexpr float kTimeDuration = 1.0f; // seconds
+	static constexpr float kTimeDuration = 0.01f; // seconds
+
+	std::unique_ptr<sensor::ILinearPotentiometer> linear_potentiometer(nullptr);
+	linear_potentiometer = std::make_unique<sensor::SLS1322>(hadc1);
+
 
 	for(;;) {
 		osThreadFlagsWait(timestamp_thread_flag, osFlagsWaitAny, osWaitForever);
@@ -210,10 +212,11 @@ void TimestampThread(void *argument) {
 
 			data_payload.Lock();
 
-			//printf(" timestamp payload locked ");
+			linear_potentiometer->DisplacementMillimeters(data_payload.linpot_displacement_mm_.data());
+			//printf(" %f ", data_payload.linpot_displacement_mm_[0]);
 
 			data_payload.timestamp_ = count * kTimeDuration;
-			printf("Time: %f seconds\n", data_payload.timestamp_);
+			//printf("Time: %f seconds\n", data_payload.timestamp_);
 
 			queue.Lock();
 			relay_queue.Lock();
@@ -249,7 +252,9 @@ void TimestampThread(void *argument) {
 void RelayThread(void *argument){
 
 	bx_can_peripheral_communications->Start();
-	////printf("CAN Communication Peripheral started \n");
+
+	//printf("CAN Communication Peripheral started \n");
+
 	relay_queue.Lock();
 
 	auto relay = application::Can_Relay(can_coms_bus, relay_queue);
@@ -257,27 +262,25 @@ void RelayThread(void *argument){
 	relay_queue.Unlock();
 
 	application::DataPayload relay_payload;
-
+	float voltage;
 	for(;;){
 		if(is_logging_flag){
 			if(!relay_queue.IsEmpty()){
+
 				//printf(" RUNNING RELAY ");
+
 				relay_queue.Lock();
-				//printf(" relay queue locked ");
 				relay_payload = relay_queue.Dequeue();
-				//printf(" relay dequeued ");
-				//printf("relay analog 0: %f", relay_payload.analog_inputs_.at(0));
-				relay.Generate_Messages(relay_payload);
-				//printf(" relay generated ");
-				relay.Send_Messages();
-				//printf(" relay send ");
 				relay_queue.Unlock();
-				//printf(" relay queue unlocked ");
+
+				voltage = relay_payload.battery_voltage_;
+				printf("relay %f ", voltage);
+
+				relay.Generate_Messages(relay_payload);
+				relay.Send_Messages();
 			}
 		}
 		relay.End_Transmission(is_logging_flag);
-
-		//printf(" end transmission method ");
 
 		osDelay(100);
 	}
@@ -310,12 +313,12 @@ void EcuThread(void *argument) {
 			uint32_t can_id = pe3_ecu.LatestCanId();
 
 			data_payload.Lock();
-			printf(" ecu locked ");
+			//printf(" ecu locked ");
 
 
 			switch(can_id) {
 			case FramePe1Id:
-				printf("[ECU] PE1 arrived\n");
+				//printf("[ECU] PE1 arrived\n");
 				data_payload.rpm_ = pe3_ecu.Rpm();
 				data_payload.tps_ = pe3_ecu.Tps();
 				data_payload.fuel_open_time_ = pe3_ecu.FuelOpenTime();
@@ -323,14 +326,14 @@ void EcuThread(void *argument) {
 				break;
 
 			case FramePe2Id:
-				printf("[ECU] PE2 arrived\n");
+				//printf("[ECU] PE2 arrived\n");
 				data_payload.barometer_ = pe3_ecu.BarometerPressure();
 				data_payload.map_ = pe3_ecu.Map();
 				data_payload.lambda_ = pe3_ecu.Lambda();
 				break;
 
 			case FramePe3Id:
-				printf("[ECU] PE3 arrived\n");
+				//printf("[ECU] PE3 arrived\n");
 				data_payload.analog_inputs_.at(0) = pe3_ecu.AnalogInputVoltage(0);
 				data_payload.analog_inputs_.at(1) = pe3_ecu.AnalogInputVoltage(1);
 				data_payload.analog_inputs_.at(2) = pe3_ecu.AnalogInputVoltage(2);
@@ -338,7 +341,7 @@ void EcuThread(void *argument) {
 				break;
 
 			case FramePe4Id:
-				printf("[ECU] PE4 arrived\n");
+				//printf("[ECU] PE4 arrived\n");
 				data_payload.analog_inputs_.at(4) = pe3_ecu.AnalogInputVoltage(4);
 				data_payload.analog_inputs_.at(5) = pe3_ecu.AnalogInputVoltage(5);
 				data_payload.analog_inputs_.at(6) = pe3_ecu.AnalogInputVoltage(6);
@@ -347,14 +350,15 @@ void EcuThread(void *argument) {
 
 
 			case FramePe6Id:
-				printf("[ECU] PE6 arrived\n");
+				printf("ecu %f ",pe3_ecu.BatteryVoltage());
 				data_payload.battery_voltage_ = pe3_ecu.BatteryVoltage();
 				data_payload.air_temp_ = pe3_ecu.AirTemperature();
 				data_payload.coolant_temp_ = pe3_ecu.CoolantTemperature();
 				break;
 
 			default:
-				printf("[ECU] Un-handled CAN ID:%" PRIu32 "\n", can_id);
+				//printf("[ECU] Un-handled CAN ID:%" PRIu32 "\n", can_id);
+				break;
 			}
 
 			data_payload.Unlock();
@@ -397,12 +401,14 @@ void RtosInit() {
 
 	// Threads
 	canRelayHandle = osThreadNew(RelayThread, NULL, &canRelayTask_attributes);
-	//dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
 	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
 	ecuTaskHandle = osThreadNew(EcuThread, NULL, &ecuTask_attributes);
+	//Datalogger is suspended for testing purposes
+	//dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
 
 	// Mutexes
 	queue_mutex->Create();
+	relay_queue_mutex->Create();
 	data_mutex->Create();
 
 	// Hardware Timers
