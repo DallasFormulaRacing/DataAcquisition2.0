@@ -158,7 +158,7 @@ uint32_t timestamp_thread_flag = 0x00000001U;
 osThreadId_t timestampTaskHandle;
 const osThreadAttr_t timestampTask_attributes = {
   .name = "timestampTask",
-  .stack_size = 128 * 8,
+  .stack_size = 128 * 20,
   .priority = (osPriority_t) osPriorityHigh,
 };
 
@@ -216,7 +216,7 @@ void TimestampThread(void *argument) {
 			//printf(" %f ", data_payload.linpot_displacement_mm_[0]);
 
 			data_payload.timestamp_ = count * kTimeDuration;
-			//printf("Time: %f seconds\n", data_payload.timestamp_);
+			printf("Time: %f seconds \n", data_payload.timestamp_);
 
 			queue.Lock();
 			relay_queue.Lock();
@@ -318,7 +318,7 @@ void EcuThread(void *argument) {
 
 			switch(can_id) {
 			case FramePe1Id:
-				//printf("[ECU] PE1 arrived\n");
+				printf("[ECU] PE1 arrived\n");
 				data_payload.rpm_ = pe3_ecu.Rpm();
 				data_payload.tps_ = pe3_ecu.Tps();
 				data_payload.fuel_open_time_ = pe3_ecu.FuelOpenTime();
@@ -326,14 +326,14 @@ void EcuThread(void *argument) {
 				break;
 
 			case FramePe2Id:
-				//printf("[ECU] PE2 arrived\n");
+				printf("[ECU] PE2 arrived\n");
 				data_payload.barometer_ = pe3_ecu.BarometerPressure();
 				data_payload.map_ = pe3_ecu.Map();
 				data_payload.lambda_ = pe3_ecu.Lambda();
 				break;
 
 			case FramePe3Id:
-				//printf("[ECU] PE3 arrived\n");
+				printf("[ECU] PE3 arrived\n");
 				data_payload.analog_inputs_.at(0) = pe3_ecu.AnalogInputVoltage(0);
 				data_payload.analog_inputs_.at(1) = pe3_ecu.AnalogInputVoltage(1);
 				data_payload.analog_inputs_.at(2) = pe3_ecu.AnalogInputVoltage(2);
@@ -341,7 +341,7 @@ void EcuThread(void *argument) {
 				break;
 
 			case FramePe4Id:
-				//printf("[ECU] PE4 arrived\n");
+				printf("[ECU] PE4 arrived\n");
 				data_payload.analog_inputs_.at(4) = pe3_ecu.AnalogInputVoltage(4);
 				data_payload.analog_inputs_.at(5) = pe3_ecu.AnalogInputVoltage(5);
 				data_payload.analog_inputs_.at(6) = pe3_ecu.AnalogInputVoltage(6);
@@ -357,8 +357,7 @@ void EcuThread(void *argument) {
 				break;
 
 			default:
-				//printf("[ECU] Un-handled CAN ID:%" PRIu32 "\n", can_id);
-				break;
+				printf("[ECU] Un-handled CAN ID:%" PRIu32 "\n", can_id);
 			}
 
 			data_payload.Unlock();
@@ -375,6 +374,13 @@ void EcuThread(void *argument) {
 void cppMain() {
 	// Enable `//printf()` using USART
 	RetargetInit(&huart3);
+
+	uint32_t primask = __get_PRIMASK();
+	if(primask){
+		printf("disabled");
+	}else{
+		printf("enabled");
+	}
 
 	RtosInit();
 
