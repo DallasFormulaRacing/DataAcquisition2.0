@@ -213,10 +213,9 @@ void TimestampThread(void *argument) {
 			data_payload.Lock();
 
 			linear_potentiometer->DisplacementMillimeters(data_payload.linpot_displacement_mm_.data());
-			//printf(" %f ", data_payload.linpot_displacement_mm_[0]);
+			//printf(" %f", data_payload.linpot_displacement_mm_[2]);
 
 			data_payload.timestamp_ = count * kTimeDuration;
-			printf("Time: %f seconds \n", data_payload.timestamp_);
 
 			queue.Lock();
 			relay_queue.Lock();
@@ -262,7 +261,7 @@ void RelayThread(void *argument){
 	relay_queue.Unlock();
 
 	application::DataPayload relay_payload;
-	float voltage;
+	//float voltage;
 	for(;;){
 		if(is_logging_flag){
 			if(!relay_queue.IsEmpty()){
@@ -273,8 +272,8 @@ void RelayThread(void *argument){
 				relay_payload = relay_queue.Dequeue();
 				relay_queue.Unlock();
 
-				voltage = relay_payload.battery_voltage_;
-				printf("relay %f ", voltage);
+				//voltage = relay_payload.battery_voltage_;
+				//printf("relay %f ", voltage);
 
 				relay.Generate_Messages(relay_payload);
 				relay.Send_Messages();
@@ -334,6 +333,7 @@ void EcuThread(void *argument) {
 
 			case FramePe3Id:
 				printf("[ECU] PE3 arrived\n");
+				printf(" %f ", pe3_ecu.AnalogInputVoltage(3));
 				data_payload.analog_inputs_.at(0) = pe3_ecu.AnalogInputVoltage(0);
 				data_payload.analog_inputs_.at(1) = pe3_ecu.AnalogInputVoltage(1);
 				data_payload.analog_inputs_.at(2) = pe3_ecu.AnalogInputVoltage(2);
@@ -357,7 +357,8 @@ void EcuThread(void *argument) {
 				break;
 
 			default:
-				printf("[ECU] Un-handled CAN ID:%" PRIu32 "\n", can_id);
+				//printf("[ECU] Un-handled CAN ID:%" PRIu32 "\n", can_id);
+				printf("");
 			}
 
 			data_payload.Unlock();
