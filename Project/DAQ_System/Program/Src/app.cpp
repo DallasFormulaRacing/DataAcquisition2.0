@@ -213,14 +213,10 @@ void TimestampThread(void *argument) {
 			data_payload.Lock();
 
 			linear_potentiometer->DisplacementMillimeters(data_payload.linpot_displacement_mm_.data());
-			//printf(" %f", data_payload.linpot_displacement_mm_[2]);
 
 			data_payload.timestamp_ = count * kTimeDuration;
-
 			queue.Lock();
 			relay_queue.Lock();
-
-			//printf(" timestamp queues locked ");
 
 			if(relay_queue.IsFull()) {
 				//printf("Queue is full! Data samples are being dropped...\n");
@@ -229,17 +225,10 @@ void TimestampThread(void *argument) {
 			queue.Enqueue(data_payload);
 			relay_queue.Enqueue(data_payload);
 
-			//printf(" timestamp enqueued ");
-
 			relay_queue.Unlock();
 			queue.Unlock();
 
-			//printf(" timestamp queue unlocked ");
-
 			data_payload.Unlock();
-
-			//printf(" timestamp payload unlocked ");
-
 		}
 		else {
 			count = 0;
@@ -251,8 +240,6 @@ void TimestampThread(void *argument) {
 void RelayThread(void *argument){
 
 	bx_can_peripheral_communications->Start();
-
-	//printf("CAN Communication Peripheral started \n");
 
 	relay_queue.Lock();
 
@@ -266,14 +253,9 @@ void RelayThread(void *argument){
 		if(is_logging_flag){
 			if(!relay_queue.IsEmpty()){
 
-				//printf(" RUNNING RELAY ");
-
 				relay_queue.Lock();
 				relay_payload = relay_queue.Dequeue();
 				relay_queue.Unlock();
-
-				//voltage = relay_payload.battery_voltage_;
-				//printf("relay %f ", voltage);
 
 				relay.Generate_Messages(relay_payload);
 				relay.Send_Messages();
@@ -333,7 +315,7 @@ void EcuThread(void *argument) {
 
 			case FramePe3Id:
 				printf("[ECU] PE3 arrived\n");
-				printf(" %f ", pe3_ecu.AnalogInputVoltage(3));
+				//printf(" %f ", pe3_ecu.AnalogInputVoltage(3));
 				data_payload.analog_inputs_.at(0) = pe3_ecu.AnalogInputVoltage(0);
 				data_payload.analog_inputs_.at(1) = pe3_ecu.AnalogInputVoltage(1);
 				data_payload.analog_inputs_.at(2) = pe3_ecu.AnalogInputVoltage(2);
@@ -350,7 +332,7 @@ void EcuThread(void *argument) {
 
 
 			case FramePe6Id:
-				printf("ecu %f ",pe3_ecu.BatteryVoltage());
+				printf("[ECU] PE6 arrived\n");
 				data_payload.battery_voltage_ = pe3_ecu.BatteryVoltage();
 				data_payload.air_temp_ = pe3_ecu.AirTemperature();
 				data_payload.coolant_temp_ = pe3_ecu.CoolantTemperature();
@@ -403,13 +385,16 @@ void cppMain() {
 
 
 void RtosInit() {
+
 	NVIC_SetPriorityGrouping( 0 );	// For allowing hardware (not RTOS/software) interrupts while the Kernel is running
 	osKernelInitialize(); 			// Initialize scheduler
 
 	// Threads
+
 	canRelayHandle = osThreadNew(RelayThread, NULL, &canRelayTask_attributes);
 	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
-	ecuTaskHandle = osThreadNew(EcuThread, NULL, &ecuTask_attributes);
+	//ecuTaskHandle = osThreadNew(EcuThread, NULL, &ecuTask_attributes);
+
 	//Datalogger is suspended for testing purposes
 	//dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
 
