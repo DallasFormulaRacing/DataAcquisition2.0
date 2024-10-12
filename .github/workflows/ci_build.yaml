@@ -1,7 +1,7 @@
 name: CI Build
 
 # Define the trigger event(s)
-on: push
+on: pull_request
 
 # Jobs run in parallel by default, each runs steps in sequence
 jobs:
@@ -14,6 +14,9 @@ jobs:
             uses: actions/checkout@v3
             with:
               submodules: 'true'
+
+          - name : List files in this repo
+            run : ls -R
 
           - name : Update the submodules
             run: |
