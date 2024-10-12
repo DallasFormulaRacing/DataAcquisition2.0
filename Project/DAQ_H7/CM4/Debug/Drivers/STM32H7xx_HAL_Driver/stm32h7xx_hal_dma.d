@@ -1,5 +1,5 @@
 Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_dma.o: \
- C:/Users/Nico/Documents/Embedded/H7_Migration_Folder/DAQ_H7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma.c \
+ C:/Users/Nico/Documents/Embedded/DataAcquisition2.0/Project/DAQ_H7/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_dma.c \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \

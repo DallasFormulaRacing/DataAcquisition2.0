@@ -86,8 +86,8 @@ all: main-build
 main-build: DAQ_H7_CM4.elf secondary-outputs
 
 # Tool invocations
-DAQ_H7_CM4.elf DAQ_H7_CM4.map: $(OBJS) $(USER_OBJS) C:\Users\Nico\Documents\Embedded\H7_Migration_Folder\DAQ_H7\CM4\STM32H755ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "DAQ_H7_CM4.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Nico\Documents\Embedded\H7_Migration_Folder\DAQ_H7\CM4\STM32H755ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="DAQ_H7_CM4.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+DAQ_H7_CM4.elf DAQ_H7_CM4.map: $(OBJS) $(USER_OBJS) C:\Users\Nico\Documents\Embedded\DataAcquisition2.0\Project\DAQ_H7\CM4\STM32H755ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-g++ -o "DAQ_H7_CM4.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Nico\Documents\Embedded\DataAcquisition2.0\Project\DAQ_H7\CM4\STM32H755ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="DAQ_H7_CM4.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -41,6 +41,16 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c</locationURI>
 		</link>
 		<link>
+			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_adc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_adc.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_adc_ex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_adc_ex.c</locationURI>
+		</link>
+		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_cortex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_cortex.c</locationURI>
@@ -59,6 +69,11 @@
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_exti.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_exti.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_fdcan.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_fdcan.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_flash.c</name>
@@ -124,6 +139,16 @@
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_tim_ex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_uart.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_uart_ex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
