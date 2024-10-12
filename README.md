@@ -1,6 +1,10 @@
 # `DataAcquisition2.0`
 🏁 For documentation, checkout our [Wiki](https://github.com/DallasFormulaRacing/DataAcquisition2.0/wiki)!
 
+- Firmware libraries are maintained in the [DAQ Firmware Libraries](https://github.com/DallasFormulaRacing/DAQ-Firmware-Libraries) repo.
+- Custom PCB revisions are maintained in the [DAQ-PCB](https://github.com/DallasFormulaRacing/DAQ-PCB) repo.
+- When you clone this library, make sure that you add the --recurse-submodules flag
+  
 ## Table of Contents
 1. [Objective](#objective)
 2. [User Features](#user-features)
@@ -95,10 +99,5 @@ A CSV file with associate a timestamp with the following sampled data.
   - The Cortex M7 core may focus on outputting the processed data.
   - Both cores may run FreeRTOS for organizational purposes.
   - Both cores may communicate and synchronize with each other using the OpenAMP framework.
-- Developing on a custom PCB microcontroller.
-  - Currently in progress and led by our Electrical Team.
-  - Ideal for mounting on the vehicle.
 
 
-## Deprecated Technologies
-Initially, this project ran a program consisting of a simple super loop and interfaced with the hardware using the Mbed framework. This allowed us to focus on building the team knowledge base for developing custom drivers to support sensors. In favor of our long term goals, we have transitioned to supporting the above [Firmware Tech Stack](#firmware-tech-stack) for the DAQ.
