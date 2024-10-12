@@ -190,8 +190,7 @@ void DataLoggingThread(void *argument) {
 	application::DataLogger data_logger(file_system, toggle_switch, queue, usb_connected_observer, is_logging_flag);
 
 	for (;;) {
-		printf("running datalogger \n");
-		//data_logger.Run();
+		data_logger.Run();
 		osDelay(100);
 	}
 }
@@ -278,7 +277,6 @@ void EcuThread(void *argument) {
 	}
 
 	bx_can_peripheral_data->Start();
-	//printf("CAN Data Peripheral started \n");
 
 	// Configure and enable CAN message arrival interrupts
 	bx_can_callback_ptr = bx_can_peripheral_data;
@@ -294,8 +292,6 @@ void EcuThread(void *argument) {
 			uint32_t can_id = pe3_ecu.LatestCanId();
 
 			data_payload.Lock();
-			//printf(" ecu locked ");
-
 
 			switch(can_id) {
 			case FramePe1Id:
@@ -307,15 +303,12 @@ void EcuThread(void *argument) {
 				break;
 
 			case FramePe2Id:
-				printf("[ECU] PE2 arrived\n");
 				data_payload.barometer_ = pe3_ecu.BarometerPressure();
 				data_payload.map_ = pe3_ecu.Map();
 				data_payload.lambda_ = pe3_ecu.Lambda();
 				break;
 
 			case FramePe3Id:
-				printf("[ECU] PE3 arrived\n");
-				//printf(" %f ", pe3_ecu.AnalogInputVoltage(3));
 				data_payload.analog_inputs_.at(0) = pe3_ecu.AnalogInputVoltage(0);
 				data_payload.analog_inputs_.at(1) = pe3_ecu.AnalogInputVoltage(1);
 				data_payload.analog_inputs_.at(2) = pe3_ecu.AnalogInputVoltage(2);
@@ -323,7 +316,6 @@ void EcuThread(void *argument) {
 				break;
 
 			case FramePe4Id:
-				printf("[ECU] PE4 arrived\n");
 				data_payload.analog_inputs_.at(4) = pe3_ecu.AnalogInputVoltage(4);
 				data_payload.analog_inputs_.at(5) = pe3_ecu.AnalogInputVoltage(5);
 				data_payload.analog_inputs_.at(6) = pe3_ecu.AnalogInputVoltage(6);
@@ -332,14 +324,12 @@ void EcuThread(void *argument) {
 
 
 			case FramePe6Id:
-				printf("[ECU] PE6 arrived\n");
 				data_payload.battery_voltage_ = pe3_ecu.BatteryVoltage();
 				data_payload.air_temp_ = pe3_ecu.AirTemperature();
 				data_payload.coolant_temp_ = pe3_ecu.CoolantTemperature();
 				break;
 
 			default:
-				//printf("[ECU] Un-handled CAN ID:%" PRIu32 "\n", can_id);
 				printf("");
 			}
 
