@@ -1,0 +1,7 @@
+../Core/Src/retarget.c:23:6:RetargetInit	1
+../Core/Src/retarget.c:31:5:_isatty	3
+../Core/Src/retarget.c:39:5:_write	4
+../Core/Src/retarget.c:53:5:_close	3
+../Core/Src/retarget.c:61:5:_lseek	1
+../Core/Src/retarget.c:70:5:_read	3
+../Core/Src/retarget.c:84:5:_fstat	3

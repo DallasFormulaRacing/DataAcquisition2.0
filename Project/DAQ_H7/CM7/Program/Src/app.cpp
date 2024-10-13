@@ -18,7 +18,7 @@
 #include "gpio.h"
 
 #include "usart.h"
-extern UART_HandleTypeDef huart3;
+extern UART_HandleTypeDef huart4;
 
 #include "adc.h"
 extern ADC_HandleTypeDef hadc1;
@@ -28,8 +28,8 @@ extern DMA_HandleTypeDef hdma_adc1;
 
 //TODO: migrate to FDCAN :)
 #include "fdcan.h"
-extern CAN_HandleTypeDef hcan1;
-extern CAN_HandleTypeDef hcan2;
+extern FDCAN_HandleTypeDef hcan1;
+extern FDCAN_HandleTypeDef hcan2;
 
 #include "i2c.h"
 extern I2C_HandleTypeDef hi2c1;
@@ -43,27 +43,7 @@ extern TIM_HandleTypeDef htim7;
 
 // DFR Custom Dependencies
 #include "app.hpp"
-#include "../DFR_Libraries/Application/circular_queue.hpp"
-#include "../DFR_Libraries/Application/data_payload.hpp"
-#include "../DFR_Libraries/Application/DataLogger/DataLogger.hpp"
-#include "../DFR_Libraries/Application/FileSystem/fat_fs.hpp"
-#include "../DFR_Libraries/Application/Mutex/mutex_cmsisv2.hpp"
-#include "../DFR_Libraries/Application/Relay/can_relay.hpp"
-#include "../DFR_Libraries/Platform/STM/F4/CAN/bxcan_stmf4.hpp"
-#include "../DFR_Libraries/Platform/Interfaces/ican.hpp"
-#include "../DFR_Libraries/Platform/Interfaces/igpio.hpp"
-#include "../DFR_Libraries/Platform/STM/F4/GPIO/gpio_stmf4.hpp"
-#include "../DFR_Libraries/Sensor/Accelerometer/lsm303dlhc.hpp"
-#include "../DFR_Libraries/Sensor/ECU/PE3/iecu.hpp"
-#include "../DFR_Libraries/Sensor/ECU/PE3/pe3.hpp"
-#include "../DFR_Libraries/Sensor/GyroScope/igyroscope.hpp"
-#include "../DFR_Libraries/Sensor/GyroScope/l3gd20h.hpp"
-#include "../DFR_Libraries/Sensor/LinearPotentiometer/ilinear_potentiometer.hpp"
-#include "../DFR_Libraries/Sensor/LinearPotentiometer/sls1322.hpp"
-#include "../DFR_Libraries/Sensor/GyroScope/LSM6DSOXGyroscope.hpp"
-#include "../DFR_Libraries/Sensor/Accelerometer/LSM6DSOXAccelerometer.hpp"
 #include "../../Core/Inc/retarget.h"
-
 
 void RtosInit();
 void DataLoggingThread(void *argument);
@@ -74,16 +54,17 @@ void RelayThread(void *argument);
 /**************************************************************
  * 				Toggle Switch Interrupt Callback
  **************************************************************/
+/*
 std::shared_ptr<platform::GpioStmF4> gpio_callback_ptr(nullptr);
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	gpio_callback_ptr->InterruptCallback(GPIO_Pin);
 }
-
-
+*/
 /**************************************************************
  * 				CAN Bus Interrupt Callback
  **************************************************************/
+/*
 std::shared_ptr<platform::BxCanStmF4> bx_can_callback_ptr(nullptr);
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
@@ -93,7 +74,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 
 
 using ReceiveInterruptMode = platform::BxCanStmF4::ReceiveInterruptMode;
-
+*/
 /**************************************************************
  * 						RTOS Mutexes
  **************************************************************/
@@ -110,15 +91,17 @@ const osMutexAttr_t data_mutex_attributes = {
   NULL,
   0U
 };
+/*
 
 auto queue_mutex = std::make_shared<application::MutexCmsisV2>(queue_mutex_attributes);
 auto relay_queue_mutex = std::make_shared<application::MutexCmsisV2>(queue_mutex_attributes);
 
 auto data_mutex = std::make_shared<application::MutexCmsisV2>(data_mutex_attributes);
-
+*/
 /**************************************************************
  * 					Shared Components
  **************************************************************/
+/*
 static constexpr uint8_t size = 20;
 application::CircularQueue<application::DataPayload> queue(size, queue_mutex);
 application::CircularQueue<application::DataPayload> relay_queue(size, relay_queue_mutex);
@@ -133,7 +116,7 @@ std::shared_ptr<platform::ICan> can_coms_bus = bx_can_peripheral_communications;
 
 
 bool is_logging_flag = true;
-
+*/
 
 /**************************************************************
  * 					RTOS Thread Properties
@@ -172,6 +155,7 @@ const osThreadAttr_t canRelayTask_attributes = {
  * 						RTOS Threads
  **************************************************************/
 void DataLoggingThread(void *argument) {
+	/*
 	MX_USB_HOST_Init();
 
 	auto file_system = std::make_shared<application::FatFs>(USBHPath, USBHFatFS, USBHFile);
@@ -185,10 +169,12 @@ void DataLoggingThread(void *argument) {
 		data_logger.Run();
 		osDelay(100);
 	}
+	*/
 }
 
 
 void TimestampThread(void *argument) {
+	/*
 	int count = 0;
 	static constexpr float kTimeDuration = 0.01f; // seconds
 
@@ -226,10 +212,11 @@ void TimestampThread(void *argument) {
 		}
 		osDelay(100);
 	}
+	*/
 }
 
 void RelayThread(void *argument){
-
+	/*
 	bx_can_peripheral_communications->Start();
 
 	relay_queue.Lock();
@@ -256,10 +243,11 @@ void RelayThread(void *argument){
 
 		osDelay(100);
 	}
+	*/
 }
 
 void EcuThread(void *argument) {
-
+	/*
 	sensor::Pe3 pe3_ecu(can_data_bus);
 	const std::vector<uint32_t>& can_id_list = pe3_ecu.CanIdList();
 
@@ -332,13 +320,14 @@ void EcuThread(void *argument) {
 		}
 		osDelay(100);
 	}
+	*/
 }
 
 
 
 void cppMain() {
 	// Enable `//printf()` using USART
-	RetargetInit(&huart3);
+	RetargetInit(&huart4);
 
 	uint32_t primask = __get_PRIMASK();
 	if(primask){
@@ -373,18 +362,19 @@ void RtosInit() {
 
 	// Threads
 
-	canRelayHandle = osThreadNew(RelayThread, NULL, &canRelayTask_attributes);
-	timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
+	//canRelayHandle = osThreadNew(RelayThread, NULL, &canRelayTask_attributes);
+	//timestampTaskHandle = osThreadNew(TimestampThread, NULL, &timestampTask_attributes);
 	//ecuTaskHandle = osThreadNew(EcuThread, NULL, &ecuTask_attributes);
 
 	//Datalogger is suspended for testing purposes
 	//dataLoggingTaskHandle = osThreadNew(DataLoggingThread, NULL, &dataLoggingTask_attributes);
 
 	// Mutexes
+	/*
 	queue_mutex->Create();
 	relay_queue_mutex->Create();
 	data_mutex->Create();
-
+	*/
 	// Hardware Timers
 	HAL_TIM_Base_Start_IT(&htim7);
 

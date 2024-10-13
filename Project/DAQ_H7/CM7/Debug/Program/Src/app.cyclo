@@ -1,0 +1,8 @@
+C:\ST\STM32CubeIDE_1.14.1\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.0.200.202406191623\tools\arm-none-eabi\include\c++\12.3.1\arm-none-eabi\thumb\v7e-m+dp\hard\bits\gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	1
+../../Drivers/CMSIS/Include/core_cm7.h:1871:22:void __NVIC_SetPriorityGrouping(uint32_t)	1
+../Program/Src/app.cpp:157:6:void DataLoggingThread(void*)	1
+../Program/Src/app.cpp:176:6:void TimestampThread(void*)	1
+../Program/Src/app.cpp:218:6:void RelayThread(void*)	1
+../Program/Src/app.cpp:249:6:void EcuThread(void*)	1
+../Program/Src/app.cpp:328:6:void cppMain()	2
+../Program/Src/app.cpp:358:6:void RtosInit()	1
