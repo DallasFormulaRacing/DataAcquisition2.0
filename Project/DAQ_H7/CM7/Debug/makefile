@@ -14,6 +14,7 @@ RM := rm -rf
 -include Drivers/STM32H7xx_HAL_Driver/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
+-include Core/Inc/subdir.mk
 -include Common/Src/subdir.mk
 -include objects.mk
 
@@ -88,7 +89,7 @@ main-build: DAQ_H7_CM7.elf secondary-outputs
 
 # Tool invocations
 DAQ_H7_CM7.elf DAQ_H7_CM7.map: $(OBJS) $(USER_OBJS) C:\Users\Nico\Documents\Embedded\DataAcquisition2.0\Project\DAQ_H7\CM7\STM32H755ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "DAQ_H7_CM7.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\Nico\Documents\Embedded\DataAcquisition2.0\Project\DAQ_H7\CM7\STM32H755ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="DAQ_H7_CM7.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+	arm-none-eabi-g++ -o "DAQ_H7_CM7.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\Nico\Documents\Embedded\DataAcquisition2.0\Project\DAQ_H7\CM7\STM32H755ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="DAQ_H7_CM7.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

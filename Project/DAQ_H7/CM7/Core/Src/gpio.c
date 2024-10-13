@@ -35,13 +35,10 @@
 /** Configure pins
      PC1   ------> ETH_MDC
      PA1   ------> ETH_REF_CLK
-     PA2   ------> ETH_MDIO
      PA7   ------> ETH_CRS_DV
      PC4   ------> ETH_RXD0
      PC5   ------> ETH_RXD1
      PB13   ------> ETH_TXD1
-     PD8   ------> USART3_TX
-     PD9   ------> USART3_RX
      PA8   ------> USB_OTG_FS_SOF
      PA9   ------> USB_OTG_FS_VBUS
      PA11   ------> USB_OTG_FS_DM
@@ -70,8 +67,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA1 PA2 PA7 */
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_7;
+  /*Configure GPIO pins : PA1 PA7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -85,14 +82,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PD8 PD9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF7_USART3;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PA8 PA11 PA12 */
   GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_11|GPIO_PIN_12;

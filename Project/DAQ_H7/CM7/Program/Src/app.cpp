@@ -18,7 +18,7 @@
 #include "gpio.h"
 
 #include "usart.h"
-extern UART_HandleTypeDef huart4;
+extern UART_HandleTypeDef huart3;
 
 #include "adc.h"
 extern ADC_HandleTypeDef hadc1;
@@ -327,7 +327,7 @@ void EcuThread(void *argument) {
 
 void cppMain() {
 	// Enable `//printf()` using USART
-	RetargetInit(&huart4);
+	RetargetInit(&huart3);
 
 	uint32_t primask = __get_PRIMASK();
 	if(primask){
@@ -348,8 +348,7 @@ void cppMain() {
 //		HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 //		HAL_GPIO_TogglePin(GPIOB, LD3_Pin);
 		HAL_Delay(1000);
-
-		////printf("hi\n");
+		printf("Hello from C \n");
 
 	}
 }

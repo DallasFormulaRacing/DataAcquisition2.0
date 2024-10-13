@@ -5,4 +5,4 @@ C:\ST\STM32CubeIDE_1.14.1\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.external
 ../Program/Src/app.cpp:218:6:void RelayThread(void*)	1
 ../Program/Src/app.cpp:249:6:void EcuThread(void*)	1
 ../Program/Src/app.cpp:328:6:void cppMain()	2
-../Program/Src/app.cpp:358:6:void RtosInit()	1
+../Program/Src/app.cpp:359:6:void RtosInit()	1

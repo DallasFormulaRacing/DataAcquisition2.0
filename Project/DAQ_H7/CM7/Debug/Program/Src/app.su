@@ -4,5 +4,5 @@ C:\ST\STM32CubeIDE_1.14.1\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.external
 ../Program/Src/app.cpp:176:6:void TimestampThread(void*)	16	static
 ../Program/Src/app.cpp:218:6:void RelayThread(void*)	16	static
 ../Program/Src/app.cpp:249:6:void EcuThread(void*)	16	static
-../Program/Src/app.cpp:328:6:void cppMain()	16	static,ignoring_inline_asm
-../Program/Src/app.cpp:358:6:void RtosInit()	8	static
+../Program/Src/app.cpp:328:6:void cppMain()	24	static,ignoring_inline_asm
+../Program/Src/app.cpp:359:6:void RtosInit()	8	static
