@@ -1,4 +1,13 @@
+> This repository was archived on Jan 10, 2025.
+
 # `DataAcquisition2.0`
+
+
+---
+## Deprecation Notice 🚨
+This repository has been deprecated. It is no longer actively maintained or updated. For the current and active IC Embedded project, please refer to the Wheel Base Sensor System [ repository](https://github.com/DallasFormulaRacing/WheelBaseSensorSystem).
+
+---
 🏁 For documentation, checkout our [Wiki](https://github.com/DallasFormulaRacing/DataAcquisition2.0/wiki)!
 
 - Firmware libraries are maintained in the [DAQ Firmware Libraries](https://github.com/DallasFormulaRacing/DAQ-Firmware-Libraries) repo.
